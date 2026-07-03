@@ -3,241 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>紅澪☆Kuremi：魔導矩陣 | Arcana Matrix Arcade</title>
-    
-    <!-- SEO 優化與專業標籤設定 -->
-    <meta name="description" content="Gothic Magician Bullet Hell Web Game - Powered by Canvas2D Engine.">
-    <meta name="author" content="KUROKO_P">
-    
-    <!-- 引入 Tailwind CSS 與 Font Awesome 圖標 -->
+    <title>紅澪☆Kuremi：魔導矩陣 | Arcana Matrix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Noto+Sans+TC:wght@400;700;900&display=swap">
-
     <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #04060a;
-        }
-        .code-font {
-            font-family: 'Fira Code', monospace;
-        }
-        /* 隱藏標準游標，在遊戲區域使用自訂十字瞄準線 */
-        .game-cursor {
-            cursor: crosshair;
-        }
-        /* 唯美黑洞流光背景霓虹燈效果 */
-        .neon-shadow-indigo {
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
-        }
-        .glass-blur {
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
+        body { font-family: sans-serif; background-color: #04060a; }
+        .game-cursor { cursor: crosshair; }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-indigo-500/30">
+<body class="text-slate-200 min-h-screen flex flex-col justify-between overflow-hidden">
 
-    <!-- 背景虛擬霓虹裝飾粒子（不干擾 Canvas 效能） -->
-    <div class="fixed inset-0 pointer-events-none z-0">
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-indigo-950/10 blur-[100px]"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-purple-950/10 blur-[100px]"></div>
-    </div>
-
-    <!-- 頂部技術標題列 -->
-    <nav class="relative z-10 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-6 py-4">
+    <!-- 頂部導覽 -->
+    <nav class="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-6 py-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-7 h-7 rounded bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-                    <i class="fa-solid fa-hat-wizard text-xs"></i>
-                </div>
-                <span class="text-base font-black tracking-widest text-white code-font">AMANO_KUREMI // ARCANA_MATRIX</span>
+                <a href="./" class="text-xs px-2.5 py-1 rounded bg-slate-900 border border-slate-800 hover:text-indigo-400 transition">← 回首頁</a>
+                <span class="text-sm font-black tracking-widest text-white">AMANO_KUREMI // ARCANA_MATRIX</span>
             </div>
-            <div class="flex items-center gap-4 text-xs font-mono text-slate-500">
-                <span class="hidden sm:inline">[ ENGINE: CANVAS_2D_CORE ]</span>
-                <span class="text-indigo-400 font-bold">[ v1.4.0-STABLE ]</span>
-            </div>
+            <span class="text-indigo-400 font-bold text-xs">[ v1.0.1-FIXED ]</span>
         </div>
     </nav>
 
-    <!-- 核心遊戲主體視窗 -->
-    <main class="relative z-10 flex-grow flex items-center justify-center p-4 md:p-6">
-        <div class="w-full max-w-4xl bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden relative neon-shadow-indigo">
+    <!-- 遊戲視窗主體 -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden relative" style="box-shadow: 0 0 30px rgba(99, 102, 241, 0.25);">
             
-            <!-- 介面層 1：遊戲未啟動首頁 (Start Screen) -->
+            <!-- 介面 1：開始畫面 -->
             <div id="startScreen" class="absolute inset-0 z-30 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
-                <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 p-[2px] mb-6 shadow-xl animate-bounce">
-                    <div class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-4xl">🔮</div>
-                </div>
-                <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white mb-2">紅澪☆Kuremi：魔導矩陣</h1>
-                <p class="text-indigo-400 font-mono text-xs md:text-sm tracking-widest uppercase mb-6">Gothic Magic Barrage Core System</p>
+                <div class="w-20 h-20 rounded-full bg-indigo-600 mb-6 flex items-center justify-center text-4xl select-none shadow-lg shadow-indigo-500/50">🔮</div>
+                <h1 class="text-3xl font-black text-white mb-2">紅澪☆Kuremi：魔導矩陣</h1>
+                <p class="text-indigo-400 text-xs tracking-widest uppercase mb-8">Gothic Magic Barrage Core System</p>
                 
-                <div class="max-w-md bg-slate-900/60 border border-slate-800 rounded-xl p-5 text-left text-xs md:text-sm text-slate-400 mb-8 space-y-2">
-                    <p class="text-white font-bold mb-1 flex items-center gap-2">
-                        <i class="fa-solid fa-gamepad text-indigo-400"></i> 操作系統說明：
-                    </p>
-                    <p>• <span class="text-slate-200 font-bold font-mono">滑鼠移動 / 手機觸控：</span> 全方位操控紅澪的法術核心移動。</p>
-                    <p>• <span class="text-slate-200 font-bold font-mono">自動射擊：</span> 核心將自動鎖定上方持續發射魔能彈幕。</p>
-                    <p>• <span class="text-slate-200 font-bold font-mono">防禦機制：</span> 購買護盾可自動抵禦突發性卡片撞擊與外來魔彈。</p>
+                <div class="max-w-md bg-slate-900/60 border border-slate-800 rounded-xl p-5 text-left text-xs text-slate-400 mb-8 space-y-2">
+                    <p class="text-white font-bold mb-1"><i class="fa-solid fa-gamepad text-indigo-400 mr-1"></i> 操作說明：</p>
+                    <p>• <b>滑鼠移動 / 觸控拖曳：</b> 控制魔導核心移動，核心會自動朝上發射子彈。</p>
+                    <p>• <b>遊戲目標：</b> 擊碎上方掉落的魔導卡牌，並躲避紅色魔彈！</p>
                 </div>
 
-                <button id="startBtn" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold rounded-xl tracking-wider shadow-lg shadow-indigo-600/30 transition-all">
-                    初始化魔導網絡 (START GAME)
+                <button id="startBtn" class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold rounded-xl tracking-wider shadow-lg shadow-indigo-600/30 transition-all">
+                    初始化魔導網絡 (START)
                 </button>
             </div>
 
-            <!-- 介面層 2：魔導實時商店 (Upgrade Shop Screen) -->
-            <div id="shopScreen" class="absolute inset-0 z-20 bg-slate-950/90 glass-blur hidden flex flex-col items-center justify-center p-6 text-center">
-                <div class="text-indigo-400 text-3xl mb-2"><i class="fa-solid fa-shop"></i></div>
-                <h2 class="text-2xl font-bold text-white mb-1">暗黑術式魔導商店</h2>
-                <p class="text-xs text-slate-500 font-mono mb-6">ARCANA UPGRADE OVERLAY // WAVE COMPLETED</p>
+            <!-- 介面 2：升級商店 -->
+            <div id="shopScreen" class="absolute inset-0 z-20 bg-slate-950/90 backdrop-blur-sm hidden flex flex-col items-center justify-center p-6 text-center">
+                <h2 class="text-2xl font-bold text-white mb-1">術式魔導商店</h2>
+                <p class="text-xs text-slate-500 font-mono mb-6">WAVE COMPLETED // SECURITY SHOP</p>
                 
-                <!-- 當前資產狀態顯示 -->
-                <div class="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg mb-8 font-mono text-sm">
-                    <span class="text-slate-500">當前儲備暗晶:</span>
-                    <span class="text-amber-400 font-bold text-base flex items-center gap-1">
-                        <i class="fa-solid fa-gem text-xs"></i> <span id="shopCrystalCount">0</span>
-                    </span>
+                <div class="px-4 py-1.5 bg-slate-900 border border-slate-800 rounded-lg mb-8 text-xs text-amber-400">
+                    儲備暗晶: 💎 <span id="shopCrystals">0</span>
                 </div>
 
-                <!-- 商品品項清單網格 -->
-                <div class="grid sm:grid-cols-2 gap-4 w-full max-w-xl text-left mb-8">
-                    <!-- 商品 1 -->
-                    <button id="buyWeapon" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group focus:outline-none">
+                <div class="grid sm:grid-cols-2 gap-4 w-full max-w-lg text-left mb-8">
+                    <button id="buyWeapon" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group">
                         <div>
-                            <div class="text-white font-bold text-sm group-hover:text-indigo-400 transition-colors">多重平行彈幕</div>
-                            <div class="text-slate-500 text-xs mt-0.5">擴充彈道數量 (Max LV.3)</div>
+                            <div class="text-white font-bold text-xs group-hover:text-indigo-400">雙重平行彈道</div>
+                            <div class="text-slate-500 text-[11px] mt-0.5">解鎖兩側副炮彈幕</div>
                         </div>
-                        <div class="text-right font-mono text-xs">
-                            <div class="text-amber-400 font-bold"><i class="fa-solid fa-gem text-[10px]"></i> <span id="costWeapon">40</span></div>
-                            <div class="text-slate-600 mt-0.5" id="lvWeapon">LV.1</div>
-                        </div>
+                        <div class="text-right text-xs text-amber-400 font-bold">💎 15</div>
                     </button>
-                    <!-- 商品 2 -->
-                    <button id="buySpeed" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group focus:outline-none">
+                    <button id="buyShield" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group">
                         <div>
-                            <div class="text-white font-bold text-sm group-hover:text-indigo-400 transition-colors">魔能核心冷卻</div>
-                            <div class="text-slate-500 text-xs mt-0.5">大幅度提升開火頻率</div>
+                            <div class="text-white font-bold text-xs group-hover:text-indigo-400">極化冥律護盾</div>
+                            <div class="text-slate-500 text-[11px] mt-0.5">生成一層可抵擋傷害的防護罩</div>
                         </div>
-                        <div class="text-right font-mono text-xs">
-                            <div class="text-amber-400 font-bold"><i class="fa-solid fa-gem text-[10px]"></i> <span id="costSpeed">25</span></div>
-                            <div class="text-slate-600 mt-0.5" id="lvSpeed">LV.1</div>
-                        </div>
-                    </button>
-                    <!-- 商品 3 -->
-                    <button id="buyShield" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group focus:outline-none">
-                        <div>
-                            <div class="text-white font-bold text-sm group-hover:text-indigo-400 transition-colors">極化冥律護盾</div>
-                            <div class="text-slate-500 text-xs mt-0.5">生成一個抵擋傷害的護盾</div>
-                        </div>
-                        <div class="text-right font-mono text-xs">
-                            <div class="text-amber-400 font-bold"><i class="fa-solid fa-gem text-[10px]"></i> <span id="costShield">30</span></div>
-                            <div class="text-slate-600 mt-0.5" id="statusShield">無護盾</div>
-                        </div>
-                    </button>
-                    <!-- 商品 4 -->
-                    <button id="buyRepair" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group focus:outline-none">
-                        <div>
-                            <div class="text-white font-bold text-sm group-hover:text-indigo-400 transition-colors">生命結構重組</div>
-                            <div class="text-slate-500 text-xs mt-0.5">立刻修復並恢復 1 點生命值</div>
-                        </div>
-                        <div class="text-right font-mono text-xs">
-                            <div class="text-amber-400 font-bold"><i class="fa-solid fa-gem text-[10px]"></i> 15</div>
-                            <div class="text-slate-600 mt-0.5">HP補給</div>
-                        </div>
+                        <div class="text-right text-xs text-amber-400 font-bold">💎 10</div>
                     </button>
                 </div>
 
-                <button id="nextWaveBtn" class="px-8 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm rounded-xl tracking-wider transition-all shadow-md shadow-purple-600/20">
-                    部署下一道矩陣 (NEXT WAVE) <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+                <button id="nextWaveBtn" class="px-8 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl tracking-wider transition-all">
+                    進入下一波次 (NEXT WAVE)
                 </button>
             </div>
 
-            <!-- 介面層 3：遊戲結束結算 (Game Over Screen) -->
+            <!-- 介面 3：遊戲結束 -->
             <div id="gameOverScreen" class="absolute inset-0 z-30 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center">
-                <div class="text-rose-500 text-4xl mb-4"><i class="fa-solid fa-skull-crossbones"></i></div>
-                <h2 class="text-3xl font-black text-white mb-1">矩陣網路潰散</h2>
-                <p class="text-xs text-slate-500 font-mono mb-8">CORE_STRUCTURE_COLLAPSED // DIAGNOSTIC_FAILED</p>
-                
-                <!-- 數據面板 -->
-                <div class="grid grid-cols-2 gap-6 px-8 py-4 bg-slate-900 border border-slate-800 rounded-xl mb-8 font-mono text-sm w-full max-w-sm">
-                    <div class="text-left">
-                        <div class="text-slate-500 text-xs">最終得分</div>
-                        <div class="text-white font-bold text-xl mt-0.5" id="finalScore">0</div>
-                    </div>
-                    <div class="text-left">
-                        <div class="text-slate-500 text-xs">最高防禦波次</div>
-                        <div class="text-indigo-400 font-bold text-xl mt-0.5" id="finalWave">Wave 1</div>
-                    </div>
+                <div class="text-rose-500 text-3xl mb-3"><i class="fa-solid fa-skull-crossbones"></i></div>
+                <h2 class="text-2xl font-black text-white mb-6">矩陣網路潰散</h2>
+                <div class="px-6 py-3 bg-slate-900 border border-slate-800 rounded-xl mb-8 text-xs text-left space-y-1">
+                    <div>最高防禦波次: <span class="text-indigo-400 font-bold" id="finalWave">1</span></div>
+                    <div>最終獲得總分: <span class="text-white font-bold" id="finalScore">0</span></div>
                 </div>
-
-                <button id="restartBtn" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl tracking-wider transition-all shadow-lg shadow-indigo-600/20">
-                    重新重構矩陣 (RETRY SYSTEM)
+                <button id="restartBtn" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs tracking-wider transition-all">
+                    重構網絡 (RETRY)
                 </button>
             </div>
 
-            <!-- 介面層 4：實時抬頭 HUD 顯示面板 -->
-            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center pointer-events-none z-10 font-mono text-xs md:text-sm select-none">
-                <!-- 左側：生命與護盾 -->
-                <div class="flex flex-col gap-1.5 bg-slate-950/80 backdrop-blur px-3 py-2 rounded-lg border border-slate-800/60">
-                    <div class="flex items-center gap-2">
-                        <span class="text-slate-500">HP:</span>
-                        <div class="flex gap-1 text-rose-500 text-xs" id="hpHearts">
-                            <i class="fa-solid fa-heart"></i>
-                            <i class="fa-solid fa-heart"></i>
-                            <i class="fa-solid fa-heart"></i>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-slate-500">SHIELD:</span>
-                        <span id="hudShieldStatus" class="text-slate-500 font-bold">OFF</span>
-                    </div>
+            <!-- HUD 面板 -->
+            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center pointer-events-none z-10 text-xs select-none font-mono">
+                <div class="bg-slate-950/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-800 flex flex-col gap-0.5 text-slate-400">
+                    <div>HP: <span id="hudHp" class="text-rose-500 font-bold">♥♥♥</span></div>
+                    <div>SHIELD: <span id="hudShield" class="text-slate-500">OFF</span></div>
                 </div>
-                
-                <!-- 中間：當前波次提示 -->
-                <div class="bg-indigo-600/10 border border-indigo-500/20 px-4 py-1.5 rounded-full text-indigo-400 font-bold tracking-widest uppercase text-xs" id="hudWave">
-                    WAVE 1
-                </div>
-
-                <!-- 右側：分數與貨幣 -->
-                <div class="flex flex-col gap-1 text-right bg-slate-950/80 backdrop-blur px-3 py-2 rounded-lg border border-slate-800/60">
-                    <div><span class="text-slate-500">SCORE:</span> <span class="text-white font-bold" id="hudScore">00000</span></div>
-                    <div><span class="text-slate-500">CRYSTAL:</span> <span class="text-amber-400 font-bold" id="hudCrystal">0</span></div>
+                <div class="bg-slate-950/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-800 text-right text-slate-400">
+                    <div>SCORE: <span id="hudScore" class="text-white font-bold">0</span></div>
+                    <div>WAVE: <span id="hudWave" class="text-indigo-400 font-bold">WAVE 1</span></div>
+                    <div>CRYSTAL: <span id="hudCrystal" class="text-amber-400 font-bold">0</span></div>
                 </div>
             </div>
 
-            <!-- 實時性能與除錯監控面板 (讓代碼看起來極其高大上的裝飾黑科技 Overlay) -->
-            <div class="absolute bottom-2 left-3 pointer-events-none z-10 font-mono text-[10px] text-slate-600 select-none hidden sm:block">
-                FPS: <span id="perfFps" class="text-emerald-500">60.0</span> | 
-                ENTITIES: <span id="perfEntities">0</span> | 
-                RENDER: <span class="text-indigo-500">CANVAS_RENDER_OK</span>
-            </div>
-
-            <!-- 核心繪圖畫布 Canvas -->
-            <div class="w-full bg-[#05080f] game-cursor flex items-center justify-center">
-                <canvas id="gameCanvas" width="800" height="600" class="w-full h-auto max-h-[600px] block"></canvas>
-            </div>
-
+            <!-- Canvas -->
+            <canvas id="gameCanvas" width="800" height="500" class="w-full h-auto bg-[#05070c] block game-cursor"></canvas>
         </div>
     </main>
 
-    <!-- 底部資訊列 -->
-    <footer class="relative z-10 w-full border-t border-slate-900 bg-slate-950/40 px-6 py-4 text-center text-xs text-slate-600 font-mono">
-        <p>&copy; 2026 Amano Kuremi Arcade Hub. Dev Signature: KUROKO_P // SECURE_DEPLOYMENT_VERIFIED.</p>
+    <footer class="w-full border-t border-slate-900 bg-slate-950/40 py-3 text-center text-[10px] text-slate-600 font-mono">
+        CODE SIGNATURE: KUROKO_P // PRIVATE_ENFORCED_MATRIX
     </footer>
 
-    <!-- ==========================================================================
-         CORE GAME ENGINE CODE (高階遊戲引擎完整核心邏輯腳本)
-         ========================================================================== -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameActive = false;
+        let score = 0;
+        let crystals = 0;
+        let currentWave = 1;
+        let player = { x: 400, y: 420, radius: 15, hp: 3, hasShield: false, weaponLevel: 1, fireTimer: 0 };
+        
+        let playerBullets = [];
+        let enemies = [];
+        let enemyBullets = [];
+        let particles = [];
+
+        function updatePlayerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            player.x = ((clientX - rect.left) / rect.width) * canvas.width;
+            player.y = ((clientY - rect.top) / rect.height) * canvas.height;
             
-            // --- 畫布與解析度精準對齊設定 ---
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            // --- HTML 介面 DOM 節點映射 ---
-            const startScreen = document.getElementById('startScreen');
-            const shopScreen = document.getElementById('shopScreen');
-            const gameOverScreen = document.getElementById('gameOverScreen');
-            Normally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
+            if (player.x < player.radius) player.x = player.radius;
+            if (player.x > canvas.width - player.radius) player.x = canvas.width - player.radius;
+            if (player.y < 200) player.y = 200;
+            if (player.y > canvas.height - player.radius) player.y = canvas.height - player.radius;
+        }
+        
+        canvas.addEventListener('mousemove', updatePlayerPos);
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); updatePlayerPos(e); }, {passive:false});
+
+        function createExplosion(x, y, color) {
+            for(let i=0; i<8; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: (Math.random() - 0.5) * 5,
+                    radius: Math.random() * 2 + 1,
+                    alpha: 1,
+                    color: color
+                });
+            }
+        }
+
+        function spawnWave() {
+            enemies = [];
+            enemyBullets = [];
+            playerBullets = [];
+            let count = 4 + currentWave * 2;
+            if (count > 18) count = 18;
+            for(let i=0; i<count; i++) {
+                enemies.push({
+                    x: 80 + (i % 6) * 120,
+                    y: 50 + Math.floor(i / 6) * 45,
+                    width: 50,
+                    height: 30,
+                    hp: 1 + Math.floor(currentWave / 2),
+                    shootCooldown: Math.random() * 100 + 50
+                });
+            }
+        }
+
+        function loop() {
+            if (!gameActive) return;
+
+            ctx.fillStyle = '#05070c';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 玩家核心
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
+            ctx.fillStyle = '#6366f1';
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
+
+            if (player.hasShield) {
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius + 10, 0, Math.PI*2);
+                ctx.strokeStyle = '#c084fc';
+                ctx.stroke();
+            }
+
+            // 射擊計時
+            player.fireTimer++;
+            if (player.fireTimer >= (player.weaponLevel > 1 ? 12 : 18)) {
+                player.fireTimer = 0;
+                if (player.weaponLevel === 1) {
+                    playerBullets.push({ x: player.x, y: player.y - 15, vy: -7 });
+                } else {
+                    playerBullets.push({ x: player.x - 8, y: player.y - 15, vy: -8 });
+                    playerBullets.push({ x: player.x + 8, y: player.y - 15, vy: -8 });
+                }
+            }
+
+            // 更新子彈
+            for(let i = playerBullets.length - 1; i >= 0; i--) {
+                let b = playerBullets[i];
+                b.y += b.vy;
+                ctx.fillStyle = '#67e8f9';
+                ctx.fillRect(b.x - 2, b.y, 4, 10);
+                if (b.y < 0) playerBullets.splice(i, 1);
+            }
+
+            // 檢查波次清除
+            if (enemies.length === 0) {
+                gameActive = false;
+                document.getElementById('shopCrystals').innerText = crystals;
+                document.getElementById('shopScreen').classList.remove('hidden');
+                return;
+            }
+
+            // 更新卡牌敵人
+            for(let i = enemies.length - 1; i >= 0; i--) {
+                let e = enemies[i];
+                ctx.fillStyle = '#1e1b4b';
+                ctx.fillRect(e.x, e.y, e.width, e.height);
+                ctx.strokeStyle = '#a5b4fc';
+                ctx.strokeRect(e.x, e.y, e.width, e.height);
+
+                e.shootCooldown--;
+                if (e.shootCooldown <= 0) {
+                    e.shootCooldown = Math.random() * 120 + 80 - (currentWave * 3);
+                    enemyBullets.push({ x: e.x + e.width/2, y: e.y + e.height, vy: 3 + currentWave * 0.2 });
+                }
+
+                // 子彈擊中判定
+                for(let j = playerBullets.length - 1; j >= 0; j--) {
+                    let b = playerBullets[j];
+                    if (b.x > e.x && b.x < e.x + e.width && b.y > e.y && b.y < e.y + e.height) {
+                        playerBullets.splice(j, 1);
+                        e.hp--;
+                        createExplosion(b.x, b.y, '#67e8f9');
+                        if (e.hp <= 0) {
+                            enemies.splice(i, 1);
+                            score += 100;
+                            crystals += 2;
+                            createExplosion(e.x + e.width/2, e.y + e.height/2, '#c084fc');
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 更新敵方魔彈
+            for(let i = enemyBullets.length - 1; i >= 0; i--) {
+                let eb = enemyBullets[i];
+                eb.y += eb.vy;
+                ctx.beginPath();
+                ctx.arc(eb.x, eb.y, 4, 0, Math.PI*2);
+                ctx.fillStyle = '#f43f5e';
+                ctx.fill();
+
+                let dist = Math.hypot(eb.x - player.x, eb.y - player.y);
+                if (dist < player.radius + 4) {
+                    enemyBullets.splice(i, 1);
+                    if (player.hasShield) {
+                        player.hasShield = false;
+                        createExplosion(player.x, player.y, '#c084fc');
+                    } else {
+                        player.hp--;
+                        createExplosion(player.x, player.y, '#f43f5e');
+                        if (player.hp <= 0) {
+                            gameActive = false;
+                            document.getElementById('finalScore').innerText = score;
+                            document.getElementById('finalWave').innerText = currentWave;
+                            document.getElementById('gameOverScreen').classList.remove('hidden');
+                        }
+                    }
+                    continue;
+                }
+                if (eb.y > canvas.height) enemyBullets.splice(i, 1);
+            }
+
+            // 爆炸粒子
+            for(let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy; p.alpha -= 0.03;
+                if (p.alpha <= 0) { particles.splice(i, 1); }
+                else {
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            // 更新介面
+            document.getElementById('hudHp').innerText = '♥'.repeat(Math.max(0, player.hp));
+            document.getElementById('hudShield').innerText = player.hasShield ? 'ON' : 'OFF';
+            document.getElementById('hudShield').className = player.hasShield ? 'text-purple-400 font-bold' : 'text-slate-500';
+            document.getElementById('hudScore').innerText = score;
+            document.getElementById('hudCrystal').innerText = crystals;
+
+            if (gameActive) requestAnimationFrame(loop);
+        }
+
+        // 按鈕控制事件綁定
+        document.getElementById('startBtn').addEventListener('click', () => {
+            document.getElementById('startScreen').classList.add('hidden');
+            gameActive = true;
+            score = 0; crystals = 0; currentWave = 1;
+            player.hp = 3; player.hasShield = false; player.weaponLevel = 1;
+            document.getElementById('hudWave').innerText = `WAVE ${currentWave}`;
+            spawnWave();
+            loop();
+        });
+
+        document.getElementById('nextWaveBtn').addEventListener('click', () => {
+            document.getElementById('shopScreen').classList.add('hidden');
+            gameActive = true;
+            currentWave++;
+            document.getElementById('hudWave').innerText = `WAVE ${currentWave}`;
+            spawnWave();
+            loop();
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        });
+
+        document.getElementById('buyWeapon').addEventListener('click', () => {
+            if (crystals >= 15 && player.weaponLevel === 1) {
+                crystals -= 15; player.weaponLevel = 2;
+                document.getElementById('shopCrystals').innerText = crystals;
+            }
+        });
+
+        document.getElementById('buyShield').addEventListener('click', () => {
+            if (crystals >= 10 && !player.hasShield) {
+                crystals -= 10; player.hasShield = true;
+                document.getElementById('shopCrystals').innerText = crystals;
+            }
+        });
+    });
+</script>
+</body>
+</html>
