@@ -2,66 +2,75 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>NEON VANGUARD: Cyberpunk FPS Engine v2.0</title>
+    <title>NEON VANGUARD: EVOLUTION Engine</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #020208; font-family: 'Orbitron', sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #010105; font-family: 'Orbitron', sans-serif; }
         
         /* 遊戲 HUD 介面 */
         #hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: none; }
-        .hud-panel { position: absolute; padding: 20px; background: linear-gradient(135deg, rgba(10,10,30,0.75) 0%, rgba(5,5,15,0.4) 100%); border: 1px solid rgba(0,255,200,0.3); box-shadow: 0 0 15px rgba(0,255,200,0.1); border-radius: 4px; color: #00ffcc; font-family: 'Share Tech Mono', monospace; }
-        #stats-left { bottom: 20px; left: 20px; width: 280px; }
+        .hud-panel { position: absolute; padding: 15px; background: linear-gradient(135deg, rgba(5,5,20,0.85) 0%, rgba(2,2,8,0.5) 100%); border: 1px solid rgba(0,255,200,0.25); box-shadow: 0 0 20px rgba(0,255,200,0.08); border-radius: 6px; color: #00ffcc; font-family: 'Share Tech Mono', monospace; }
+        
+        /* 左下角狀態 */
+        #stats-left { bottom: 20px; left: 20px; width: 300px; }
+        .bar-container { width: 100%; height: 10px; background: rgba(255,255,255,0.07); border: 1px solid rgba(0,255,200,0.4); border-radius: 5px; margin-top: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff0055, #ff5500); transition: width 0.1s ease; box-shadow: 0 0 8px #ff0055; }
+        #shield-fill { background: linear-gradient(90deg, #0055ff, #00d2ff); box-shadow: 0 0 8px #00d2ff; }
+        #dash-fill { background: linear-gradient(90deg, #ffff00, #ffaa00); box-shadow: 0 0 8px #ffff00; }
+        
+        /* 右下角武器 */
         #stats-right { bottom: 20px; right: 20px; width: 280px; text-align: right; }
-        #stats-top { top: 20px; left: 50%; transform: translateX(-50%); text-align: center; min-width: 200px; }
+        .hud-label { font-size: 12px; color: rgba(0,255,200,0.6); text-transform: uppercase; letter-spacing: 1.5px; }
+        .hud-value { font-size: 30px; font-weight: 700; color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,0.4); }
         
-        .bar-container { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,255,200,0.5); border-radius: 6px; margin-top: 5px; overflow: hidden; }
-        .bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff0077, #00ffcc); transition: width 0.1s ease; box-shadow: 0 0 10px #00ffcc; }
-        #shield-fill { background: linear-gradient(90deg, #0077ff, #00ffff); }
+        /* 正上方得分與連殺 */
+        #stats-top { top: 20px; left: 50%; transform: translateX(-50%); text-align: center; min-width: 240px; }
+        #combo-box { color: #ff0055; font-size: 20px; font-weight: bold; margin-top: 5px; opacity: 0; transition: opacity 0.2s; text-shadow: 0 0 10px #ff0055; }
         
-        .hud-label { font-size: 14px; color: rgba(0,255,200,0.7); text-transform: uppercase; letter-spacing: 1px; }
-        .hud-value { font-size: 32px; font-weight: bold; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
-        
+        /* 左上方雷達小地圖 */
+        #minimap-container { top: 20px; left: 20px; width: 160px; height: 160px; border: 2px solid #00ffcc; box-shadow: 0 0 15px rgba(0,255,200,0.2); border-radius: 4px; overflow: hidden; background: rgba(2,2,10,0.7); }
+        #minimap { width: 100%; height: 100%; }
+
         /* 準心 */
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; transform: translate(-50%, -50%); pointer-events: none; z-index: 11; }
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; transform: translate(-50%, -50%); pointer-events: none; z-index: 11; }
         #crosshair::before, #crosshair::after { content: ''; position: absolute; background: #00ffcc; box-shadow: 0 0 5px #00ffcc; }
-        #crosshair::before { top: 9px; left: 0; width: 20px; height: 2px; }
-        #crosshair::after { top: 0; left: 9px; width: 2px; height: 20px; }
-        #crosshair-dot { position: absolute; top: 8px; left: 8px; width: 4px; height: 4px; background: #ffffff; border-radius: 50%; }
+        #crosshair::before { top: 11px; left: 0; width: 24px; height: 2px; }
+        #crosshair::after { top: 0; left: 11px; width: 2px; height: 24px; }
+        #crosshair-ring { position: absolute; top: 4px; left: 4px; width: 14px; height: 14px; border: 1px solid rgba(0,255,200,0.4); border-radius: 50%; }
 
-        /* 武器清單 HUD */
-        #weapon-slots { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; }
-        .weapon-slot { padding: 8px 15px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #888; border-radius: 3px; font-size: 12px; transition: all 0.2s; }
-        .weapon-slot.active { border-color: #ff0055; color: #ff0055; background: rgba(255,0,85,0.1); box-shadow: 0 0 10px rgba(255,0,85,0.3); font-weight: bold; }
+        #weapon-slots { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 6px; }
+        .weapon-slot { padding: 6px 12px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.15); color: #777; border-radius: 3px; font-size: 11px; transition: all 0.2s; }
+        .weapon-slot.active { border-color: #ff0055; color: #ff0055; background: rgba(255,0,85,0.08); box-shadow: 0 0 8px rgba(255,0,85,0.3); font-weight: bold; }
 
-        /* 擊殺提示 feed */
-        #kill-feed { position: absolute; top: 100px; left: 20px; display: flex; flex-direction: column; gap: 5px; max-height: 200px; overflow: hidden; color: #ff3366; font-family: 'Share Tech Mono', monospace; font-size: 14px; text-shadow: 0 0 4px rgba(255,51,102,0.5); }
+        #kill-feed { position: absolute; top: 200px; left: 20px; display: flex; flex-direction: column; gap: 4px; color: #ff3366; font-family: 'Share Tech Mono', monospace; font-size: 13px; }
 
-        /* 大螢幕覆蓋層（主選單、暫停、死亡） */
-        .overlay { position: absolute; width: 100%; height: 100%; top: 0; left: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(15,10,35,0.95) 0%, rgba(5,2,15,0.98) 100%); z-index: 100; color: #ffffff; text-align: center; padding: 20px; }
-        .overlay h1 { font-size: 64px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px; background: linear-gradient(45deg, #ff0055, #00ffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(0,255,200,0.3)); }
-        .overlay p { font-size: 18px; color: #8888aa; margin-bottom: 30px; max-width: 600px; line-height: 1.6; font-family: 'Share Tech Mono', monospace; }
-        .btn { padding: 15px 40px; font-size: 20px; font-family: 'Orbitron', sans-serif; font-weight: bold; color: #00ffcc; background: transparent; border: 2px solid #00ffcc; border-radius: 4px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 15px rgba(0,255,200,0.2); text-transform: uppercase; letter-spacing: 2px; }
-        .btn:hover { background: #00ffcc; color: #050515; box-shadow: 0 0 30px #00ffcc; transform: scale(1.05); }
+        /* 覆蓋層 */
+        .overlay { position: absolute; width: 100%; height: 100%; top: 0; left: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(10,5,30,0.96) 0%, rgba(3,1,10,0.99) 100%); z-index: 100; color: #ffffff; text-align: center; padding: 20px; }
+        .overlay h1 { font-size: 56px; font-weight: 900; letter-spacing: 5px; margin-bottom: 15px; background: linear-gradient(45deg, #ff0055, #00ffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 15px rgba(0,255,255,0.4)); }
+        .overlay p { font-size: 16px; color: #8888aa; margin-bottom: 25px; max-width: 650px; line-height: 1.6; font-family: 'Share Tech Mono', monospace; }
+        .btn { padding: 12px 35px; font-size: 18px; font-family: 'Orbitron', sans-serif; font-weight: bold; color: #00ffcc; background: transparent; border: 2px solid #00ffcc; border-radius: 4px; cursor: pointer; transition: all 0.25s; box-shadow: 0 0 15px rgba(0,255,200,0.15); letter-spacing: 2px; }
+        .btn:hover { background: #00ffcc; color: #050515; box-shadow: 0 0 25px #00ffcc; transform: scale(1.03); }
         
-        #gameover-screen { display: none; background: radial-gradient(circle, rgba(40,5,15,0.96) 0%, rgba(10,0,5,0.99) 100%); }
-        #gameover-screen h1 { background: linear-gradient(45deg, #ff0000, #ff5500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #gameover-screen { display: none; background: radial-gradient(circle, rgba(35,3,10,0.97) 0%, rgba(5,0,2,0.99) 100%); }
         
-        /* 傷害閃紅特效 */
         #damage-flash { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: rgba(255,0,0,0); pointer-events: none; z-index: 5; transition: background 0.1s ease; }
     </style>
-    <!-- 三維核心控制庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <!-- 傷害閃紅屏 -->
     <div id="damage-flash"></div>
 
-    <!-- 抬頭顯示器 (HUD) -->
+    <!-- 抬頭顯示器 HUD -->
     <div id="hud">
         <div id="crosshair">
-            <div id="crosshair-dot"></div>
+            <div id="crosshair-ring"></div>
+        </div>
+        
+        <!-- 左上角雷達 -->
+        <div id="minimap-container" class="hud-panel">
+            <canvas id="minimap"></canvas>
         </div>
         
         <div id="stats-left" class="hud-panel">
@@ -69,192 +78,179 @@
             <div id="hp-value" class="hud-value">100</div>
             <div class="bar-container"><div id="hp-fill" class="bar-fill"></div></div>
             
-            <div class="hud-label" style="margin-top: 15px;">🛡️ DEFENSE (SHIELD)</div>
+            <div class="hud-label" style="margin-top: 10px;">🛡️ DEFENSE (SHIELD)</div>
             <div id="shield-value" class="hud-value">100</div>
             <div class="bar-container"><div id="shield-fill" class="bar-fill"></div></div>
+
+            <div class="hud-label" style="margin-top: 10px;">🚀 THRUSTER (DASH)</div>
+            <div class="bar-container"><div id="dash-fill" class="bar-fill" style="width: 100%"></div></div>
         </div>
         
         <div id="stats-right" class="hud-panel">
-            <div class="hud-label">WEAPON MATRIX</div>
+            <div class="hud-label">WEAPON REGISTRY</div>
             <div id="weapon-name" class="hud-value" style="color: #ff0055;">PIS-01</div>
-            <div class="hud-label" style="margin-top: 15px;">AMMO CAPACITY</div>
+            <div class="hud-label" style="margin-top: 10px;">AMMO CAPACITY</div>
             <div id="ammo-value" class="hud-value">12 / ∞</div>
         </div>
         
         <div id="stats-top" class="hud-panel">
-            <div class="hud-label">SYSTEM SCORE</div>
+            <div class="hud-label">TOTAL SCORE</div>
             <div id="score-value" class="hud-value" style="color: #ffff00;">00000</div>
-            <div id="wave-label" class="hud-label" style="margin-top: 5px; color: #ff9900;">WAVE 1</div>
+            <div id="wave-label" class="hud-label" style="margin-top: 3px; color: #ff9900;">WAVE 1</div>
+            <div id="combo-box">COMBO X2</div>
         </div>
 
         <div id="weapon-slots">
-            <div id="slot-1" class="weapon-slot active">[1] NEON PISTOL</div>
-            <div id="slot-2" class="weapon-slot">[2] VOLT SHOTGUN</div>
-            <div id="slot-3" class="weapon-slot">[3] PLASMA RIFLE</div>
+            <div id="slot-1" class="weapon-slot active">[1] NEON OVERLORD</div>
+            <div id="slot-2" class="weapon-slot">[2] VOLT BREACHER</div>
+            <div id="slot-3" class="weapon-slot">[3] PLASMA VULCAN</div>
         </div>
 
         <div id="kill-feed"></div>
     </div>
 
-    <!-- 主選單覆蓋層 -->
+    <!-- 主選單 -->
     <div id="menu-screen" class="overlay">
-        <h1>NEON VANGUARD</h1>
-        <p>歡迎來到次世代網頁 3D 模擬器。這是一個完全基於矩陣數學與程序音效構建的第一人稱射擊遊戲引擎底層。<br>
-        系統內建高精準 O(1) 網格幾何滑動碰撞、有限狀態機 AI 群體以及自動垃圾回收物件池。</p>
-        <button class="btn" id="start-btn">INITIALIZE CORE</button>
+        <h1>NEON VANGUARD: EVOLUTION</h1>
+        <p>歡迎來到全面進化的 3D 程序化射擊引擎。<br>
+        本版本解鎖高階幾何堆疊建模、全息雷達小地圖、高爆發多向噴射衝刺（Dash）以及連殺加成系統。</p>
+        <button class="btn" id="start-btn">ENGAGE SIMULATION</button>
     </div>
 
-    <!-- 死亡結算覆蓋層 -->
+    <!-- 死亡結算 -->
     <div id="gameover-screen" class="overlay">
-        <h1>CONNECTION TERMINATED</h1>
-        <p>玩家生命特徵已消失，核心數據上傳中...<br>最終系統防衛得分：<span id="final-score" style="color: #ffff00; font-weight: bold;">0</span></p>
-        <button class="btn" id="restart-btn">REBOOT SYSTEM</button>
+        <h1>SIMULATION TERMINATED</h1>
+        <p>核心數據同步失敗...<br>最終防衛評級得分：<span id="final-score" style="color: #ffff00; font-weight: bold;">0</span></p>
+        <button class="btn" id="restart-btn">REBOOT CORE</button>
     </div>
 
-    <!-- ========================================== -->
-    <!--            遊戲邏輯主核心核心腳本            -->
-    <!-- ========================================== -->
     <script>
-        // --- 模組一：全自動音效合成引擎 (Web Audio API) ---
+        // --- 模組一：全自動程序音效合成引擎 ---
         class SoundEngine {
-            constructor() {
-                this.ctx = null;
-                this.masterGain = null;
-            }
+            constructor() { this.ctx = null; this.masterGain = null; }
             init() {
                 if (this.ctx) return;
                 this.ctx = new (window.AudioContext || window.webkitAudioContext)();
                 this.masterGain = this.ctx.createGain();
-                this.masterGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                this.masterGain.gain.setValueAtTime(0.25, this.ctx.currentTime);
                 this.masterGain.connect(this.ctx.destination);
                 this.startBGM();
             }
             playLaser() {
                 if (!this.ctx) return;
                 let t = this.ctx.currentTime;
-                let osc = this.ctx.createOscillator();
-                let gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(880, t);
-                osc.frequency.exponentialRampToValueAtTime(110, t + 0.15);
-                gain.gain.setValueAtTime(0.4, t);
-                gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
-                osc.connect(gain);
-                gain.connect(this.masterGain);
-                osc.start(t);
-                osc.stop(t + 0.15);
+                let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(900, t);
+                osc.frequency.exponentialRampToValueAtTime(150, t + 0.12);
+                gain.gain.setValueAtTime(0.3, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.12);
+                osc.connect(gain); gain.connect(this.masterGain);
+                osc.start(t); osc.stop(t + 0.12);
             }
             playShotgun() {
                 if (!this.ctx) return;
                 let t = this.ctx.currentTime;
-                for(let i=0; i<3; i++) {
-                    let osc = this.ctx.createOscillator();
-                    let gain = this.ctx.createGain();
+                for(let i=0; i<4; i++) {
+                    let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
                     osc.type = i === 0 ? 'sawtooth' : 'triangle';
-                    osc.frequency.setValueAtTime(300 + Math.random()*200, t);
-                    osc.frequency.linearRampToValueAtTime(40, t + 0.3);
-                    gain.gain.setValueAtTime(0.6, t);
-                    gain.gain.linearRampToValueAtTime(0.01, t + 0.3);
-                    osc.connect(gain);
-                    gain.connect(this.masterGain);
-                    osc.start(t);
-                    osc.stop(t + 0.3);
+                    osc.frequency.setValueAtTime(250 + Math.random()*250, t);
+                    osc.frequency.linearRampToValueAtTime(30, t + 0.25);
+                    gain.gain.setValueAtTime(0.5, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.25);
+                    osc.connect(gain); gain.connect(this.masterGain);
+                    osc.start(t); osc.stop(t + 0.25);
                 }
             }
             playPlasma() {
                 if (!this.ctx) return;
                 let t = this.ctx.currentTime;
-                let osc = this.ctx.createOscillator();
-                let gain = this.ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(1200, t);
-                osc.frequency.exponentialRampToValueAtTime(600, t + 0.08);
-                gain.gain.setValueAtTime(0.3, t);
-                gain.gain.linearRampToValueAtTime(0.01, t + 0.08);
-                osc.connect(gain);
-                gain.connect(this.masterGain);
-                osc.start(t);
-                osc.stop(t + 0.08);
+                let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(1400, t);
+                osc.frequency.exponentialRampToValueAtTime(700, t + 0.06);
+                gain.gain.setValueAtTime(0.2, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.06);
+                osc.connect(gain); gain.connect(this.masterGain);
+                osc.start(t); osc.stop(t + 0.06);
             }
             playExplosion() {
                 if (!this.ctx) return;
                 let t = this.ctx.currentTime;
-                let osc = this.ctx.createOscillator();
-                let gain = this.ctx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(100, t);
-                osc.frequency.linearRampToValueAtTime(10, t + 0.5);
-                gain.gain.setValueAtTime(0.8, t);
-                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
-                osc.connect(gain);
-                gain.connect(this.masterGain);
-                osc.start(t);
-                osc.stop(t + 0.5);
+                let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
+                osc.type = 'square'; osc.frequency.setValueAtTime(120, t);
+                osc.frequency.linearRampToValueAtTime(8, t + 0.45);
+                gain.gain.setValueAtTime(0.6, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.45);
+                osc.connect(gain); gain.connect(this.masterGain);
+                osc.start(t); osc.stop(t + 0.45);
+            }
+            playDash() {
+                if (!this.ctx) return;
+                let t = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(200, t);
+                osc.frequency.exponentialRampToValueAtTime(800, t + 0.15);
+                gain.gain.setValueAtTime(0.4, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
+                osc.connect(gain); gain.connect(this.masterGain);
+                osc.start(t); osc.stop(t + 0.15);
+            }
+            playPickup() {
+                if (!this.ctx) return;
+                let t = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(600, t);
+                osc.frequency.linearRampToValueAtTime(1200, t + 0.15);
+                gain.gain.setValueAtTime(0.3, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
+                osc.connect(gain); gain.connect(this.masterGain);
+                osc.start(t); osc.stop(t + 0.15);
             }
             playHurt() {
                 if (!this.ctx) return;
                 let t = this.ctx.currentTime;
-                let osc = this.ctx.createOscillator();
-                let gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(180, t);
-                osc.frequency.linearRampToValueAtTime(60, t + 0.2);
-                gain.gain.setValueAtTime(0.5, t);
-                gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
-                osc.connect(gain);
-                gain.connect(this.masterGain);
-                osc.start(t);
-                osc.stop(t + 0.2);
+                let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(160, t);
+                osc.frequency.linearRampToValueAtTime(50, t + 0.18);
+                gain.gain.setValueAtTime(0.4, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.18);
+                osc.connect(gain); gain.connect(this.masterGain);
+                osc.start(t); osc.stop(t + 0.18);
             }
             startBGM() {
                 let scheduleNext = (time, step) => {
                     let notes = [55, 55, 65.41, 65.41, 73.42, 73.42, 48.99, 48.99];
                     let freq = notes[step % notes.length];
-                    
-                    let osc = this.ctx.createOscillator();
-                    let gain = this.ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, time);
-                    gain.gain.setValueAtTime(0.12, time);
-                    gain.gain.linearRampToValueAtTime(0.01, time + 0.25);
-                    
-                    osc.connect(gain);
-                    gain.connect(this.masterGain);
-                    osc.start(time);
-                    osc.stop(time + 0.25);
-                    
+                    let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, time);
+                    gain.gain.setValueAtTime(0.1, time); gain.gain.linearRampToValueAtTime(0.01, time + 0.28);
+                    osc.connect(gain); gain.connect(this.masterGain);
+                    osc.start(time); osc.stop(time + 0.28);
                     setTimeout(() => {
-                        if(CONFIG.gameState === "PLAYING") scheduleNext(this.ctx.currentTime + 0.3, step + 1);
-                    }, 300);
+                        if(CONFIG.gameState === "PLAYING") scheduleNext(this.ctx.currentTime + 0.25, step + 1);
+                    }, 250);
                 };
                 scheduleNext(this.ctx.currentTime, 0);
             }
         }
         const audio = new SoundEngine();
 
-        // --- 模組二：通用全域配置與狀態管理 ---
+        // --- 模組二：全域配置與狀態管理 ---
         const CONFIG = {
             gameState: "MENU", 
             player: {
                 hp: 100, maxHp: 100,
                 shield: 100, maxShield: 100,
-                radius: 0.6, height: 1.7, speed: 7.5, // 速度調整為每秒移動單位
+                radius: 0.6, height: 1.7, speed: 8.0,
                 velocity: new THREE.Vector3(),
-                canJump: true, isGrounded: true
+                canJump: true, isGrounded: true,
+                // 噴射衝刺系統子狀態
+                dashCooldown: 0, dashTimer: 0, dashSpeed: 32.0, maxDashCooldown: 1.5,
+                dashDir: new THREE.Vector3()
             },
             weapons: [
-                { id: 0, name: "NEON PISTOL", type: "raycast", maxAmmo: 12, ammo: 12, fireRate: 350, dmg: 35, recoil: 0.05 },
-                { id: 1, name: "VOLT SHOTGUN", type: "spread", maxAmmo: 5, ammo: 5, fireRate: 850, dmg: 15, pellets: 6, recoil: 0.18 },
-                { id: 2, name: "PLASMA RIFLE", type: "projectile", maxAmmo: 30, ammo: 30, fireRate: 120, dmg: 20, recoil: 0.02 }
+                { id: 0, name: "NEON OVERLORD", type: "raycast", maxAmmo: 12, ammo: 12, fireRate: 300, dmg: 40, recoil: 0.04 },
+                { id: 1, name: "VOLT BREACHER", type: "spread", maxAmmo: 6, ammo: 6, fireRate: 800, dmg: 16, pellets: 7, recoil: 0.16 },
+                { id: 2, name: "PLASMA VULCAN", type: "projectile", maxAmmo: 45, ammo: 45, fireRate: 90, dmg: 22, recoil: 0.015 }
             ],
-            currentWeaponIdx: 0,
-            lastFireTime: 0,
-            isReloading: false,
-            score: 0, wave: 1,
-            mapScale: 3.0 // 格子寬度
+            currentWeaponIdx: 0, lastFireTime: 0, isReloading: false,
+            score: 0, wave: 1, mapScale: 4.0,
+            // 連殺計時器
+            combo: { count: 0, timer: 0, maxTime: 3.0 }
         };
 
-        // 地圖網格：1 代表高牆，0 代表空地通道
         const MAP_GRID = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
@@ -280,241 +276,307 @@
         const MAP_ROWS = MAP_GRID.length;
         const MAP_COLS = MAP_GRID[0].length;
 
-        // --- 模組三：3D 視覺環境初始化 ---
+        // --- 模組三：3D 視覺與高階建模初始化 ---
         let scene, camera, renderer, clock;
         let yawObject, pitchObject; 
-        let weaponGroup, muzzleFlashLight;
-
+        let weaponGroup, muzzleFlashLight, scopeMesh;
         let materials = {}, geometries = {};
 
         function createProceduralTextures() {
             const canvas = document.createElement('canvas');
             canvas.width = 256; canvas.height = 256;
             const ctx = canvas.getContext('2d');
-            
-            ctx.fillStyle = '#0a0a1c'; ctx.fillRect(0,0,256,256);
-            ctx.strokeStyle = '#ff0055'; ctx.lineWidth = 4; ctx.strokeRect(0,0,256,256);
-            ctx.strokeStyle = 'rgba(0, 255, 200, 0.3)'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(0, 128); ctx.lineTo(256, 128); ctx.moveTo(128, 0); ctx.lineTo(128, 256); ctx.stroke();
+            ctx.fillStyle = '#080812'; ctx.fillRect(0,0,256,256);
+            ctx.strokeStyle = '#00ffcc'; ctx.lineWidth = 4; ctx.strokeRect(0,0,256,256);
+            ctx.strokeStyle = 'rgba(255, 0, 85, 0.25)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, 64); ctx.lineTo(256, 64); ctx.moveTo(64, 0); ctx.lineTo(64, 256); ctx.stroke();
             const wallTex = new THREE.CanvasTexture(canvas);
 
             const canvasF = document.createElement('canvas');
-            canvasF.width = 128; canvasF.height = 128;
+            canvasF.width = 256; canvasF.height = 256;
             const ctxF = canvasF.getContext('2d');
-            ctxF.fillStyle = '#03030c'; ctxF.fillRect(0,0,128,128);
-            ctxF.strokeStyle = '#0055aa'; ctxF.lineWidth = 1;
-            for(let i=0; i<=128; i+=32) {
-                ctxF.moveTo(i, 0); ctxF.lineTo(i, 128); ctxF.moveTo(0, i); ctxF.lineTo(128, i);
+            ctxF.fillStyle = '#020207'; ctxF.fillRect(0,0,256,256);
+            ctxF.strokeStyle = '#220055'; ctxF.lineWidth = 2;
+            for(let i=0; i<=256; i+64) {
+                ctxF.strokeRect(i, 0, 64, 256); ctxF.strokeRect(0, i, 256, 64);
             }
-            ctxF.stroke();
             const floorTex = new THREE.CanvasTexture(canvasF);
             floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping;
-            floorTex.repeat.set(40, 40);
+            floorTex.repeat.set(30, 30);
 
-            materials.wall = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 0.4, metalness: 0.2 });
-            materials.floor = new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.6, metalness: 0.1 });
-            materials.ceiling = new THREE.MeshStandardMaterial({ color: 0x05050f, wireframe: true });
+            materials.wall = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 0.3, metalness: 0.5 });
+            materials.floor = new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.5, metalness: 0.3 });
+            materials.ceiling = new THREE.MeshStandardMaterial({ color: 0x07071c, wireframe: true });
         }
 
-        // 核心修正：自動尋找安全空地生成玩家出生點，杜絕卡牆 Bug
         function getSafeSpawnPosition() {
-            for (let r = 0; r < MAP_ROWS; r++) {
-                for (let c = 0; c < MAP_COLS; c++) {
+            for (let r = 2; r < MAP_ROWS; r++) {
+                for (let c = 2; c < MAP_COLS; c++) {
                     if (MAP_GRID[r][c] === 0) {
                         return new THREE.Vector3(c * CONFIG.mapScale, CONFIG.player.height, r * CONFIG.mapScale);
                     }
                 }
             }
-            return new THREE.Vector3(3.0, CONFIG.player.height, 3.0);
+            return new THREE.Vector3(4.0, CONFIG.player.height, 4.0);
         }
 
         function initGraphics() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x020206);
-            scene.fog = new THREE.FogExp2(0x020206, 0.04);
+            scene.background = new THREE.Color(0x010104);
+            scene.fog = new THREE.FogExp2(0x010104, 0.035);
 
             clock = new THREE.Clock();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             
-            pitchObject = new THREE.Object3D();
-            pitchObject.add(camera);
+            pitchObject = new THREE.Object3D(); pitchObject.add(camera);
             yawObject = new THREE.Object3D();
-            
-            // 載入安全出生點
-            const spawnPos = getSafeSpawnPosition();
-            yawObject.position.copy(spawnPos);
-            
-            yawObject.add(pitchObject);
-            scene.add(yawObject);
+            yawObject.position.copy(getSafeSpawnPosition());
+            yawObject.add(pitchObject); scene.add(yawObject);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             document.body.appendChild(renderer.domElement);
 
-            const ambientLight = new THREE.AmbientLight(0x1a1a3a);
-            scene.add(ambientLight);
-
-            const dirLight = new THREE.DirectionalLight(0x00ffff, 0.6);
-            dirLight.position.set(20, 40, 20);
-            scene.add(dirLight);
+            scene.add(new THREE.AmbientLight(0x15152a));
+            const dLight = new THREE.DirectionalLight(0xff00aa, 0.4); dLight.position.set(10, 30, 10); scene.add(dLight);
 
             createProceduralTextures();
             buildMap();
             buildProceduralWeapons();
             
-            muzzleFlashLight = new THREE.PointLight(0xffaa00, 0, 5);
-            muzzleFlashLight.position.set(0.2, -0.2, -0.6);
+            muzzleFlashLight = new THREE.PointLight(0xffaa00, 0, 6);
+            muzzleFlashLight.position.set(0.2, -0.15, -0.8);
             pitchObject.add(muzzleFlashLight);
 
             window.addEventListener('resize', onWindowResize);
+            initMinimapCanvas();
         }
 
-        // --- 模組四：地圖構建 ---
+        // --- 模組四：精細化地圖與柱體裝飾建模 ---
         function buildMap() {
             const size = CONFIG.mapScale;
-            geometries.wall = new THREE.BoxGeometry(size, size * 2, size);
-            geometries.floor = new THREE.PlaneGeometry(120, 120);
+            geometries.wall = new THREE.BoxGeometry(size, size * 1.8, size);
+            geometries.floor = new THREE.PlaneGeometry(160, 160);
+            geometries.pillar = new THREE.CylinderGeometry(0.12, 0.12, size * 1.8, 8);
+            const pillarMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
 
             const floorMesh = new THREE.Mesh(geometries.floor, materials.floor);
-            floorMesh.rotation.x = -Math.PI / 2;
-            scene.add(floorMesh);
+            floorMesh.rotation.x = -Math.PI / 2; scene.add(floorMesh);
 
             const ceilMesh = new THREE.Mesh(geometries.floor, materials.ceiling);
-            ceilMesh.rotation.x = Math.PI / 2;
-            ceilMesh.position.y = size * 2;
-            scene.add(ceilMesh);
+            ceilMesh.rotation.x = Math.PI / 2; ceilMesh.position.y = size * 1.8; scene.add(ceilMesh);
 
             for (let r = 0; r < MAP_ROWS; r++) {
                 for (let c = 0; c < MAP_COLS; c++) {
+                    const wx = c * size; const wz = r * size;
                     if (MAP_GRID[r][c] === 1) {
                         const wall = new THREE.Mesh(geometries.wall, materials.wall);
-                        wall.position.set(c * size, size, r * size);
+                        wall.position.set(wx, (size * 1.8)/2, wz);
                         scene.add(wall);
+                        
+                        // 在牆壁的四個角落動態添加發光的霓虹光柱，增加視覺立體層次
+                        if(c > 0 && c < MAP_COLS-1 && r > 0 && r < MAP_ROWS-1) {
+                            const p1 = new THREE.Mesh(geometries.pillar, pillarMat);
+                            p1.position.set(wx - size/2, (size*1.8)/2, wz - size/2);
+                            scene.add(p1);
+                        }
+                    } else {
+                        // 裝飾性擺設：在走道角落隨機放置賽博機械箱
+                        if(Math.random() > 0.94 && r>1 && c>1) {
+                            const boxGeo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+                            const boxMat = new THREE.MeshStandardMaterial({ color: 0x1a1a26, metalness: 0.8, roughness: 0.1 });
+                            const mBox = new THREE.Mesh(boxGeo, boxMat);
+                            mBox.position.set(wx + (Math.random()-0.5), 0.4, wz + (Math.random()-0.5));
+                            scene.add(mBox);
+                        }
                     }
                 }
             }
         }
 
+        // 核心改版：重型雙管突擊粒子槍模型組裝
         function buildProceduralWeapons() {
             weaponGroup = new THREE.Group();
-            const bodyGeo = new THREE.BoxGeometry(0.06, 0.08, 0.3);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x111116, metalness: 0.8, roughness: 0.2 });
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            
+            // 主槍身框架
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.09, 0.34), new THREE.MeshStandardMaterial({ color: 0x0f0f14, metalness: 0.8, roughness: 0.3 }));
             weaponGroup.add(body);
 
-            const barrelGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.25);
-            barrelGeo.rotateX(Math.PI / 2);
-            const barrelMat = new THREE.MeshStandardMaterial({ color: 0x22222a, metalness: 0.9, roughness: 0.1 });
-            const barrel = new THREE.Mesh(barrelGeo, barrelMat);
-            barrel.position.set(0, 0.01, -0.2);
-            weaponGroup.add(barrel);
+            // 頂部多層次戰術導軌架
+            const rail = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.28), new THREE.MeshStandardMaterial({ color: 0x252530 }));
+            rail.position.set(0, 0.055, -0.02); weaponGroup.add(rail);
 
-            const neonGeo = new THREE.BoxGeometry(0.065, 0.01, 0.2);
+            // 雙生平行粒子槍管
+            const barrelMat = new THREE.MeshStandardMaterial({ color: 0x3a3a4b, metalness: 0.9, roughness: 0.1 });
+            const b1 = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.3), barrelMat);
+            b1.rotateX(Math.PI/2); b1.position.set(0.018, 0.01, -0.22);
+            const b2 = b1.clone(); b2.position.x = -0.018;
+            weaponGroup.add(b1); weaponGroup.add(b2);
+
+            // 全息環形瞄準鏡 (Holographic Sight Frame)
+            const scopeRing = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.004, 6, 16), new THREE.MeshBasicMaterial({ color: 0x00ffcc, transparent: true, opacity: 0.8 }));
+            scopeRing.position.set(0, 0.09, 0.04);
+            weaponGroup.add(scopeRing);
+            
+            // 瞄準鏡中心的十字發光點
+            const centerDot = new THREE.Mesh(new THREE.SphereGeometry(0.003, 4, 4), new THREE.MeshBasicMaterial({ color: 0xff0055 }));
+            centerDot.position.set(0, 0.09, 0.04);
+            weaponGroup.add(centerDot);
+
+            // 槍體側邊散熱霓虹發光片
             materials.weaponNeon = new THREE.MeshBasicMaterial({ color: 0xff0055 });
-            const neon = new THREE.Mesh(neonGeo, materials.weaponNeon);
-            neon.position.set(0, 0.03, -0.05);
-            weaponGroup.add(neon);
+            const neonPanel = new THREE.Mesh(new THREE.BoxGeometry(0.076, 0.02, 0.18), materials.weaponNeon);
+            neonPanel.position.set(0, -0.01, -0.02); weaponGroup.add(neonPanel);
 
-            weaponGroup.position.set(0.25, -0.25, -0.45);
+            weaponGroup.position.set(0.22, -0.24, -0.42);
             pitchObject.add(weaponGroup);
         }
 
-        // --- 模組五：高效記憶體回收物件池 (Pools) ---
+        // --- 模組五：高效記憶體回收物件池 ---
         const ParticlePool = {
             active: [], cache: [],
-            spawn(pos, color, count=15) {
-                const geo = new THREE.BoxGeometry(0.08, 0.08, 0.08);
+            spawn(pos, color, count=12) {
+                const geo = new THREE.BoxGeometry(0.06, 0.06, 0.06);
                 const mat = new THREE.MeshBasicMaterial({ color: color });
                 for(let i=0; i<count; i++) {
-                    let p;
-                    if(this.cache.length > 0) {
-                        p = this.cache.pop(); p.mesh.visible = true; p.mesh.material.color.setHex(color);
-                    } else {
-                        p = { mesh: new THREE.Mesh(geo, mat), vel: new THREE.Vector3() };
-                        scene.add(p.mesh);
-                    }
-                    p.mesh.position.copy(pos);
-                    p.vel.set((Math.random()-0.5)*8, (Math.random())*6 + 2, (Math.random()-0.5)*8);
-                    p.life = 0.4; this.active.push(p);
+                    let p = this.cache.length > 0 ? this.cache.pop() : { mesh: new THREE.Mesh(geo, mat), vel: new THREE.Vector3() };
+                    p.mesh.visible = true; p.mesh.material.color.setHex(color); p.mesh.position.copy(pos);
+                    p.vel.set((Math.random()-0.5)*7, (Math.random())*5 + 2, (Math.random()-0.5)*7);
+                    p.life = 0.35; scene.add(p.mesh); this.active.push(p);
                 }
             },
             update(dt) {
                 for (let i = this.active.length - 1; i >= 0; i--) {
-                    let p = this.active[i]; p.life -= dt; p.vel.y -= 9.8 * dt;
-                    p.mesh.position.addScaledVector(p.vel, dt);
-                    if(p.life <= 0) {
-                        p.mesh.visible = false; this.cache.push(p); this.active.splice(i, 1);
-                    }
+                    let p = this.active[i]; p.life -= dt; p.vel.y -= 9.8 * dt; p.mesh.position.addScaledVector(p.vel, dt);
+                    if(p.life <= 0) { p.mesh.visible = false; this.cache.push(p); this.active.splice(i, 1); }
                 }
             },
-            clearAll() {
-                this.active.forEach(p => p.mesh.visible = false);
-                this.cache = this.cache.concat(this.active); this.active = [];
-            }
+            clearAll() { this.active.forEach(p => p.mesh.visible = false); this.cache = this.cache.concat(this.active); this.active = []; }
         };
 
         const ProjectilePool = {
             active: [], cache: [],
             spawn(pos, dir, speed, dmg) {
-                let b;
-                if(this.cache.length > 0) {
-                    b = this.cache.pop(); b.mesh.visible = true;
-                } else {
-                    const geo = new THREE.SphereGeometry(0.08, 8, 8);
-                    const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-                    b = { mesh: new THREE.Mesh(geo, mat) }; scene.add(b.mesh);
-                }
-                b.mesh.position.copy(pos); b.dir = dir.clone().normalize();
-                b.speed = speed; b.dmg = dmg; b.life = 2.0; this.active.push(b);
+                let b = this.cache.length > 0 ? this.cache.pop() : { mesh: new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 6), new THREE.MeshBasicMaterial({ color: 0x00ffff })) };
+                b.mesh.visible = true; b.mesh.position.copy(pos); b.dir = dir.clone().normalize(); b.speed = speed; b.dmg = dmg; b.life = 1.8;
+                scene.add(b.mesh); this.active.push(b);
             },
             update(dt) {
                 for(let i=this.active.length-1; i>=0; i--) {
-                    let b = this.active[i]; b.life -= dt;
-                    b.mesh.position.addScaledVector(b.dir, b.speed * dt);
-                    
+                    let b = this.active[i]; b.life -= dt; b.mesh.position.addScaledVector(b.dir, b.speed * dt);
                     let hitWall = checkGridCollision(b.mesh.position.x, b.mesh.position.z, 0.1);
-                    let distToPlayer = b.mesh.position.distanceTo(yawObject.position);
-
-                    if(distToPlayer < CONFIG.player.radius) {
-                        damagePlayer(b.dmg); b.life = 0;
-                        ParticlePool.spawn(b.mesh.position, 0xff0055, 10); audio.playHurt();
+                    
+                    if(b.mesh.position.distanceTo(yawObject.position) < CONFIG.player.radius) {
+                        damagePlayer(b.dmg); b.life = 0; ParticlePool.spawn(b.mesh.position, 0xff0055, 10); audio.playHurt();
                     }
                     if(b.life <= 0 || hitWall) {
-                        if(hitWall) ParticlePool.spawn(b.mesh.position, 0x00ffff, 6);
+                        if(hitWall) ParticlePool.spawn(b.mesh.position, 0x00ffff, 5);
                         b.mesh.visible = false; this.cache.push(b); this.active.splice(i, 1);
                     }
                 }
             },
-            clearAll() {
-                this.active.forEach(b => b.mesh.visible = false);
-                this.cache = this.cache.concat(this.active); this.active = [];
-            }
+            clearAll() { this.active.forEach(b => b.mesh.visible = false); this.cache = this.cache.concat(this.active); this.active = []; }
         };
 
-        // --- 模組六：有限狀態機 AI 敵人系統 (FSM) ---
+        // --- 模組六：動態浮物資補給系統 ---
+        const PickupManager = {
+            pickups: [],
+            spawn(pos, type = null) {
+                if(!type) type = Math.random() > 0.5 ? "HEALTH" : "AMMO";
+                const group = new THREE.Group();
+                
+                // 核心發光水晶幾何體
+                const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.25, 0), new THREE.MeshStandardMaterial({
+                    color: type === "HEALTH" ? 0xff0055 : 0x00ffaa,
+                    emissive: type === "HEALTH" ? 0xff0055 : 0x00ffaa,
+                    emissiveIntensity: 0.6
+                }));
+                group.add(crystal);
+
+                // 環繞全息發光環
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.015, 4, 12), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent:true, opacity:0.5 }));
+                ring.rotation.x = Math.PI/2; group.add(ring);
+
+                group.position.copy(pos); group.position.y = 0.5;
+                scene.add(group);
+                this.pickups.push({ mesh: group, type: type, crystal: crystal, ring: ring });
+            },
+            update(dt) {
+                const pPos = yawObject.position;
+                const time = performance.now() * 0.002;
+                
+                for(let i = this.pickups.length-1; i>=0; i--) {
+                    let p = this.pickups[i];
+                    p.mesh.rotation.y += dt * 1.5;
+                    p.mesh.position.y = 0.5 + Math.sin(time * 2 + i) * 0.08; // 浮空律動
+                    p.ring.rotation.y -= dt * 2.0;
+
+                    // 玩家接近觸發拾取邏輯
+                    if(p.mesh.position.distanceTo(pPos) < 1.1) {
+                        audio.playPickup();
+                        if(p.type === "HEALTH") {
+                            CONFIG.player.hp = Math.min(CONFIG.player.maxHp, CONFIG.player.hp + 30);
+                            pushKillFeed("✨ MATRIX HEALED: +30 HP");
+                        } else {
+                            // 所有武器彈藥回滿，護盾加滿
+                            CONFIG.player.shield = CONFIG.player.maxShield;
+                            CONFIG.weapons.forEach(w => w.ammo = w.maxAmmo);
+                            pushKillFeed("🔋 CORE RECHARGED: FULL AMMO & SHIELD");
+                        }
+                        updateHUD();
+                        scene.remove(p.mesh);
+                        this.pickups.splice(i, 1);
+                    }
+                }
+            },
+            clearAll() { this.pickups.forEach(p => scene.remove(p.mesh)); this.pickups = []; }
+        };
+
+        // --- 模組七：有限狀態機 AI 敵人高階建模系統 ---
         const EnemyManager = {
             enemies: [],
             spawnEnemy() {
-                const isSpitter = Math.random() > 0.6 && CONFIG.wave >= 2;
+                const isSpitter = Math.random() > 0.5 && CONFIG.wave >= 2;
                 let r, c;
                 do {
                     r = Math.floor(Math.random() * (MAP_ROWS - 2)) + 1;
                     c = Math.floor(Math.random() * (MAP_COLS - 2)) + 1;
-                } while (MAP_GRID[r][c] !== 0 || (Math.abs(c*CONFIG.mapScale - yawObject.position.x) < 6));
+                } while (MAP_GRID[r][c] !== 0 || (Math.abs(c*CONFIG.mapScale - yawObject.position.x) < 7));
 
-                const size = 1.0;
-                const geo = isSpitter ? new THREE.CylinderGeometry(0, 0.6, 1.4, 4) : new THREE.BoxGeometry(size, size*1.5, size);
-                const color = isSpitter ? 0x9900ff : 0x00ff66;
-                const mat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.3 });
+                const eGroup = new THREE.Group();
+                let eType = "CHASER";
                 
-                const mesh = new THREE.Mesh(geo, mat);
-                mesh.position.set(c * CONFIG.mapScale, size*0.75, r * CONFIG.mapScale);
-                scene.add(mesh);
+                if (isSpitter) {
+                    eType = "SPITTER";
+                    // 浮空無人機高級建模：中心核心球 + 外部雙圓形旋轉外殼 + 兩側側翼推進器
+                    const core = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), new THREE.MeshStandardMaterial({ color: 0x9900ff, emissive: 0x9900ff }));
+                    eGroup.add(core);
+                    const shieldRing = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.03, 4, 16), new THREE.MeshBasicMaterial({ color: 0xcc00ff, wireframe: true }));
+                    eGroup.add(shieldRing);
+                    eGroup.userData = { rotator: shieldRing }; // 保存引用以便進行物件動畫旋轉
+                    
+                    const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.4), new THREE.MeshStandardMaterial({color:0x221133}));
+                    wingL.position.x = -0.6; eGroup.add(wingL);
+                    const wingR = wingL.clone(); wingR.position.x = 0.6; eGroup.add(wingR);
+                    eGroup.position.set(c * CONFIG.mapScale, 1.4, r * CONFIG.mapScale);
+                } else {
+                    // 機械蜘蛛爬行者幾何建模：扁平中心甲殼 + 四支關節足爪
+                    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.2, 5), new THREE.MeshStandardMaterial({ color: 0x00ff66, metalness: 0.8 }));
+                    eGroup.add(body);
+                    for(let i=0; i<4; i++) {
+                        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.5, 0.12), new THREE.MeshStandardMaterial({ color: 0x114422 }));
+                        leg.position.set(Math.cos(i*Math.PI/2)*0.45, -0.2, Math.sin(i*Math.PI/2)*0.45);
+                        leg.rotation.z = i % 2 === 0 ? 0.4 : -0.4;
+                        eGroup.add(leg);
+                    }
+                    eGroup.position.set(c * CONFIG.mapScale, 0.45, r * CONFIG.mapScale);
+                }
 
+                scene.add(eGroup);
                 this.enemies.push({
-                    mesh: mesh, hp: isSpitter ? 60 : 100, type: isSpitter ? "SPITTER" : "CHASER",
-                    speed: isSpitter ? 1.5 : 2.2 + (CONFIG.wave*0.2), shootTimer: Math.random() * 2, state: "CHASE"
+                    mesh: eGroup, hp: isSpitter ? 70 : 100, type: eType,
+                    speed: isSpitter ? 2.0 : 2.5 + (CONFIG.wave*0.15), shootTimer: Math.random() * 1.5, state: "CHASE"
                 });
             },
             update(dt) {
@@ -526,147 +588,220 @@
                     let dist = e.mesh.position.distanceTo(playerPos);
                     e.mesh.lookAt(playerPos.x, e.mesh.position.y, playerPos.z);
 
+                    // 執行各物件特有幾何旋轉動畫
+                    if(e.mesh.userData.rotator) {
+                        e.mesh.userData.rotator.rotation.x += dt * 3.0;
+                        e.mesh.userData.rotator.rotation.y += dt * 1.5;
+                    }
+
                     if(e.type === "CHASER") {
-                        if(dist > 1.2) {
+                        if(dist > 1.3) {
                             let dir = new THREE.Vector3().subVectors(playerPos, e.mesh.position);
                             dir.y = 0; dir.normalize();
                             let nextX = e.mesh.position.x + dir.x * e.speed * dt;
                             let nextZ = e.mesh.position.z + dir.z * e.speed * dt;
                             if(!checkGridCollision(nextX, e.mesh.position.z, 0.5)) e.mesh.position.x = nextX;
                             if(!checkGridCollision(e.mesh.position.x, nextZ, 0.5)) e.mesh.position.z = nextZ;
+                            
+                            // 機械腿部的微幅爬行律動
+                            e.mesh.children.forEach((child, idx) => {
+                                if(idx > 0) child.rotation.x = Math.sin(performance.now()*0.01 + idx)*0.3;
+                            });
                         } else {
-                            damagePlayer(25 * dt);
-                            if(Math.random() > 0.85) audio.playHurt();
+                            damagePlayer(30 * dt); if(Math.random() > 0.88) audio.playHurt();
                         }
                     } 
                     else if(e.type === "SPITTER") {
-                        if(dist > 12) {
+                        if(dist > 14) {
                             let dir = new THREE.Vector3().subVectors(playerPos, e.mesh.position).normalize();
                             e.mesh.position.addScaledVector(dir, e.speed * dt);
-                        } else if(dist < 6) {
+                        } else if(dist < 7) {
                             let dir = new THREE.Vector3().subVectors(e.mesh.position, playerPos).normalize();
                             dir.y = 0; e.mesh.position.addScaledVector(dir, e.speed * dt);
                         }
 
                         e.shootTimer += dt;
-                        if(e.shootTimer >= 2.0) {
+                        if(e.shootTimer >= 1.8) {
                             e.shootTimer = 0;
-                            let firePos = e.mesh.position.clone().add(new THREE.Vector3(0, 0.5, 0));
+                            let firePos = e.mesh.position.clone();
                             let fireDir = new THREE.Vector3().subVectors(playerPos, firePos).normalize();
-                            ProjectilePool.spawn(firePos, fireDir, 14, 15);
+                            ProjectilePool.spawn(firePos, fireDir, 15, 12);
                         }
                     }
                 }
 
                 if(this.enemies.length === 0 && CONFIG.gameState === "PLAYING") {
-                    CONFIG.wave++;
-                    document.getElementById('wave-label').innerText = "WAVE " + CONFIG.wave;
-                    let nextSpawnCount = 4 + CONFIG.wave * 2;
-                    for(let k=0; k<Math.min(nextSpawnCount, 15); k++) this.spawnEnemy();
+                    CONFIG.wave++; document.getElementById('wave-label').innerText = "WAVE " + CONFIG.wave;
+                    let n = 3 + CONFIG.wave * 2; for(let k=0; k<Math.min(n, 12); k++) this.spawnEnemy();
                 }
             },
             hitEnemy(mesh, dmg) {
-                let e = this.enemies.find(x => x.mesh === mesh);
+                // 由於怪物是由 Group 堆疊組成，需要向上搜尋其最頂層 Group 父節點
+                let topGroup = mesh;
+                while (topGroup.parent && topGroup.parent !== scene) {
+                    topGroup = topGroup.parent;
+                }
+
+                let e = this.enemies.find(x => x.mesh === topGroup);
                 if(e) {
-                    e.hp -= dmg; ParticlePool.spawn(e.mesh.position, 0x00ff66, 8);
+                    e.hp -= dmg; ParticlePool.spawn(mesh.position, 0x00ffcc, 6);
                     if(e.hp <= 0) {
-                        e.state = "DEAD"; ParticlePool.spawn(e.mesh.position, 0xff0055, 30);
-                        audio.playExplosion(); scene.remove(e.mesh);
+                        e.state = "DEAD"; ParticlePool.spawn(e.mesh.position, 0xff0055, 25);
+                        audio.playExplosion();
+                        
+                        // 隨機在怪物死亡地點爆出浮空補給箱
+                        if(Math.random() > 0.5) PickupManager.spawn(e.mesh.position);
+
+                        scene.remove(e.mesh);
                         this.enemies = this.enemies.filter(x => x !== e);
-                        CONFIG.score += e.type === "SPITTER" ? 250 : 100; updateHUD();
-                        pushKillFeed("SYSTEM PURGED: +1 TARGET");
+                        
+                        // 更新 Combo 連殺核心狀態
+                        CONFIG.combo.count++;
+                        CONFIG.combo.timer = CONFIG.combo.maxTime;
+                        
+                        let baseScore = e.type === "SPITTER" ? 200 : 100;
+                        CONFIG.score += baseScore * CONFIG.combo.count; // 越連殺越高分！
+                        
+                        updateHUD();
+                        pushKillFeed(`PURGED: +${baseScore * CONFIG.combo.count} (COMBO X${CONFIG.combo.count})`);
                     }
                 }
             },
-            clearAll() {
-                this.enemies.forEach(e => scene.remove(e.mesh)); this.enemies = [];
-            }
+            clearAll() { this.enemies.forEach(e => scene.remove(e.mesh)); this.enemies = []; }
         };
 
-        // --- 模組七：終極無 Bug 網格反推幾何碰撞偵測機制 ---
-        // 利用玩家圓形切面動態反推二維矩陣索引，解決浮點數 AABB 卡牆缺陷
+        // --- 模組八：O(1) 高精準網格反推幾何碰撞偵測機制 ---
         function checkGridCollision(x, z, radius) {
             const size = CONFIG.mapScale;
-            // 取樣圓周上的關鍵檢測點
-            const checkPoints = [
-                {x: x, z: z}, // 中心點
-                {x: x + radius, z: z}, {x: x - radius, z: z},
+            const points = [
+                {x: x, z: z}, {x: x + radius, z: z}, {x: x - radius, z: z},
                 {x: x, z: z + radius}, {x: x, z: z - radius},
                 {x: x + radius*0.7, z: z + radius*0.7}, {x: x - radius*0.7, z: z - radius*0.7}
             ];
-            
-            for (let p of checkPoints) {
-                let c = Math.round(p.x / size);
-                let r = Math.round(p.z / size);
-                
-                // 越界視同撞牆
+            for (let p of points) {
+                let c = Math.round(p.x / size); let r = Math.round(p.z / size);
                 if (r < 0 || r >= MAP_ROWS || c < 0 || c >= MAP_COLS) return true;
                 if (MAP_GRID[r][c] === 1) return true;
             }
             return false;
         }
 
-        // --- 模組八：滑鼠視角鎖定與鍵盤多重輸入防攔截處理 ---
-        const keysPressed = {};
-        
-        function setupControls() {
-            const startBtn = document.getElementById('start-btn');
-            const restartBtn = document.getElementById('restart-btn');
+        // --- 模組九：2D 全息雷達小地圖繪製系統 (Minimap Subsystem) ---
+        let minimapCanvas, minimapCtx;
+        function initMinimapCanvas() {
+            minimapCanvas = document.getElementById('minimap');
+            minimapCanvas.width = 160; minimapCanvas.height = 160;
+            minimapCtx = minimapCanvas.getContext('2d');
+        }
 
-            startBtn.addEventListener('click', () => { document.body.requestPointerLock(); });
-            restartBtn.addEventListener('click', () => { resetGame(); document.body.requestPointerLock(); });
+        function drawMinimap() {
+            if (CONFIG.gameState !== "PLAYING") return;
+            const ctx = minimapCtx; const w = minimapCanvas.width; const h = minimapCanvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const scale = CONFIG.mapScale;
+            const px = yawObject.position.x; const pz = yawObject.position.z;
+
+            // 中心映射：將雷達視角鎖定在玩家正中央
+            ctx.save();
+            ctx.translate(w/2, h/2);
+            
+            // 繪製迷宮阻擋高牆 (灰色區域)
+            ctx.fillStyle = "rgba(0, 255, 200, 0.08)";
+            for(let r=0; r<MAP_ROWS; r++) {
+                for(let c=0; c<MAP_COLS; c++) {
+                    if(MAP_GRID[r][c] === 1) {
+                        // 計算相對玩家的位置偏移
+                        let rx = (c * scale - px) * 6; // 6為地圖雷達放大倍率
+                        let rz = (r * scale - pz) * 6;
+                        ctx.fillRect(rx - 8, rz - 8, 16, 16);
+                    }
+                }
+            }
+
+            // 繪製地圖浮空物資箱 (發光綠點)
+            ctx.fillStyle = "#00ffaa";
+            PickupManager.pickups.forEach(p => {
+                let rx = (p.mesh.position.x - px) * 6; let rz = (p.mesh.position.z - pz) * 6;
+                ctx.beginPath(); ctx.arc(rx, rz, 3, 0, Math.PI*2); ctx.fill();
+            });
+
+            // 繪製敵軍位置 (閃爍紅點)
+            ctx.fillStyle = "#ff0055";
+            EnemyManager.enemies.forEach(e => {
+                let rx = (e.mesh.position.x - px) * 6; let rz = (p.mesh.position.z - pz) * 6;
+                // 用時間差製造雷達呼吸燈般閃爍感
+                if(Math.floor(performance.now() * 0.006) % 2 === 0) {
+                    let ex = (e.mesh.position.x - px) * 6; let ez = (e.mesh.position.z - pz) * 6;
+                    ctx.beginPath(); ctx.arc(ex, ez, 4, 0, Math.PI*2); ctx.fill();
+                }
+            });
+
+            ctx.restore();
+
+            // 繪製位於雷達正中央的玩家箭頭本身
+            ctx.save(); ctx.translate(w/2, h/2);
+            ctx.rotate(-yawObject.rotation.y - Math.PI); // 跟隨視角旋轉
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(-4, 4); ctx.lineTo(4, 4); ctx.closePath(); ctx.fill();
+            
+            // 繪製扇形手電筒視角掃描區
+            ctx.fillStyle = "rgba(0, 255, 200, 0.15)";
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0, 0, 30, -Math.PI/4 - Math.PI/2, Math.PI/4 - Math.PI/2); ctx.closePath(); ctx.fill();
+            ctx.restore();
+        }
+
+        // --- 模組十：滑鼠視角鎖定與噴射衝刺多重監聽 ---
+        const keysPressed = {};
+        function setupControls() {
+            document.getElementById('start-btn').addEventListener('click', () => { document.body.requestPointerLock(); });
+            document.getElementById('restart-btn').addEventListener('click', () => { resetGame(); document.body.requestPointerLock(); });
 
             document.addEventListener('pointerlockchange', () => {
                 if (document.pointerLockElement === document.body) {
                     document.getElementById('menu-screen').style.display = 'none';
                     document.getElementById('gameover-screen').style.display = 'none';
                     document.getElementById('hud').style.display = 'block';
-                    CONFIG.gameState = "PLAYING";
-                    audio.init();
+                    CONFIG.gameState = "PLAYING"; audio.init();
                 } else {
                     if (CONFIG.gameState !== "GAMEOVER") {
                         document.getElementById('menu-screen').style.display = 'flex';
-                        document.getElementById('hud').style.display = 'none';
-                        CONFIG.gameState = "MENU";
+                        document.getElementById('hud').style.display = 'none'; CONFIG.gameState = "MENU";
                     }
                 }
             });
 
             document.addEventListener('mousemove', (e) => {
                 if (CONFIG.gameState !== "PLAYING") return;
-                const sensitivity = 0.0022;
-                yawObject.rotation.y -= e.movementX * sensitivity;
-                pitchObject.rotation.x -= e.movementY * sensitivity;
+                yawObject.rotation.y -= e.movementX * 0.0022; pitchObject.rotation.x -= e.movementY * 0.0022;
                 pitchObject.rotation.x = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitchObject.rotation.x));
             });
 
-            // 修正重點：同時支持 e.code 與 e.key，徹底相容所有輸入法狀態
             document.addEventListener('keydown', (e) => {
-                keysPressed[e.code] = true;
-                const keyFallback = e.key.toLowerCase();
-                if(keyFallback === 'w') keysPressed['KeyW'] = true;
-                if(keyFallback === 's') keysPressed['KeyS'] = true;
-                if(keyFallback === 'a') keysPressed['KeyA'] = true;
-                if(keyFallback === 'd') keysPressed['KeyD'] = true;
-                if(keyFallback === ' ') keysPressed['Space'] = true;
+                keysPressed[e.code] = true; const k = e.key.toLowerCase();
+                if(k === 'w') keysPressed['KeyW'] = true; if(k === 's') keysPressed['KeyS'] = true;
+                if(k === 'a') keysPressed['KeyA'] = true; if(k === 'd') keysPressed['KeyD'] = true;
+                if(k === ' ') keysPressed['Space'] = true;
 
-                if(e.code === 'Digit1' || keyFallback === '1') switchWeapon(0);
-                if(e.code === 'Digit2' || keyFallback === '2') switchWeapon(1);
-                if(e.code === 'Digit3' || keyFallback === '3') switchWeapon(2);
-                if((e.code === 'KeyR' || keyFallback === 'r') && !CONFIG.isReloading) reloadWeapon();
-                if((e.code === 'Space' || keyFallback === ' ') && CONFIG.player.canJump) {
-                    CONFIG.player.velocity.y = 6.0; CONFIG.player.canJump = false; CONFIG.player.isGrounded = false;
+                // 核心爆發功能：按下 LeftShift 觸發多向噴射衝刺 (Dash)
+                if(e.code === 'ShiftLeft' && CONFIG.player.dashCooldown <= 0 && CONFIG.player.dashTimer <= 0) {
+                    triggerDash();
+                }
+
+                if(e.code === 'Digit1' || k === '1') switchWeapon(0);
+                if(e.code === 'Digit2' || k === '2') switchWeapon(1);
+                if(e.code === 'Digit3' || k === '3') switchWeapon(2);
+                if((e.code === 'KeyR' || k === 'r') && !CONFIG.isReloading) reloadWeapon();
+                if((e.code === 'Space' || k === ' ') && CONFIG.player.canJump) {
+                    CONFIG.player.velocity.y = 6.2; CONFIG.player.canJump = false; CONFIG.player.isGrounded = false;
                 }
             });
             
             document.addEventListener('keyup', (e) => { 
-                keysPressed[e.code] = false; 
-                const keyFallback = e.key.toLowerCase();
-                if(keyFallback === 'w') keysPressed['KeyW'] = false;
-                if(keyFallback === 's') keysPressed['KeyS'] = false;
-                if(keyFallback === 'a') keysPressed['KeyA'] = false;
-                if(keyFallback === 'd') keysPressed['KeyD'] = false;
-                if(keyFallback === ' ') keysPressed['Space'] = false;
+                keysPressed[e.code] = false; const k = e.key.toLowerCase();
+                if(k === 'w') keysPressed['KeyW'] = false; if(k === 's') keysPressed['KeyS'] = false;
+                if(k === 'a') keysPressed['KeyA'] = false; if(k === 'd') keysPressed['KeyD'] = false;
+                if(k === ' ') keysPressed['Space'] = false;
             });
 
             document.addEventListener('mousedown', (e) => {
@@ -674,7 +809,31 @@
             });
         }
 
-        // --- 模組九：武器管理與後座力 ---
+        // 核心爆發功能實作：多向噴射衝刺
+        function triggerDash() {
+            const f = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
+            const s = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
+            
+            let dDir = new THREE.Vector3();
+            if (keysPressed['KeyW']) dDir.add(f); if (keysPressed['KeyS']) dDir.addScaledVector(f, -1);
+            if (keysPressed['KeyA']) dDir.addScaledVector(s, -1); if (keysPressed['KeyD']) dDir.add(s);
+            
+            // 如果玩家按著方向鍵就朝方向衝刺，若沒按則默認朝前方衝刺
+            if(dDir.lengthSq() === 0) dDir.copy(f);
+            dDir.normalize();
+
+            CONFIG.player.dashDir.copy(dDir);
+            CONFIG.player.dashTimer = 0.2; // 衝刺持續 0.2 秒
+            CONFIG.player.dashCooldown = CONFIG.player.maxDashCooldown;
+            
+            audio.playDash();
+            pushKillFeed("🚀 THRUSTER DASH ENGAGED!");
+            
+            // 爆發視覺特效：拉伸攝影機視野 FOV
+            camera.fov = 95; camera.updateProjectionMatrix();
+        }
+
+        // --- 模組十一：武器管理與全息雷射發射 ---
         function switchWeapon(idx) {
             if(idx === CONFIG.currentWeaponIdx || CONFIG.isReloading) return;
             CONFIG.currentWeaponIdx = idx;
@@ -686,69 +845,62 @@
         }
 
         function reloadWeapon() {
-            const w = CONFIG.weapons[CONFIG.currentWeaponIdx];
-            if(w.ammo === w.maxAmmo) return;
-            CONFIG.isReloading = true;
-            document.getElementById('ammo-value').innerText = "RELOADING";
-            setTimeout(() => {
-                w.ammo = w.maxAmmo; CONFIG.isReloading = false; updateHUD();
-            }, 1200);
+            const w = CONFIG.weapons[CONFIG.currentWeaponIdx]; if(w.ammo === w.maxAmmo) return;
+            CONFIG.isReloading = true; document.getElementById('ammo-value').innerText = "RELOADING";
+            setTimeout(() => { w.ammo = w.maxAmmo; CONFIG.isReloading = false; updateHUD(); }, 1100);
         }
 
         function fireWeapon() {
-            const now = performance.now();
-            const w = CONFIG.weapons[CONFIG.currentWeaponIdx];
-
+            const now = performance.now(); const w = CONFIG.weapons[CONFIG.currentWeaponIdx];
             if (now - CONFIG.lastFireTime < w.fireRate || CONFIG.isReloading) return;
             if (w.ammo <= 0) { reloadWeapon(); return; }
 
             w.ammo--; CONFIG.lastFireTime = now; updateHUD();
-            weaponGroup.position.z = -0.32; muzzleFlashLight.intensity = 4.0;
+            weaponGroup.position.z = -0.30; muzzleFlashLight.intensity = 4.5;
             setTimeout(() => { muzzleFlashLight.intensity = 0; }, 40);
 
             if (w.id === 0) { audio.playLaser(); executeRaycastShot(w.dmg, 0); } 
-            else if (w.id === 1) { audio.playShotgun(); for (let i = 0; i < w.pellets; i++) executeRaycastShot(w.dmg, 0.06); } 
+            else if (w.id === 1) { audio.playShotgun(); for (let i = 0; i < w.pellets; i++) executeRaycastShot(w.dmg, 0.07); } 
             else if (w.id === 2) { 
                 audio.playPlasma();
-                let spawnPos = yawObject.position.clone();
-                let camDir = new THREE.Vector3();
-                camera.getWorldDirection(camDir);
-                spawnPos.addScaledVector(camDir, 0.6); spawnPos.y -= 0.2;
-                ProjectilePool.spawn(spawnPos, camDir, 28, w.dmg);
+                let sPos = yawObject.position.clone();
+                let cDir = new THREE.Vector3(); camera.getWorldDirection(cDir);
+                sPos.addScaledVector(cDir, 0.6); sPos.y -= 0.18;
+                ProjectilePool.spawn(sPos, cDir, 32, w.dmg);
             }
         }
 
         function executeRaycastShot(damage, spread) {
             const raycaster = new THREE.Raycaster();
-            const targetParam = new THREE.Vector2((Math.random() - 0.5) * spread * 2, (Math.random() - 0.5) * spread * 2);
-            raycaster.setFromCamera(targetParam, camera);
+            const param = new THREE.Vector2((Math.random() - 0.5) * spread * 2, (Math.random() - 0.5) * spread * 2);
+            raycaster.setFromCamera(param, camera);
 
+            // 提取所有活著的怪獸的網格群組做遞迴射線碰撞
             const targetMeshes = EnemyManager.enemies.map(e => e.mesh);
-            const intersects = raycaster.intersectObjects(targetMeshes);
+            const intersects = raycaster.intersectObjects(targetMeshes, true);
 
             if (intersects.length > 0) {
                 EnemyManager.hitEnemy(intersects[0].object, damage);
-                ParticlePool.spawn(intersects[0].point, 0xffffff, 8);
+                ParticlePool.spawn(intersects[0].point, 0xffffff, 6);
             } else {
-                const allWalls = scene.children.filter(c => c.geometry === geometries.wall);
-                const wallIntersects = raycaster.intersectObjects(allWalls);
-                if(wallIntersects.length > 0) ParticlePool.spawn(wallIntersects[0].point, 0xff0055, 4);
+                const walls = scene.children.filter(c => c.geometry === geometries.wall);
+                const intersectsWall = raycaster.intersectObjects(walls);
+                if(intersectsWall.length > 0) ParticlePool.spawn(intersectsWall[0].point, 0x00ffcc, 3);
             }
         }
 
-        // --- 模組十：狀態變更機制 ---
+        // --- 模組十二：狀態變更機制 ---
         function damagePlayer(amount) {
-            if(CONFIG.gameState !== "PLAYING") return;
+            if(CONFIG.gameState !== "PLAYING" || CONFIG.player.dashTimer > 0) return; // 衝刺期間享有完全無敵幀
+            
             if(CONFIG.player.shield > 0) {
-                CONFIG.player.shield -= amount * 0.7; CONFIG.player.hp -= amount * 0.3;
-            } else {
-                CONFIG.player.hp -= amount;
-            }
+                CONFIG.player.shield -= amount * 0.75; CONFIG.player.hp -= amount * 0.25;
+            } else { CONFIG.player.hp -= amount; }
+            
             if(CONFIG.player.shield < 0) CONFIG.player.shield = 0;
             
-            const flash = document.getElementById('damage-flash');
-            flash.style.background = 'rgba(255,0,0,0.3)';
-            setTimeout(() => { flash.style.background = 'rgba(255,0,0,0)'; }, 80);
+            const flash = document.getElementById('damage-flash'); flash.style.background = 'rgba(255,0,0,0.32)';
+            setTimeout(() => { flash.style.background = 'rgba(255,0,0,0)'; }, 90);
 
             if(CONFIG.player.hp <= 0) { CONFIG.player.hp = 0; triggerGameOver(); }
             updateHUD();
@@ -762,20 +914,17 @@
         }
 
         function resetGame() {
-            CONFIG.player.hp = 100; CONFIG.player.shield = 100; CONFIG.score = 0; CONFIG.wave = 1;
-            CONFIG.currentWeaponIdx = 0; CONFIG.weapons.forEach(w => w.ammo = w.maxAmmo);
-            
-            const spawnPos = getSafeSpawnPosition();
-            yawObject.position.copy(spawnPos);
+            CONFIG.player.hp = 100; CONFIG.player.shield = 100; CONFIG.score = 0; CONFIG.wave = 1; CONFIG.combo.count = 0;
+            CONFIG.weapons.forEach(w => w.ammo = w.maxAmmo);
+            yawObject.position.copy(getSafeSpawnPosition());
             pitchObject.rotation.set(0,0,0); yawObject.rotation.set(0,0,0);
             
-            EnemyManager.clearAll(); ParticlePool.clearAll(); ProjectilePool.clearAll();
+            EnemyManager.clearAll(); ParticlePool.clearAll(); ProjectilePool.clearAll(); PickupManager.clearAll();
             for(let i=0; i<4; i++) EnemyManager.spawnEnemy();
             document.getElementById('wave-label').innerText = "WAVE 1";
             switchWeapon(0); updateHUD();
         }
 
-        // --- 模組十一：UI HUD 渲染器 ---
         function updateHUD() {
             document.getElementById('hp-value').innerText = Math.ceil(CONFIG.player.hp);
             document.getElementById('hp-fill').style.width = `${(CONFIG.player.hp / CONFIG.player.maxHp) * 100}%`;
@@ -789,76 +938,111 @@
         }
 
         function pushKillFeed(text) {
-            const feed = document.getElementById('kill-feed');
-            const el = document.createElement('div'); el.innerText = text; feed.appendChild(el);
-            setTimeout(() => { el.remove(); }, 3000);
+            const feed = document.getElementById('kill-feed'); const el = document.createElement('div');
+            el.innerText = text; feed.appendChild(el); setTimeout(() => { el.remove(); }, 2500);
         }
 
         function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // --- 模組十二：高精度 Delta-Time 物理主迴圈線程 ---
+        // --- 模組十三：高刷新物理與狀態計時主迴圈引擎 ---
         function runEngine() {
             requestAnimationFrame(runEngine);
-            let dt = clock.getDelta();
-            if (dt > 0.1) dt = 0.1; // 邊界保護防巨幅掉幀穿牆
+            let dt = clock.getDelta(); if (dt > 0.08) dt = 0.08;
 
             if (CONFIG.gameState === "PLAYING") {
+                // 1. 連殺 Combo 計時收斂判定
+                if(CONFIG.combo.timer > 0) {
+                    CONFIG.combo.timer -= dt;
+                    const cBox = document.getElementById('combo-box');
+                    cBox.style.opacity = '1';
+                    cBox.innerText = `COMBO X${CONFIG.combo.count}`;
+                    if(CONFIG.combo.timer <= 0) {
+                        CONFIG.combo.count = 0; cBox.style.opacity = '0';
+                    }
+                }
+
+                // 2. 護盾防禦微幅回充
                 if (CONFIG.player.shield < CONFIG.player.maxShield) {
-                    CONFIG.player.shield += dt * 2.5; updateHUD();
+                    CONFIG.player.shield += dt * 3.0; updateHUD();
                 }
 
-                // 核心修正：計算基於平面的移動向量
-                const frontVec = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
-                const sideVec = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
-                
+                // 3. 噴射衝刺冷卻計時器
+                if (CONFIG.player.dashCooldown > 0) {
+                    CONFIG.player.dashCooldown -= dt;
+                    let ratio = Math.max(0, (1 - CONFIG.player.dashCooldown / CONFIG.player.maxDashCooldown) * 100);
+                    document.getElementById('dash-fill').style.width = `${ratio}%`;
+                }
+
+                // 4. 位移向量運算（分流一般位移與 Dash 位移）
                 let moveDir = new THREE.Vector3();
-                if (keysPressed['KeyW']) moveDir.add(frontVec);
-                if (keysPressed['KeyS']) moveDir.addScaledVector(frontVec, -1);
-                if (keysPressed['KeyA']) moveDir.addScaledVector(sideVec, -1);
-                if (keysPressed['KeyD']) moveDir.add(sideVec);
-                moveDir.normalize();
+                let radius = CONFIG.player.radius;
 
-                // 重力與跳躍
-                if (!CONFIG.player.isGrounded) CONFIG.player.velocity.y -= 15.0 * dt;
-                yawObject.position.y += CONFIG.player.velocity.y * dt;
-
-                if (yawObject.position.y <= CONFIG.player.height) {
-                    yawObject.position.y = CONFIG.player.height;
-                    CONFIG.player.velocity.y = 0; CONFIG.player.isGrounded = true; CONFIG.player.canJump = true;
-                }
-
-                // 核心修正：移動步伐乘上 dt，並實作解耦式雙軸網格滑動碰撞
-                let moveStep = CONFIG.player.speed * dt;
-                let nextX = yawObject.position.x + moveDir.x * moveStep;
-                let nextZ = yawObject.position.z + moveDir.z * moveStep;
-                let r = CONFIG.player.radius;
-
-                if (!checkGridCollision(nextX, yawObject.position.z, r)) yawObject.position.x = nextX;
-                if (!checkGridCollision(yawObject.position.x, nextZ, r)) yawObject.position.z = nextZ;
-
-                // 呼吸燈與後座力平滑插值
-                if (moveDir.lengthSq() > 0 && CONFIG.player.isGrounded) {
-                    const timer = performance.now() * 0.012;
-                    weaponGroup.position.y = -0.25 + Math.sin(timer) * 0.015;
-                    weaponGroup.position.x = 0.25 + Math.cos(timer * 0.5) * 0.01;
+                if(CONFIG.player.dashTimer > 0) {
+                    // 噴射衝刺狀態中
+                    CONFIG.player.dashTimer -= dt;
+                    let dStep = CONFIG.player.dashSpeed * dt;
+                    let nextX = yawObject.position.x + CONFIG.player.dashDir.x * dStep;
+                    let nextZ = yawObject.position.z + CONFIG.player.dashDir.z * dStep;
+                    
+                    if (!checkGridCollision(nextX, yawObject.position.z, radius)) yawObject.position.x = nextX;
+                    if (!checkGridCollision(yawObject.position.x, nextZ, radius)) yawObject.position.z = nextZ;
+                    
+                    // 衝刺結束時平滑復位 FOV
+                    if(CONFIG.player.dashTimer <= 0) {
+                        camera.fov = 75; camera.updateProjectionMatrix();
+                    }
                 } else {
-                    weaponGroup.position.y = THREE.MathUtils.lerp(weaponGroup.position.y, -0.25, 10 * dt);
-                    weaponGroup.position.x = THREE.MathUtils.lerp(weaponGroup.position.x, 0.25, 10 * dt);
-                }
-                weaponGroup.position.z = THREE.MathUtils.lerp(weaponGroup.position.z, -0.45, 10 * dt);
+                    // 標準一般位移狀態下
+                    const fVec = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
+                    const sVec = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
+                    
+                    if (keysPressed['KeyW']) moveDir.add(fVec); if (keysPressed['KeyS']) moveDir.addScaledVector(fVec, -1);
+                    if (keysPressed['KeyA']) moveDir.addScaledVector(sVec, -1); if (keysPressed['KeyD']) moveDir.add(sVec);
+                    moveDir.normalize();
 
+                    if (!CONFIG.player.isGrounded) CONFIG.player.velocity.y -= 15.5 * dt;
+                    yawObject.position.y += CONFIG.player.velocity.y * dt;
+
+                    if (yawObject.position.y <= CONFIG.player.height) {
+                        yawObject.position.y = CONFIG.player.height;
+                        CONFIG.player.velocity.y = 0; CONFIG.player.isGrounded = true; CONFIG.player.canJump = true;
+                    }
+
+                    let step = CONFIG.player.speed * dt;
+                    let nextX = yawObject.position.x + moveDir.x * step;
+                    let nextZ = yawObject.position.z + moveDir.z * step;
+
+                    if (!checkGridCollision(nextX, yawObject.position.z, radius)) yawObject.position.x = nextX;
+                    if (!checkGridCollision(yawObject.position.x, nextZ, radius)) yawObject.position.z = nextZ;
+                }
+
+                // 5. 槍體第一人稱呼吸晃動與後座力平滑插值
+                if (moveDir.lengthSq() > 0 && CONFIG.player.isGrounded) {
+                    const time = performance.now() * 0.012;
+                    weaponGroup.position.y = -0.24 + Math.sin(time) * 0.014;
+                    weaponGroup.position.x = 0.22 + Math.cos(time * 0.5) * 0.008;
+                } else {
+                    weaponGroup.position.y = THREE.MathUtils.lerp(weaponGroup.position.y, -0.24, 10 * dt);
+                    weaponGroup.position.x = THREE.MathUtils.lerp(weaponGroup.position.x, 0.22, 10 * dt);
+                }
+                weaponGroup.position.z = THREE.MathUtils.lerp(weaponGroup.position.z, -0.42, 10 * dt);
+
+                // 6. 更新各個子系統物件管理池
                 ParticlePool.update(dt);
                 ProjectilePool.update(dt);
                 EnemyManager.update(dt);
+                PickupManager.update(dt);
+                
+                // 7. 每幀重新調用繪製全息雷達
+                drawMinimap();
             }
             renderer.render(scene, camera);
         }
 
-        // 啟動入口
+        // 入口啟動
         window.onload = () => {
             initGraphics();
             setupControls();
