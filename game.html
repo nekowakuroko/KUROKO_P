@@ -3,353 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>紅澪☆Kuremi：魔導矩陣 | Arcana Matrix</title>
+    <title>貓咪惡搞大冒險 | Troll Cat Adventure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background-color: #04060a; }
-        .game-cursor { cursor: crosshair; }
+        body { font-family: sans-serif; background-color: #1a1a24; color: #fff; }
+        canvas { background-color: #87CEEB; border: 4px solid #000; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen flex flex-col justify-between overflow-hidden">
+<body class="min-h-screen flex flex-col justify-between select-none">
 
     <!-- 頂部導覽 -->
-    <nav class="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-6 py-4">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <a href="./" class="text-xs px-2.5 py-1 rounded bg-slate-900 border border-slate-800 hover:text-indigo-400 transition">← 回首頁</a>
-                <span class="text-sm font-black tracking-widest text-white">AMANO_KUREMI // ARCANA_MATRIX</span>
-            </div>
-            <span class="text-indigo-400 font-bold text-xs">[ v1.0.1-FIXED ]</span>
+    <nav class="bg-slate-900 border-b-4 border-black px-6 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <a href="./" class="text-xs px-3 py-1 bg-slate-800 border-2 border-black rounded font-bold hover:bg-slate-700 transition">← 回首頁</a>
+            <span class="text-sm font-black tracking-wider text-yellow-400 font-mono">⚠️ 警告：本遊戲包含極度崩潰內容</span>
         </div>
+        <div class="font-mono text-xs text-slate-400">DEATH_COUNTER_ACTIVE</div>
     </nav>
 
-    <!-- 遊戲視窗主體 -->
-    <main class="flex-grow flex items-center justify-center p-4">
-        <div class="w-full max-w-4xl bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden relative" style="box-shadow: 0 0 30px rgba(99, 102, 241, 0.25);">
+    <!-- 遊戲主舞台 -->
+    <main class="flex-grow flex items-center justify-center p-4 relative">
+        <div class="relative max-w-4xl w-full flex flex-col items-center">
             
-            <!-- 介面 1：開始畫面 -->
-            <div id="startScreen" class="absolute inset-0 z-30 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
-                <div class="w-20 h-20 rounded-full bg-indigo-600 mb-6 flex items-center justify-center text-4xl select-none shadow-lg shadow-indigo-500/50">🔮</div>
-                <h1 class="text-3xl font-black text-white mb-2">紅澪☆Kuremi：魔導矩陣</h1>
-                <p class="text-indigo-400 text-xs tracking-widest uppercase mb-8">Gothic Magic Barrage Core System</p>
-                
-                <div class="max-w-md bg-slate-900/60 border border-slate-800 rounded-xl p-5 text-left text-xs text-slate-400 mb-8 space-y-2">
-                    <p class="text-white font-bold mb-1"><i class="fa-solid fa-gamepad text-indigo-400 mr-1"></i> 操作說明：</p>
-                    <p>• <b>滑鼠移動 / 觸控拖曳：</b> 控制魔導核心移動，核心會自動朝上發射子彈。</p>
-                    <p>• <b>遊戲目標：</b> 擊碎上方掉落的魔導卡牌，並躲避紅色魔彈！</p>
-                </div>
-
-                <button id="startBtn" class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold rounded-xl tracking-wider shadow-lg shadow-indigo-600/30 transition-all">
-                    初始化魔導網絡 (START)
-                </button>
-            </div>
-
-            <!-- 介面 2：升級商店 -->
-            <div id="shopScreen" class="absolute inset-0 z-20 bg-slate-950/90 backdrop-blur-sm hidden flex flex-col items-center justify-center p-6 text-center">
-                <h2 class="text-2xl font-bold text-white mb-1">術式魔導商店</h2>
-                <p class="text-xs text-slate-500 font-mono mb-6">WAVE COMPLETED // SECURITY SHOP</p>
-                
-                <div class="px-4 py-1.5 bg-slate-900 border border-slate-800 rounded-lg mb-8 text-xs text-amber-400">
-                    儲備暗晶: 💎 <span id="shopCrystals">0</span>
-                </div>
-
-                <div class="grid sm:grid-cols-2 gap-4 w-full max-w-lg text-left mb-8">
-                    <button id="buyWeapon" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group">
-                        <div>
-                            <div class="text-white font-bold text-xs group-hover:text-indigo-400">雙重平行彈道</div>
-                            <div class="text-slate-500 text-[11px] mt-0.5">解鎖兩側副炮彈幕</div>
-                        </div>
-                        <div class="text-right text-xs text-amber-400 font-bold">💎 15</div>
-                    </button>
-                    <button id="buyShield" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group">
-                        <div>
-                            <div class="text-white font-bold text-xs group-hover:text-indigo-400">極化冥律護盾</div>
-                            <div class="text-slate-500 text-[11px] mt-0.5">生成一層可抵擋傷害的防護罩</div>
-                        </div>
-                        <div class="text-right text-xs text-amber-400 font-bold">💎 10</div>
-                    </button>
-                </div>
-
-                <button id="nextWaveBtn" class="px-8 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl tracking-wider transition-all">
-                    進入下一波次 (NEXT WAVE)
-                </button>
-            </div>
-
-            <!-- 介面 3：遊戲結束 -->
-            <div id="gameOverScreen" class="absolute inset-0 z-30 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center">
-                <div class="text-rose-500 text-3xl mb-3"><i class="fa-solid fa-skull-crossbones"></i></div>
-                <h2 class="text-2xl font-black text-white mb-6">矩陣網路潰散</h2>
-                <div class="px-6 py-3 bg-slate-900 border border-slate-800 rounded-xl mb-8 text-xs text-left space-y-1">
-                    <div>最高防禦波次: <span class="text-indigo-400 font-bold" id="finalWave">1</span></div>
-                    <div>最終獲得總分: <span class="text-white font-bold" id="finalScore">0</span></div>
-                </div>
-                <button id="restartBtn" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs tracking-wider transition-all">
-                    重構網絡 (RETRY)
-                </button>
-            </div>
-
             <!-- HUD 面板 -->
-            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center pointer-events-none z-10 text-xs select-none font-mono">
-                <div class="bg-slate-950/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-800 flex flex-col gap-0.5 text-slate-400">
-                    <div>HP: <span id="hudHp" class="text-rose-500 font-bold">♥♥♥</span></div>
-                    <div>SHIELD: <span id="hudShield" class="text-slate-500">OFF</span></div>
-                </div>
-                <div class="bg-slate-950/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-800 text-right text-slate-400">
-                    <div>SCORE: <span id="hudScore" class="text-white font-bold">0</span></div>
-                    <div>WAVE: <span id="hudWave" class="text-indigo-400 font-bold">WAVE 1</span></div>
-                    <div>CRYSTAL: <span id="hudCrystal" class="text-amber-400 font-bold">0</span></div>
-                </div>
+            <div class="w-full max-w-[800px] flex justify-between items-center mb-2 font-mono text-sm bg-slate-950 p-2 border-2 border-black rounded">
+                <div class="text-rose-500 font-bold">💀 死亡次數: <span id="deathCount">0</span></div>
+                <div class="text-yellow-400 font-bold" id="gameStatus">關卡 1：看起來很正常的平原</div>
+                <div class="text-emerald-400">操作：A/D鍵移動，空白鍵跳躍</div>
             </div>
 
-            <!-- Canvas -->
-            <canvas id="gameCanvas" width="800" height="500" class="w-full h-auto bg-[#05070c] block game-cursor"></canvas>
+            <!-- 核心 Canvas -->
+            <canvas id="trollCanvas" width="800" height="400" class="w-full h-auto block"></canvas>
+
+            <!-- 彈出式大崩潰結算層 -->
+            <div id="trollOverlay" class="absolute inset-0 bg-black/80 backdrop-blur-sm hidden flex flex-col items-center justify-center text-center p-6 rounded-xl">
+                <h2 class="text-4xl font-black text-rose-500 mb-2" id="overlayTitle">勝敗乃兵家常事</h2>
+                <p class="text-slate-400 text-sm mb-6" id="overlayMsg">這也能死？想不到吧？</p>
+                <button id="respawnBtn" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black text-sm border-4 border-black rounded-xl active:scale-95 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    復活再戰 (RESTART)
+                </button>
+            </div>
+
         </div>
     </main>
 
-    <footer class="w-full border-t border-slate-900 bg-slate-950/40 py-3 text-center text-[10px] text-slate-600 font-mono">
-        CODE SIGNATURE: KUROKO_P // PRIVATE_ENFORCED_MATRIX
+    <!-- 頁尾 -->
+    <footer class="bg-slate-950 border-t-4 border-black py-2 text-center text-[10px] text-slate-600 font-mono">
+        ANTI-GRAVITY CAT PARODY ENGINE V1.0 // NO REFUNDS
     </footer>
 
+    <!-- 遊戲邏輯控制核心 -->
     <script>
-        const canvas = document.getElementById('gameCanvas');
+        const canvas = document.getElementById('trollCanvas');
         const ctx = canvas.getContext('2d');
 
-        let gameActive = false;
-        let score = 0;
-        let crystals = 0;
-        let currentWave = 1;
-        let player = { x: 400, y: 420, radius: 15, hp: 3, hasShield: false, weaponLevel: 1, fireTimer: 0 };
-        
-        let playerBullets = [];
-        let enemies = [];
-        let enemyBullets = [];
-        let particles = [];
+        // 全局計數器
+        let deaths = 0;
+        let isDead = false;
+        let hasWon = false;
 
-        function updatePlayerPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            player.x = ((clientX - rect.left) / rect.width) * canvas.width;
-            player.y = ((clientY - rect.top) / rect.height) * canvas.height;
-            
-            if (player.x < player.radius) player.x = player.radius;
-            if (player.x > canvas.width - player.radius) player.x = canvas.width - player.radius;
-            if (player.y < 200) player.y = 200;
-            if (player.y > canvas.height - player.radius) player.y = canvas.height - player.radius;
-        }
-        
-        canvas.addEventListener('mousemove', updatePlayerPos);
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); updatePlayerPos(e); }, {passive:false});
+        // 玩家設定
+        let player = {
+            x: 50, y: 300, width: 30, height: 30,
+            vx: 0, vy: 0, speed: 4, jumpForce: 11,
+            gravity: 0.5, isGrounded: false
+        };
 
-        function createExplosion(x, y, color) {
-            for(let i=0; i<8; i++) {
-                particles.push({
-                    x, y,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: (Math.random() - 0.5) * 5,
-                    radius: Math.random() * 2 + 1,
-                    alpha: 1,
-                    color: color
-                });
+        // 按鍵監聽
+        let keys = { a: false, d: false, space: false };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.a = true;
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = true;
+            if (e.code === 'Space' || e.code === 'KeyW' || e.code === 'ArrowUp') {
+                keys.space = true;
+                e.preventDefault();
             }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.a = false;
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = false;
+            if (e.code === 'Space' || e.code === 'KeyW' || e.code === 'ArrowUp') keys.space = false;
+        });
+
+        // 惡搞地圖物件陣列設定
+        let platforms = [];
+        let trollBlocks = [];
+        let spikes = [];
+        let goal = { x: 730, y: 230, width: 20, height: 120 };
+
+        function initMap() {
+            isDead = false;
+            hasWon = false;
+            document.getElementById('trollOverlay').classList.add('hidden');
+            document.getElementById('gameStatus').innerText = "關卡 1：看起來很正常的平原";
+
+            // 重置玩家
+            player.x = 50; player.y = 250; player.vx = 0; player.vy = 0;
+
+            // 地板與標準平台
+            platforms = [
+                { x: 0, y: 350, width: 250, height: 50 },  // 起始地面
+                { x: 380, y: 350, width: 120, height: 50 }, // 中間小島
+                { x: 580, y: 350, width: 220, height: 50 }, // 終點地面
+                { x: 180, y: 240, width: 60, height: 20 }   // 看似安全的磚塊
+            ];
+
+            // 惡搞陷阱 1：隱形方塊（當跳到一半時會突然出現把你撞進深淵）
+            trollBlocks = [
+                { x: 285, y: 190, width: 35, height: 35, visible: false, type: 'block' },
+                { x: 440, y: 240, width: 30, height: 30, visible: true, type: 'poison_coin' } // 問號方塊
+            ];
+
+            // 惡搞陷阱 2：隱藏地刺（走到特定位置才會突然升起）
+            spikes = [
+                { x: 120, y: 355, width: 30, height: 20, active: false, triggerX: 100 },
+                { x: 410, y: 355, width: 30, height: 20, active: true, triggerX: 0 } // 一開始就看得見的刺
+            ];
         }
 
-        function spawnWave() {
-            enemies = [];
-            enemyBullets = [];
-            playerBullets = [];
-            let count = 4 + currentWave * 2;
-            if (count > 18) count = 18;
-            for(let i=0; i<count; i++) {
-                enemies.push({
-                    x: 80 + (i % 6) * 120,
-                    y: 50 + Math.floor(i / 6) * 45,
-                    width: 50,
-                    height: 30,
-                    hp: 1 + Math.floor(currentWave / 2),
-                    shootCooldown: Math.random() * 100 + 50
-                });
+        // 死亡判定觸發
+        function playerDie(msg) {
+            if (isDead) return;
+            isDead = true;
+            deaths++;
+            document.getElementById('deathCount').innerText = deaths;
+            document.getElementById('overlayTitle').innerText = "💀 你死了";
+            document.getElementById('overlayMsg').innerText = msg;
+            document.getElementById('trollOverlay').classList.remove('hidden');
+        }
+
+        // AABB 碰撞檢測基礎核心
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        // 遊戲主迴圈
+        function update() {
+            if (isDead || hasWon) return;
+
+            // 玩家左右移動
+            if (keys.a) player.vx = -player.speed;
+            else if (keys.d) player.vx = player.speed;
+            else player.vx = 0;
+
+            // 物理重力計算
+            player.vy += player.gravity;
+            player.x += player.vx;
+            player.y += player.vy;
+            player.isGrounded = false;
+
+            // 限制左邊界
+            if (player.x < 0) player.x = 0;
+
+            // 1. 與正常平台碰撞檢測
+            platforms.forEach(p => {
+                if (checkCollision(player, p)) {
+                    // 從上方踩上平台
+                    if (player.vy > 0 && player.y + player.height - player.vy <= p.y + 4) {
+                        player.y = p.y - player.height;
+                        player.vy = 0;
+                        player.isGrounded = true;
+                    }
+                }
+            });
+
+            // 跳躍輸入處理
+            if (keys.space && player.isGrounded) {
+                player.vy = -player.jumpForce;
+                player.isGrounded = false;
             }
-        }
 
-        function loop() {
-            if (!gameActive) return;
+            // 2. 處理惡搞隱形/陷阱磚塊
+            trollBlocks.forEach(tb => {
+                // 檢測是否從「下方」撞擊磚塊
+                if (checkCollision(player, tb)) {
+                    if (player.vy < 0 && player.y - player.vy >= tb.y + tb.height - 4) {
+                        player.y = tb.y + tb.height;
+                        player.vy = 1; // 被反彈向下
+                        
+                        if (!tb.visible && tb.type === 'block') {
+                            tb.visible = true; // 隱形磚顯形！成功把玩家頂進懸崖
+                        }
+                        
+                        if (tb.type === 'poison_coin') {
+                            playerDie("這個問號方塊是有毒的，你頭骨碎裂了。");
+                        }
+                    }
+                }
+            });
 
-            ctx.fillStyle = '#05070c';
+            // 3. 處理突發性陷阱刺
+            spikes.forEach(s => {
+                // 如果玩家走過觸發點，隱形地刺瞬間彈出
+                if (!s.active && player.x > s.triggerX && player.x < s.triggerX + 40) {
+                    s.active = true;
+                    s.y = 330; // 猛烈刺出地面
+                }
+                
+                if (s.active && checkCollision(player, s)) {
+                    playerDie("地表突然噴出鋼刺，你變成了貓咪串燒。");
+                }
+            });
+
+            // 惡搞終點旗桿陷阱：碰到旗桿時，旗桿會突然倒塌砸死玩家
+            if (checkCollision(player, goal)) {
+                if (player.x > goal.x - 10) {
+                    playerDie("想不到吧！旗桿頂端帶有 萬伏高壓電，你被電焦了。");
+                }
+            }
+
+            // 掉落虛空深淵死亡判定
+            if (player.y > canvas.height) {
+                playerDie("你掉進了無底深淵。這裡除了重力什麼都沒有。");
+            }
+
+            // --- 畫面繪製渲染區塊 ---
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 繪製背景藍天白雲
+            ctx.fillStyle = "#87CEEB";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 玩家核心
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
-            ctx.fillStyle = '#6366f1';
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.stroke();
+            // 繪製正常平台（綠色草地外觀）
+            platforms.forEach(p => {
+                ctx.fillStyle = "#49a038";
+                ctx.fillRect(p.x, p.y, p.width, p.height);
+                ctx.fillStyle = "#2d6322";
+                ctx.fillRect(p.x, p.y, p.width, 6); // 草地頂部深色邊
+            });
 
-            if (player.hasShield) {
-                ctx.beginPath();
-                ctx.arc(player.x, player.y, player.radius + 10, 0, Math.PI*2);
-                ctx.strokeStyle = '#c084fc';
-                ctx.stroke();
-            }
-
-            // 射擊計時
-            player.fireTimer++;
-            if (player.fireTimer >= (player.weaponLevel > 1 ? 12 : 18)) {
-                player.fireTimer = 0;
-                if (player.weaponLevel === 1) {
-                    playerBullets.push({ x: player.x, y: player.y - 15, vy: -7 });
-                } else {
-                    playerBullets.push({ x: player.x - 8, y: player.y - 15, vy: -8 });
-                    playerBullets.push({ x: player.x + 8, y: player.y - 15, vy: -8 });
+            // 繪製惡搞方塊
+            trollBlocks.forEach(tb => {
+                if (tb.visible) {
+                    ctx.fillStyle = tb.type === 'poison_coin' ? "#d97706" : "#475569";
+                    ctx.fillRect(tb.x, tb.y, tb.width, tb.height);
+                    ctx.strokeStyle = "#000";
+                    ctx.strokeRect(tb.x, tb.y, tb.width, tb.height);
+                    
+                    // 畫個問號
+                    ctx.fillStyle = "#fff";
+                    ctx.font = "bold 14px sans-serif";
+                    ctx.fillText("?", tb.x + 12, tb.y + 20);
                 }
-            }
+            });
 
-            // 更新子彈
-            for(let i = playerBullets.length - 1; i >= 0; i--) {
-                let b = playerBullets[i];
-                b.y += b.vy;
-                ctx.fillStyle = '#67e8f9';
-                ctx.fillRect(b.x - 2, b.y, 4, 10);
-                if (b.y < 0) playerBullets.splice(i, 1);
-            }
-
-            // 檢查波次清除
-            if (enemies.length === 0) {
-                gameActive = false;
-                document.getElementById('shopCrystals').innerText = crystals;
-                document.getElementById('shopScreen').classList.remove('hidden');
-                return;
-            }
-
-            // 更新卡牌敵人
-            for(let i = enemies.length - 1; i >= 0; i--) {
-                let e = enemies[i];
-                ctx.fillStyle = '#1e1b4b';
-                ctx.fillRect(e.x, e.y, e.width, e.height);
-                ctx.strokeStyle = '#a5b4fc';
-                ctx.strokeRect(e.x, e.y, e.width, e.height);
-
-                e.shootCooldown--;
-                if (e.shootCooldown <= 0) {
-                    e.shootCooldown = Math.random() * 120 + 80 - (currentWave * 3);
-                    enemyBullets.push({ x: e.x + e.width/2, y: e.y + e.height, vy: 3 + currentWave * 0.2 });
-                }
-
-                // 子彈擊中判定
-                for(let j = playerBullets.length - 1; j >= 0; j--) {
-                    let b = playerBullets[j];
-                    if (b.x > e.x && b.x < e.x + e.width && b.y > e.y && b.y < e.y + e.height) {
-                        playerBullets.splice(j, 1);
-                        e.hp--;
-                        createExplosion(b.x, b.y, '#67e8f9');
-                        if (e.hp <= 0) {
-                            enemies.splice(i, 1);
-                            score += 100;
-                            crystals += 2;
-                            createExplosion(e.x + e.width/2, e.y + e.height/2, '#c084fc');
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // 更新敵方魔彈
-            for(let i = enemyBullets.length - 1; i >= 0; i--) {
-                let eb = enemyBullets[i];
-                eb.y += eb.vy;
-                ctx.beginPath();
-                ctx.arc(eb.x, eb.y, 4, 0, Math.PI*2);
-                ctx.fillStyle = '#f43f5e';
-                ctx.fill();
-
-                let dist = Math.hypot(eb.x - player.x, eb.y - player.y);
-                if (dist < player.radius + 4) {
-                    enemyBullets.splice(i, 1);
-                    if (player.hasShield) {
-                        player.hasShield = false;
-                        createExplosion(player.x, player.y, '#c084fc');
-                    } else {
-                        player.hp--;
-                        createExplosion(player.x, player.y, '#f43f5e');
-                        if (player.hp <= 0) {
-                            gameActive = false;
-                            document.getElementById('finalScore').innerText = score;
-                            document.getElementById('finalWave').innerText = currentWave;
-                            document.getElementById('gameOverScreen').classList.remove('hidden');
-                        }
-                    }
-                    continue;
-                }
-                if (eb.y > canvas.height) enemyBullets.splice(i, 1);
-            }
-
-            // 爆炸粒子
-            for(let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.x += p.vx; p.y += p.vy; p.alpha -= 0.03;
-                if (p.alpha <= 0) { particles.splice(i, 1); }
-                else {
-                    ctx.save();
-                    ctx.globalAlpha = p.alpha;
+            // 繪製地刺
+            ctx.fillStyle = "#78716c";
+            spikes.forEach(s => {
+                if (s.active) {
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
-                    ctx.fillStyle = p.color;
+                    ctx.moveTo(s.x, s.y + s.height);
+                    ctx.lineTo(s.x + s.width/2, s.y);
+                    ctx.lineTo(s.x + s.width, s.y + s.height);
                     ctx.fill();
-                    ctx.restore();
                 }
-            }
+            });
 
-            // 更新介面
-            document.getElementById('hudHp').innerText = '♥'.repeat(Math.max(0, player.hp));
-            document.getElementById('hudShield').innerText = player.hasShield ? 'ON' : 'OFF';
-            document.getElementById('hudShield').className = player.hasShield ? 'text-purple-400 font-bold' : 'text-slate-500';
-            document.getElementById('hudScore').innerText = score;
-            document.getElementById('hudCrystal').innerText = crystals;
+            // 繪製終點旗桿
+            ctx.fillStyle = "#ef4444";
+            ctx.fillRect(goal.x, goal.y, goal.width, 15); // 旗幟
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(goal.x + 15, goal.y, 5, goal.height); // 桿子
 
-            if (gameActive) requestAnimationFrame(loop);
+            // 繪製主角馬力喵（用可愛的顏文字代替圖片，載入速度極快）
+            ctx.font = "26px sans-serif";
+            ctx.fillText("🐱", player.x, player.y + 24);
         }
 
-        // 按鈕控制事件綁定
-        document.getElementById('startBtn').addEventListener('click', () => {
-            document.getElementById('startScreen').classList.add('hidden');
-            gameActive = true;
-            score = 0; crystals = 0; currentWave = 1;
-            player.hp = 3; player.hasShield = false; player.weaponLevel = 1;
-            document.getElementById('hudWave').innerText = `WAVE ${currentWave}`;
-            spawnWave();
-            loop();
-        });
+        // 啟動遊戲引擎
+        initMap();
+        setInterval(update, 1000 / 60); // 鎖定穩定 60 幀執行
 
-        document.getElementById('nextWaveBtn').addEventListener('click', () => {
-            document.getElementById('shopScreen').classList.add('hidden');
-            gameActive = true;
-            currentWave++;
-            document.getElementById('hudWave').innerText = `WAVE ${currentWave}`;
-            spawnWave();
-            loop();
+        // 點擊復活再戰
+        document.getElementById('respawnBtn').addEventListener('click', () => {
+            initMap();
         });
-
-        document.getElementById('restartBtn').addEventListener('click', () => {
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            document.getElementById('startScreen').classList.remove('hidden');
-        });
-
-        document.getElementById('buyWeapon').addEventListener('click', () => {
-            if (crystals >= 15 && player.weaponLevel === 1) {
-                crystals -= 15; player.weaponLevel = 2;
-                document.getElementById('shopCrystals').innerText = crystals;
-            }
-        });
-
-        document.getElementById('buyShield').addEventListener('click', () => {
-            if (crystals >= 10 && !player.hasShield) {
-                crystals -= 10; player.hasShield = true;
-                document.getElementById('shopCrystals').innerText = crystals;
-            }
-        });
-    });
-</script>
+    </script>
 </body>
 </html>
