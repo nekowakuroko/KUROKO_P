@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuroko's Creative Space</title>
+    <title>紅澪☆Kuremi | Amano Kuremi Official Space</title>
     <!-- 引入 Tailwind CSS 實現現代感排版 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,134 +14,160 @@
             background-color: #0b0f19;
         }
         .glow-effect:hover {
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
-            transition: all 0.3s ease;
+            box-shadow: 0 0 25px rgba(129, 140, 248, 0.5);
+            transition: all 0.4s ease;
         }
     </style>
 </head>
 <body class="text-gray-200 min-h-screen flex flex-col justify-between">
 
     <!-- 導覽列 -->
-    <nav class="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+    <nav class="border-b border-gray-800 bg-gray-900/60 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <a href="#" class="text-xl font-bold text-indigo-400 tracking-wider">KUROKO_P .</a>
+            <a href="#" class="text-xl font-bold text-indigo-400 tracking-wider flex items-center gap-2">
+                <span class="inline-block w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></span>
+                AMANO KUREMI
+            </a>
             <div class="space-x-6 text-sm font-medium">
-                <a href="#about" class="hover:text-indigo-400 transition">關於我</a>
-                <a href="#works" class="hover:text-indigo-400 transition">作品展示</a>
-                <a href="#contact" class="hover:text-indigo-400 transition">聯絡管道</a>
+                <a href="#about" class="hover:text-indigo-400 transition">關於紅澪</a>
+                <a href="#profile" class="hover:text-indigo-400 transition">角色設定</a>
+                <a href="#pipeline" class="hover:text-indigo-400 transition">製作專案</a>
+                <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="text-red-400 hover:text-red-300 transition"><i class="fa-brands fa-youtube mr-1"></i>YouTube</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero 主視覺區塊 -->
-    <header id="about" class="max-w-4xl mx-auto text-center py-20 px-6">
+    <header id="about" class="max-w-4xl mx-auto text-center pt-24 pb-16 px-6">
         <div class="inline-block relative mb-6">
             <!-- 頭貼外圈發光效果 -->
-            <div class="w-28 h-28 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-1 shadow-lg">
-                <!-- 這裡可以把 src 換成你的頭貼網址，目前先用預設灰底 -->
-                <div class="w-full h-full rounded-full bg-gray-800 flex items-center justify-center text-3xl">🐱</div>
+            <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-1 shadow-2xl">
+                <!-- 預設頭貼，未來可替換為紅澪的頭像圖片 -->
+                <div class="w-full h-full rounded-full bg-gray-950 flex items-center justify-center text-4xl">🔮</div>
             </div>
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight">Kuroko's Creative Space</h1>
-        <p class="text-indigo-400 font-medium mb-6">Video Editor & Multimedia Creator</p>
-        <p class="text-gray-400 max-w-xl mx-auto leading-relaxed text-sm md:text-base">
-            熱衷於影音剪輯、動態視覺與各式數位創意。這裡記錄了我的作品與熱愛的事物。<br>
-            <span class="text-xs text-gray-500 block mt-2">KUROKOKAWAIIINE !!!</span>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-indigo-400">
+            紅澪☆Kuremi
+        </h1>
+        <p class="text-indigo-400 font-semibold text-lg mb-6 tracking-wide">Amano Kuremi Project Space</p>
+        <p class="text-gray-400 max-w-2xl mx-auto leading-relaxed text-base">
+            專注於虛擬角色「紅澪☆Kuremi」的創作空間。這裡記錄了從概念構想、視覺原畫、圖層拆解到 Live2D 動態模型重塑的完整足跡。
+            <span class="text-xs text-gray-600 block mt-3 font-mono tracking-widest">KUROKOKAWAIIINE !!!</span>
         </p>
-        
-        <!-- 核心技能標籤 -->
-        <div class="mt-8 flex flex-wrap justify-center gap-2.5 text-xs">
-            <span class="px-3 py-1.5 rounded-full bg-gray-900 border border-gray-800 text-gray-300"># 影片剪輯</span>
-            <span class="px-3 py-1.5 rounded-full bg-gray-900 border border-gray-800 text-gray-300"># 後期特效</span>
-            <span class="px-3 py-1.5 rounded-full bg-gray-900 border border-gray-800 text-gray-300"># 數位二創</span>
-            <span class="px-3 py-1.5 rounded-full bg-gray-900 border border-gray-800 text-gray-300"># Live2D 嘗試</span>
-        </div>
     </header>
 
-    <!-- 作品展示區塊 -->
-    <section id="works" class="max-w-6xl mx-auto px-6 py-12 w-full">
-        <h2 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-            <span class="w-1 h-6 bg-indigo-500 rounded"></span>精選作品
-        </h2>
-        
-        <!-- 作品卡片網格 -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            <!-- 卡片 1 (影片範例) -->
-            <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden glow-effect flex flex-col justify-between">
-                <div>
-                    <!-- 預留的影片/圖片封面位置 -->
-                    <div class="aspect-video bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
-                        <i class="fa-solid fa-video text-3xl"></i>
-                    </div>
-                    <div class="p-5">
-                        <span class="text-xs font-semibold text-indigo-400 tracking-wider uppercase block mb-1">Video Editing</span>
-                        <h3 class="text-lg font-bold text-white mb-2">影音剪輯作品集</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">包含節奏卡點、動態特效與轉場調色，專注於呈現流暢的視覺體驗。</p>
-                    </div>
+    <!-- 新增：角色詳細設定區塊 (Profile) -->
+    <section id="profile" class="max-w-5xl mx-auto px-6 py-12 w-full">
+        <div class="bg-gradient-to-b from-gray-900 to-gray-950 border border-gray-800 rounded-2xl p-8 md:p-10 shadow-xl">
+            <h2 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                <span class="w-1 h-6 bg-indigo-500 rounded"></span>角色初設定
+            </h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <!-- 左側：形象描述 -->
+                <div class="space-y-4 text-sm md:text-base leading-relaxed text-gray-300">
+                    <p class="border-l-2 border-indigo-500/50 pl-4">
+                        <strong class="text-white block mb-1">🖤 外觀特徵：</strong>
+                        擁有一頭深邃的<span class="text-indigo-300 font-medium">黑色長髮</span>，散發出神祕且高雅的氣質。
+                    </p>
+                    <p class="border-l-2 border-indigo-500/50 pl-4">
+                        <strong class="text-white block mb-1">🔮 服裝風格：</strong>
+                        以經典且充滿細節的<span class="text-purple-300 font-medium">哥德風魔術師裝扮</span>為主軸，融合奇幻與華麗的數位美學。
+                    </p>
+                    <p class="border-l-2 border-indigo-500/50 pl-4">
+                        <strong class="text-white block mb-1">✨ 企劃核心：</strong>
+                        透過先進的 AI 技術輔助生成基礎原畫，並投注大量後期技術進行精修與動態賦能。
+                    </p>
                 </div>
-                <div class="p-5 pt-0">
-                    <a href="#" class="inline-flex items-center text-xs font-medium text-indigo-400 hover:underline gap-1">觀看影片 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+                <!-- 右側：設定小表格 -->
+                <div class="bg-gray-900/50 border border-gray-800/60 rounded-xl p-5 space-y-3 font-mono text-xs md:text-sm">
+                    <div class="flex justify-between border-b border-gray-800/80 pb-2">
+                        <span class="text-gray-500">PROJECT NAME</span>
+                        <span class="text-indigo-400 font-bold">紅澪☆Kuremi</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-800/80 pb-2">
+                        <span class="text-gray-500">HAIR COLOR</span>
+                        <span class="text-gray-300">黑色 (Black)</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-800/80 pb-2">
+                        <span class="text-gray-500">THEME CONCEPT</span>
+                        <span class="text-purple-400">Gothic Magician</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">STATUS</span>
+                        <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 text-[11px] border border-indigo-500/20">Live2D Developing</span>
+                    </div>
                 </div>
             </div>
-
-            <!-- 卡片 2 (Live2D / 2D 專案) -->
-            <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden glow-effect flex flex-col justify-between">
-                <div>
-                    <div class="aspect-video bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
-                        <i class="fa-solid fa-wand-magic-sparkles text-3xl"></i>
-                    </div>
-                    <div class="p-5">
-                        <span class="text-xs font-semibold text-purple-400 tracking-wider uppercase block mb-1">Live2D / Design</span>
-                        <h3 class="text-lg font-bold text-white mb-2">角色與動態模型實作</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">探索虛擬角色模型的圖層拆解與動態綁定，打造極具生命力的角色互動。</p>
-                    </div>
-                </div>
-                <div class="p-5 pt-0">
-                    <a href="#" class="inline-flex items-center text-xs font-medium text-purple-400 hover:underline gap-1">查看專案 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
-                </div>
-            </div>
-
-            <!-- 卡片 3 (其他創意嘗試) -->
-            <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden glow-effect flex flex-col justify-between">
-                <div>
-                    <div class="aspect-video bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
-                        <i class="fa-solid fa-gamepad text-3xl"></i>
-                    </div>
-                    <div class="p-5">
-                        <span class="text-xs font-semibold text-emerald-400 tracking-wider uppercase block mb-1">Creative Log</span>
-                        <h3 class="text-lg font-bold text-white mb-2">遊戲二創與企劃</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">結合喜愛的遊戲 IP（米哈遊、動漫等系列）進行精華剪輯與音樂節奏混剪。</p>
-                    </div>
-                </div>
-                <div class="p-5 pt-0">
-                    <a href="#" class="inline-flex items-center text-xs font-medium text-emerald-400 hover:underline gap-1">瀏覽更多 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
-                </div>
-            </div>
-
         </div>
     </section>
 
-    <!-- 聯絡與社群區塊 -->
-    <footer id="contact" class="w-full bg-gray-900/60 border-t border-gray-800 mt-20 px-6 py-12 text-center">
+    <!-- 專案製作管線區塊 (Pipeline) -->
+    <section id="pipeline" class="max-w-6xl mx-auto px-6 py-12 w-full">
+        <h2 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+            <span class="w-1 h-6 bg-indigo-500 rounded"></span>製作技術分解
+        </h2>
+        
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- 階段 1 -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 glow-effect flex flex-col justify-between">
+                <div>
+                    <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 font-bold">01</div>
+                    <h3 class="text-lg font-bold text-white mb-2">AI 生成與原畫精修</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">利用前沿 AI 技術探索角色基底，針對哥德式魔術師服飾的複雜紋理與配件進行多次反覆生成，並親自優化黑髮與五官細節，奠定高精度的視覺基礎。</p>
+                </div>
+            </div>
+
+            <!-- 階段 2 -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 glow-effect flex flex-col justify-between">
+                <div>
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4 font-bold">02</div>
+                    <h3 class="text-lg font-bold text-white mb-2">Live2D 精細圖層拆解</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">為了賦予角色自然的動態生命力，對原畫進行嚴格的物理拆層。將頭髮、眼神、服飾飄帶及魔術道具解構為數十個獨立圖層，以便進行後續微動態設計。</p>
+                </div>
+            </div>
+
+            <!-- 階段 3 -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 glow-effect flex flex-col justify-between">
+                <div>
+                    <div class="w-10 h-10 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 mb-4 font-bold">03</div>
+                    <h3 class="text-lg font-bold text-white mb-2">多媒體影音與發布</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">將製作過程與未來完成的模型作品，轉化為高質感的影音精華、動態二創影片。所有的專案進度與動態更新，都將第一時間在官方 YouTube 頻道發布。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 影音專區嵌入提示區塊 -->
+        <div class="mt-8 bg-gray-900/40 border border-gray-800/80 rounded-xl p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="text-red-500 text-3xl px-2"><i class="fa-brands fa-youtube"></i></div>
+                <div>
+                    <h4 class="text-white font-bold text-sm md:text-base">前往紅澪☆Kuremi 的 YouTube 官方頻道</h4>
+                    <p class="text-gray-500 text-xs md:text-sm mt-0.5">點擊右側連結訂閱，即時追蹤最新 Live2D 影片作品展示與創作軌跡。</p>
+                </div>
+            </div>
+            <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium text-xs md:text-sm transition shadow-lg tracking-wider whitespace-nowrap">
+                進入頻道 <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- 聯絡與底部區塊 -->
+    <footer id="contact" class="w-full bg-gray-900/60 border-t border-gray-800 mt-12 px-6 py-10 text-center">
         <div class="max-w-4xl mx-auto">
-            <h3 class="text-xl font-bold text-white mb-4">與我聯絡</h3>
-            <p class="text-gray-400 text-sm mb-6">歡迎各類影音合作案或技術交流提案！</p>
+            <h3 class="text-lg font-bold text-white mb-3">專案交流與聯絡</h3>
+            <p class="text-gray-400 text-xs md:text-sm mb-6">歡迎虛擬角色設計、Live2D 技術交流或影像剪輯合作提案。</p>
             
-            <!-- 社群按鈕連結（可自行修改 href） -->
-            <div class="flex justify-center gap-4 mb-8">
+            <!-- 社群按鈕 -->
+            <div class="flex justify-center gap-4 mb-6">
+                <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-300 hover:bg-red-600 hover:text-white transition shadow" title="YouTube 頻道">
+                    <i class="fa-brands fa-youtube text-lg"></i>
+                </a>
                 <a href="https://github.com/nekowakuroko" target="_blank" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-300 hover:bg-indigo-600 hover:text-white transition shadow" title="GitHub">
                     <i class="fa-brands fa-github text-lg"></i>
                 </a>
-                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-300 hover:bg-red-600 hover:text-white transition shadow" title="YouTube">
-                    <i class="fa-brands fa-youtube text-lg"></i>
-                </a>
-                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-300 hover:bg-orange-500 hover:text-white transition shadow" title="Shopee 賣場">
-                    <i class="fa-solid fa-bag-shopping text-lg"></i>
-                </a>
             </div>
             
-            <p class="text-xs text-gray-600">&copy; 2026 Kuroko_P. All rights reserved. Powered by GitHub Pages.</p>
+            <p class="text-[11px] text-gray-600 font-mono">&copy; 2026 Amano Kuremi Project. All rights reserved. Powered by GitHub Pages.</p>
         </div>
     </footer>
 
