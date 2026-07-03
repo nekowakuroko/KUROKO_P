@@ -3,802 +3,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>紅澪☆Kuremi | Amano Kuremi Official Studio</title>
-    
-    <!-- Core UI Dependencies -->
+    <title>賽博深淵：自動超載 | Cyber Abyss: Auto-Drive</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Embedded Advanced CSS Architecture -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
-        
-        :root {
-            --color-bg-primary: #05070f;
-            --color-bg-secondary: #0b0f19;
-            --color-glow-indigo: rgba(99, 102, 241, 0.4);
-            --color-glow-purple: rgba(168, 85, 247, 0.4);
-        }
-
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: var(--color-bg-primary);
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-        }
-
-        .code-font {
-            font-family: 'Fira Code', monospace;
-        }
-
-        /* Custom Professional Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #05070f;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e1b4b;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #312e81;
-        }
-
-        /* Neon Glow Effects */
-        .neon-border-indigo {
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
-            border: 1px solid rgba(99, 102, 241, 0.4);
-        }
-        .neon-border-purple {
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
-            border: 1px solid rgba(168, 85, 247, 0.4);
-        }
-        
-        .glow-text-indigo {
-            text-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
-        }
-        .glow-text-purple {
-            text-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
-        }
-
-        /* Smooth Hover Transitions */
-        .interactive-card {
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .interactive-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.15);
-            border-color: rgba(99, 102, 241, 0.6);
-        }
-
-        /* Cyberpunk Grid Background Overlay */
-        .cyber-grid {
-            background-image: linear-gradient(rgba(18, 24, 38, 0.4) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(18, 24, 38, 0.4) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        /* Custom Animation Keyframes */
-        @keyframes floatY {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .animate-float {
-            animation: floatY 6x ease-in-out infinite;
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-        }
-        .bg-glow-pulse {
-            animation: pulseGlow 4s ease-in-out infinite;
-        }
-
-        /* Tab Active States */
-        .tab-active {
-            color: #ffffff;
-            border-bottom: 2px solid #6366f1;
-            background-color: rgba(99, 102, 241, 0.05);
-        }
+        body { background-color: #030508; overflow: hidden; font-family: monospace; }
+        canvas { background-color: #04060b; border: 2px solid #1e293b; box-shadow: 0 0 25px rgba(99, 102, 241, 0.2); }
     </style>
 </head>
-<body class="text-gray-300 min-h-screen relative cyber-grid">
+<body class="min-h-screen flex flex-col justify-between text-slate-400 select-none">
 
-    <!-- Interactive Background Canvas Element -->
-    <canvas id="magicParticleCanvas" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"></canvas>
+    <!-- 頂部即時核心日誌列 -->
+    <nav class="border-b border-slate-900 bg-slate-950/80 px-6 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <a href="./" class="text-xs px-2.5 py-1 bg-slate-900 border border-slate-800 rounded hover:text-indigo-400 transition font-bold">← 回首頁</a>
+            <span class="text-xs text-emerald-400 font-bold animate-pulse">● ENGINE_LOADED_IMMEDIATELY // DIRECT_PLAY_ACTIVE</span>
+        </div>
+        <span class="text-[10px] text-slate-600 font-mono">[ NO_BUTTONS_ARCHITECTURE ]</span>
+    </nav>
 
-    <!-- Background Ambience Gradients -->
-    <div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-900/10 blur-[120px] pointer-events-none bg-glow-pulse"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-900/10 blur-[120px] pointer-events-none bg-glow-pulse" style="animation-delay: 2s;"></div>
+    <!-- 遊戲唯一舞台區塊 -->
+    <main class="flex-grow flex items-center justify-center p-2">
+        <div class="w-full max-w-4xl flex flex-col items-center">
+            <!-- 唯一核心 Canvas 畫布 -->
+            <canvas id="stageCanvas" width="900" height="520" class="w-full h-auto block rounded-xl"></canvas>
+        </div>
+    </main>
 
-    <!-- Global Layout Wrapper -->
-    <div class="flex flex-col justify-between min-h-screen">
+    <!-- 頁尾技術標籤 -->
+    <footer class="border-t border-slate-900 bg-slate-950/40 py-2.5 text-center text-[10px] text-slate-600 tracking-wider">
+        CORE_LOG: RUNTIME_INSTANT_START // PIPELINE: PURE_CANVAS_RENDER // AUTH: KUROKO_P
+    </footer>
 
-        <!-- ========================================== -->
-        <!-- NAVIGATION ARCHITECTURE                    -->
-        <!-- ========================================== -->
-        <nav class="border-b border-gray-800 bg-gray-950/70 backdrop-blur-xl sticky top-0 z-50 px-6 py-4 transition-all duration-300">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <a href="#" class="text-xl font-black text-white tracking-widest flex items-center gap-3 code-font">
-                    <span class="w-3 h-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 animate-ping"></span>
-                    AMANO_KUREMI <span class="text-indigo-400 font-normal text-sm">v2.0.4</span>
-                </a>
-                
-                <!-- Desktop Nav Links -->
-                <div class="hidden md:flex space-x-8 text-sm font-medium tracking-wide">
-                    <a href="#hero" class="text-gray-400 hover:text-white transition duration-200">主首頁</a>
-                    <a href="#lore" class="text-gray-400 hover:text-white transition duration-200">角色矩陣</a>
-                    <a href="#live2d-dashboard" class="text-gray-400 hover:text-white transition duration-200">核心控制器</a>
-                    <a href="#mesh-inventory" class="text-gray-400 hover:text-white transition duration-200">拓撲模型架構</a>
-                    <a href="#dev-timeline" class="text-gray-400 hover:text-white transition duration-200">研發編年史</a>
-                </div>
-
-                <!-- Channel Quick Entry -->
-                <div class="flex items-center gap-4">
-                    <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-red-600/20 border border-red-600/40 rounded-lg hover:bg-red-600 hover:border-red-600 transition-all duration-300 flex items-center gap-2">
-                        <i class="fa-brands fa-youtube text-sm"></i>
-                        <span>進入頻道</span>
-                    </a>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Main Content Stream Container -->
-        <main class="flex-grow">
-
-            <!-- ========================================== -->
-            <!-- SECTION 1: HERO CONTAINER                 -->
-            <!-- ========================================== -->
-            <section id="hero" class="max-w-6xl mx-auto pt-24 pb-16 px-6 relative">
-                <div class="grid lg:grid-cols-12 gap-12 items-center">
-                    
-                    <!-- Hero Content Left -->
-                    <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/40 border border-indigo-800/60 text-indigo-400 text-xs font-mono">
-                            <i class="fa-solid fa-terminal animate-pulse"></i>
-                            <span>SYSTEM_STATUS: ACTIVE_DEPLOYMENT</span>
-                        </div>
-                        <h1 class="text-5xl md:text-7xl font-black text-white tracking-tight leading-none">
-                            紅澪☆Kuremi <br>
-                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-4xl md:text-5xl font-bold tracking-normal">
-                                Amano Kuremi Project
-                            </span>
-                        </h1>
-                        <p class="text-gray-400 text-base md:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
-                            這是一個專注於原創虛擬角色「紅澪☆Kuremi」的尖端開發空間。融合精密圖層工程與 Live2D 動態綁定技術，從靜態幾何圖形重塑具備物理維度的數位生命。
-                        </p>
-                        <div class="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
-                            <a href="#live2d-dashboard" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-all shadow-lg shadow-indigo-600/20 tracking-wider">
-                                調試核心控制器
-                            </a>
-                            <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="px-6 py-3 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 text-gray-300 font-medium text-sm transition-all tracking-wider flex items-center gap-2">
-                                <i class="fa-brands fa-youtube"></i> 訂閱 YouTube 頻道
-                            </a>
-                        </div>
-                        <div class="pt-6 font-mono text-[11px] text-gray-600 tracking-widest block">
-                            INTERNAL_ID_HASH: KUROKOKAWAIIINE_SYS_INIT_OK
-                        </div>
-                    </div>
-
-                    <!-- Hero Visual Right -->
-                    <div class="lg:col-span-5 flex justify-center relative">
-                        <div class="w-72 h-72 md:w-80 md:h-80 rounded-full bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 p-1.5 shadow-2xl relative animate-float">
-                            <div class="w-full h-full rounded-full bg-gray-950 flex flex-col items-center justify-center relative overflow-hidden group">
-                                <span class="text-6xl mb-2 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">🔮</span>
-                                <span class="text-xs font-mono tracking-widest text-purple-400 font-bold">PROJECT KUREMI</span>
-                                <span class="text-[10px] font-mono text-gray-600 mt-1">AWAITING_RENDER</span>
-                                
-                                <!-- Scanner Decorative Line Effect -->
-                                <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-400 to-transparent shadow-[0_0_10px_#6366f1] opacity-60 animate-[bounce_3s_infinite]"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ========================================== -->
-            <!-- SECTION 2: LORE & MATRIX METADATA         -->
-            <!-- ========================================== -->
-            <section id="lore" class="max-w-6xl mx-auto px-6 py-16">
-                <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">角色架構矩陣</h2>
-                    <p class="text-sm text-indigo-400 font-mono mt-2">CHARACTER MATRIX PROFILE & SCHEMATICS</p>
-                    <div class="w-12 h-1 bg-indigo-500 mx-auto mt-4 rounded-full"></div>
-                </div>
-
-                <div class="grid md:grid-cols-12 gap-8 items-stretch">
-                    
-                    <!-- Left Block: Lore Descriptive -->
-                    <div class="md:col-span-7 bg-gray-900/40 border border-gray-800/80 rounded-2xl p-8 flex flex-col justify-between">
-                        <div class="space-y-6">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-sm border border-indigo-500/20">
-                                    <i class="fa-solid fa-address-card"></i>
-                                </div>
-                                <h3 class="text-xl font-bold text-white">紅澪☆Kuremi 概念設定集</h3>
-                            </div>
-                            
-                            <div class="space-y-4 text-sm md:text-base leading-relaxed text-gray-400 font-light">
-                                <p class="border-l-4 border-indigo-500 pl-4 bg-indigo-950/10 py-2 rounded-r-lg">
-                                    <strong class="text-white block text-sm font-bold mb-0.5">🖤 髮色形態學 (Hair Morphology)</strong>
-                                    在視覺維度上，捨棄了一切繁雜多餘的色彩，堅持採用最純粹的<span class="text-indigo-300 font-medium">深邃黑色長髮</span>。黑髮在動態物理模擬中具有最高級別的陰影權重，能完美襯托出面部的高光與神祕感。
-                                </p>
-                                <p class="border-l-4 border-purple-500 pl-4 bg-purple-950/10 py-2 rounded-r-lg">
-                                    <strong class="text-white block text-sm font-bold mb-0.5">🔮 哥德風魔術師制服 (Gothic Magician Regalia)</strong>
-                                    整體服裝造型結構定義為「古典哥德式幻想魔術師」。服裝圖層包含多層次束腰設計、破碎蕾絲邊緣、具有流體幾何感的魔術高帽，以及帶有獨立物理擺動骨骼的披風組件。
-                                </p>
-                                <p class="border-l-4 border-pink-500 pl-4 bg-pink-950/10 py-2 rounded-r-lg">
-                                    <strong class="text-white block text-sm font-bold mb-0.5">✨ 開發源流 (Development Core)</strong>
-                                    本項目底層設計採用前沿的生成式人工智慧進行特徵探索與原畫渲染。再由人工進行深度幾何去噪、手繪細節補全，以及極度苛刻的二維物理分層處理，屬於數位藝術二創的高階範疇。
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Interactive Terminal Fake Console Lines -->
-                        <div class="mt-8 pt-4 border-t border-gray-800/60 code-font text-[11px] text-gray-500 space-y-1">
-                            <div>&gt; KUREMI_CORE: Loading neural visual weights... Success.</div>
-                            <div>&gt; KUREMI_CORE: Color space validation hex: #000000 [TRUE_BLACK].</div>
-                        </div>
-                    </div>
-
-                    <!-- Right Block: Spec Sheet -->
-                    <div class="md:col-span-5 bg-gradient-to-br from-gray-950 to-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
-                        <div>
-                            <h3 class="text-sm font-bold tracking-widest text-gray-400 uppercase mb-6 flex items-center gap-2 font-mono">
-                                <i class="fa-solid fa-sliders text-xs text-purple-400"></i> SYSTEM_SPECIFICATIONS
-                            </h3>
-                            
-                            <div class="space-y-4 text-xs md:text-sm font-mono">
-                                <div class="flex justify-between border-b border-gray-800 pb-2.5">
-                                    <span class="text-gray-500">PROJECT CODENAME</span>
-                                    <span class="text-indigo-400 font-bold tracking-wider">AMANO_KUREMI</span>
-                                </div>
-                                <div class="flex justify-between border-b border-gray-800 pb-2.5">
-                                    <span class="text-gray-500">HAIR SYMMETRY</span>
-                                    <span class="text-gray-300">Pure Black / Dual-Tail Variant</span>
-                                </div>
-                                <div class="flex justify-between border-b border-gray-800 pb-2.5">
-                                    <span class="text-gray-500">OUTFIT CLASSIFICATION</span>
-                                    <span class="text-purple-400 font-semibold">Gothic Illusionist Tier-1</span>
-                                </div>
-                                <div class="flex justify-between border-b border-gray-800 pb-2.5">
-                                    <span class="text-gray-500">TEXTURE RESOLUTION</span>
-                                    <span class="text-gray-300">8192 x 8192 Px (Ultra-HD)</span>
-                                </div>
-                                <div class="flex justify-between border-b border-gray-800 pb-2.5">
-                                    <span class="text-gray-500">RIGGING WEIGHTS</span>
-                                    <span class="text-pink-400">Normalized Dual-Linear</span>
-                                </div>
-                                <div class="flex justify-between border-b border-gray-800 pb-2.5">
-                                    <span class="text-gray-500">PHYSICS ALGORITHM</span>
-                                    <span class="text-emerald-400">Cubism Pendulum v4.2</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">CURRENT COMPLIANCE</span>
-                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-green-500/10 text-green-400 border border-green-500/20 uppercase tracking-widest">PASS</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Secondary Prompt Quote Decorative Box -->
-                        <div class="mt-6 p-4 rounded-xl bg-gray-900 border border-gray-800/80 text-center">
-                            <span class="text-xs text-gray-500 italic block mb-1">Interactive Vector Token</span>
-                            <div class="text-xs font-mono font-bold text-white tracking-widest">天野紅澪 · DIGITAL MATRIX</div>
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
-            <!-- ========================================== -->
-            <!-- SECTION 3: LIVE2D PARAMETER SIMULATOR     -->
-            <!-- ========================================== -->
-            <section id="live2d-dashboard" class="max-w-6xl mx-auto px-6 py-16">
-                <div class="bg-gray-900/60 border border-gray-800 rounded-2xl p-8 md:p-10 relative overflow-hidden">
-                    
-                    <!-- Decorative glowing orbs inside section -->
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none"></div>
-
-                    <!-- Header -->
-                    <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-10 border-b border-gray-800 pb-6 relative z-10">
-                        <div>
-                            <span class="text-xs font-mono text-indigo-400 uppercase tracking-widest block mb-1">[CORE_ENVIRONMENT_EMULATION]</span>
-                            <h2 class="text-3xl font-extrabold text-white tracking-tight">Live2D 核心參數模擬調試板</h2>
-                        </div>
-                        <div class="flex items-center gap-2 text-xs font-mono text-gray-500">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span>ENGINE_CONNECTED: REALTIME_CALCULATION</span>
-                        </div>
-                    </div>
-
-                    <!-- Interactive Layout Grid -->
-                    <div class="grid lg:grid-cols-12 gap-8 relative z-10">
-                        
-                        <!-- Left Controls: 6 Columns -->
-                        <div class="lg:col-span-7 space-y-6">
-                            <h3 class="text-sm font-bold font-mono tracking-wider text-gray-400 flex items-center gap-2">
-                                <i class="fa-solid fa-gamepad text-indigo-400"></i> DEGREE_OF_FREEDOM_INPUT
-                            </h3>
-                            
-                            <!-- Slider Group 1: Angle X -->
-                            <div class="space-y-2 bg-gray-950/50 border border-gray-800/60 p-4 rounded-xl">
-                                <div class="flex justify-between text-xs font-mono">
-                                    <span class="text-gray-300 font-medium">面部左右轉動 (ParamAngleX)</span>
-                                    <span id="valAngleX" class="text-indigo-400 font-bold">0.00</span>
-                                </div>
-                                <input type="range" id="inputAngleX" min="-30" max="30" value="0" step="0.1"
-                                       class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 transition-all duration-200">
-                                <div class="flex justify-between text-[10px] font-mono text-gray-600">
-                                    <span>-30.0 (Left)</span>
-                                    <span>0.0 (Center)</span>
-                                    <span>+30.0 (Right)</span>
-                                </div>
-                            </div>
-
-                            <!-- Slider Group 2: Angle Y -->
-                            <div class="space-y-2 bg-gray-950/50 border border-gray-800/60 p-4 rounded-xl">
-                                <div class="flex justify-between text-xs font-mono">
-                                    <span class="text-gray-300 font-medium">面部上下俯仰 (ParamAngleY)</span>
-                                    <span id="valAngleY" class="text-purple-400 font-bold">0.00</span>
-                                </div>
-                                <input type="range" id="inputAngleY" min="-30" max="30" value="0" step="0.1"
-                                       class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-purple-500 transition-all duration-200">
-                                <div class="flex justify-between text-[10px] font-mono text-gray-600">
-                                    <span>-30.0 (Down)</span>
-                                    <span>0.0 (Center)</span>
-                                    <span>+30.0 (Up)</span>
-                                </div>
-                            </div>
-
-                            <!-- Slider Group 3: Eye Blink -->
-                            <div class="space-y-2 bg-gray-950/50 border border-gray-800/60 p-4 rounded-xl">
-                                <div class="flex justify-between text-xs font-mono">
-                                    <span class="text-gray-300 font-medium">眼球左/右眨眼連動 (ParamEyeBlink)</span>
-                                    <span id="valEyeBlink" class="text-pink-400 font-bold">1.00</span>
-                                </div>
-                                <input type="range" id="inputEyeBlink" min="0" max="1" value="1" step="0.01"
-                                       class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-pink-500 transition-all duration-200">
-                                <div class="flex justify-between text-[10px] font-mono text-gray-600">
-                                    <span>0.0 (Closed)</span>
-                                    <span>1.0 (Fully Opened)</span>
-                                </div>
-                            </div>
-
-                            <!-- Slider Group 4: Physics Pendulum -->
-                            <div class="space-y-2 bg-gray-950/50 border border-gray-800/60 p-4 rounded-xl">
-                                <div class="flex justify-between text-xs font-mono">
-                                    <span class="text-gray-300 font-medium">黑髮物理擺動加速度 (ParamHairPhysics)</span>
-                                    <span id="valPhysics" class="text-emerald-400 font-bold">0.50</span>
-                                </div>
-                                <input type="range" id="inputPhysics" min="-1" max="1" value="0.5" step="0.01"
-                                       class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 transition-all duration-200">
-                                <div class="flex justify-between text-[10px] font-mono text-gray-600">
-                                    <span>-1.0 (Max Inertia Left)</span>
-                                    <span>0.0 (Static)</span>
-                                    <span>+1.0 (Max Inertia Right)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Vector Data Stream: 5 Columns -->
-                        <div class="lg:col-span-5 flex flex-col justify-between bg-gray-950 border border-gray-800 p-6 rounded-xl">
-                            <div class="space-y-4">
-                                <h4 class="text-xs font-bold font-mono text-gray-400 tracking-wider flex items-center gap-2">
-                                    <i class="fa-solid fa-calculator text-purple-400"></i> REALTIME_MATRIX_OUTPUT
-                                </h4>
-                                
-                                <!-- Fake Vector Visual Output Console -->
-                                <div class="bg-gray-900/80 rounded-lg p-4 font-mono text-xs text-gray-400 space-y-2 border border-gray-800/60 min-h-[160px]">
-                                    <div class="text-indigo-400 font-bold">// Transformation Matrix V1</div>
-                                    <div class="flex justify-between">
-                                        <span>[M00_TRANS_X] :</span>
-                                        <span id="matrixM00" class="text-white font-medium">1.0023</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>[M01_TRANS_Y] :</span>
-                                        <span id="matrixM01" class="text-white font-medium">-0.4412</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>[DEFORM_W_EYE] :</span>
-                                        <span id="matrixDeform" class="text-pink-400 font-medium">0.0000</span>
-                                    </div>
-                                    <div class="flex justify-between border-t border-gray-800/80 pt-2 mt-2">
-                                        <span class="text-gray-500">DEFORMER_TOTAL_COUNT :</span>
-                                        <span class="text-white">1,424 Units</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Reset Control Button -->
-                            <div class="pt-6">
-                                <button type="button" id="btnResetParams"
-                                        class="w-full py-2.5 text-xs font-bold font-mono uppercase tracking-wider text-center text-indigo-400 border border-indigo-500/30 rounded-lg bg-indigo-500/5 hover:bg-indigo-500 hover:text-white transition-all duration-300 shadow-md">
-                                    重置模擬器硬體暫存器 (RESET_BUFFERS)
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
-
-            <!-- ========================================== -->
-            <!-- SECTION 4: MESH & TOPOLOGY DATA TABLE      -->
-            <!-- ========================================== -->
-            <section id="mesh-inventory" class="max-w-6xl mx-auto px-6 py-16">
-                <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">精細化圖層拆解與網格拓撲</h2>
-                    <p class="text-sm text-purple-400 font-mono mt-2">LIVE2D GRAPHICS LAYER PARTS & MESH TOPOLOGY INVENTORY</p>
-                    <div class="w-12 h-1 bg-purple-500 mx-auto mt-4 rounded-full"></div>
-                </div>
-
-                <!-- Structured Professional Table Area -->
-                <div class="bg-gray-900/30 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse font-mono text-xs md:text-sm">
-                            <thead>
-                                <tr class="bg-gray-950 border-b border-gray-800 text-gray-400 uppercase tracking-wider font-bold">
-                                    <th class="p-4 md:p-5">部件識別碼 (Part ID)</th>
-                                    <th class="p-4 md:p-5">圖層中文名稱</th>
-                                    <th class="p-4 md:p-5 text-right">多邊形頂點數 (Vertices)</th>
-                                    <th class="p-4 md:p-5 text-right">變形器類型 (Deformer)</th>
-                                    <th class="p-4 md:p-5 text-center">物理權重狀態</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-800/60 text-gray-300">
-                                <tr class="hover:bg-gray-900/40 transition">
-                                    <td class="p-4 md:p-5 font-bold text-indigo-400">ArtMesh_Hair_Front_01</td>
-                                    <td class="p-4 md:p-5 font-sans">前額黑髮主體 · 流海</td>
-                                    <td class="p-4 md:p-5 text-right font-medium text-white">428</td>
-                                    <td class="p-4 md:p-5 text-right text-purple-400">WarpDeformer</td>
-                                    <td class="p-4 md:p-5 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] border border-emerald-500/20">雙向擺動</span></td>
-                                </tr>
-                                <tr class="hover:bg-gray-900/40 transition">
-                                    <td class="p-4 md:p-5 font-bold text-indigo-400">ArtMesh_Hair_Back_Main</td>
-                                    <td class="p-4 md:p-5 font-sans">後髮高精細重疊層</td>
-                                    <td class="p-4 md:p-5 text-right font-medium text-white">892</td>
-                                    <td class="p-4 md:p-5 text-right text-purple-400">WarpDeformer</td>
-                                    <td class="p-4 md:p-5 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] border border-emerald-500/20">多級緩衝</span></td>
-                                </tr>
-                                <tr class="hover:bg-gray-900/40 transition">
-                                    <td class="p-4 md:p-5 font-bold text-indigo-400">ArtMesh_Eye_Iris_Left</td>
-                                    <td class="p-4 md:p-5 font-sans">左眼虹膜 · 瞳孔高光</td>
-                                    <td class="p-4 md:p-5 text-right font-medium text-white">156</td>
-                                    <td class="p-4 md:p-5 text-right text-pink-400">RotationDeformer</td>
-                                    <td class="p-4 md:p-5 text-center"><span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] border border-indigo-500/20">視線連動</span></td>
-                                </tr>
-                                <tr class="hover:bg-gray-900/40 transition">
-                                    <td class="p-4 md:p-5 font-bold text-indigo-400">ArtMesh_Eye_Lid_Upper_Right</td>
-                                    <td class="p-4 md:p-5 font-sans">右眼上眼瞼 · 睫毛陰影</td>
-                                    <td class="p-4 md:p-5 text-right font-medium text-white">312</td>
-                                    <td class="p-4 md:p-5 text-right text-purple-400">WarpDeformer</td>
-                                    <td class="p-4 md:p-5 text-center"><span class="px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-400 text-[10px] border border-pink-500/20">非線性形變</span></td>
-                                </tr>
-                                <tr class="hover:bg-gray-900/40 transition">
-                                    <td class="p-4 md:p-5 font-bold text-indigo-400">ArtMesh_Cloth_Hat_Gothic</td>
-                                    <td class="p-4 md:p-5 font-sans">哥德式古典魔術高帽</td>
-                                    <td class="p-4 md:p-5 text-right font-medium text-white">614</td>
-                                    <td class="p-4 md:p-5 text-right text-purple-400">WarpDeformer</td>
-                                    <td class="p-4 md:p-5 text-center"><span class="px-2 py-0.5 rounded-full bg-gray-800 text-gray-500 text-[10px] border border-gray-700">靜態剛體</span></td>
-                                </tr>
-                                <tr class="hover:bg-gray-900/40 transition">
-                                    <td class="p-4 md:p-5 font-bold text-indigo-400">ArtMesh_Cloth_Cape_Flow</td>
-                                    <td class="p-4 md:p-5 font-sans">魔術絲絨披風動態下擺</td>
-                                    <td class="p-4 md:p-5 text-right font-medium text-white">1,142</td>
-                                    <td class="p-4 md:p-5 text-right text-purple-400">WarpDeformer</td>
-                                    <td class="p-4 md:p-5 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] border border-emerald-500/20">風場動態模擬</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Table Summary Bar -->
-                    <div class="bg-gray-950 p-4 border-t border-gray-800/80 flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 gap-2">
-                        <div>DATA_INTEGRITY_VERIFICATION: SHA256_PASSED</div>
-                        <div class="font-bold text-white">總計模型幾何頂點數: 33,584 Vertices</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ========================================== -->
-            <!-- SECTION 5: DEVELOPMENT TIMELINE            -->
-            <!-- ========================================== -->
-            <section id="dev-timeline" class="max-w-4xl mx-auto px-6 py-16">
-                <div class="text-center max-w-2xl mx-auto mb-16">
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">紅澪研發編年史</h2>
-                    <p class="text-sm text-pink-400 font-mono mt-2">PROJECT AMANO KUREMI TIMELINE LOGS</p>
-                    <div class="w-12 h-1 bg-pink-500 mx-auto mt-4 rounded-full"></div>
-                </div>
-
-                <!-- Vertical Timeline Grid -->
-                <div class="relative border-l-2 border-gray-800 ml-4 md:ml-32 space-y-12">
-                    
-                    <!-- Log Item 1 -->
-                    <div class="relative">
-                        <!-- Date Display for desktop left side -->
-                        <div class="absolute hidden md:block top-1 left-[-150px] w-28 text-right font-mono text-xs font-bold text-gray-500">
-                            2026 / Q1
-                        </div>
-                        <!-- Timeline Node Dot -->
-                        <div class="absolute top-1.5 left-[-6px] w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1]"></div>
-                        
-                        <div class="ml-6 space-y-2">
-                            <span class="inline-block md:hidden font-mono text-xs font-bold text-indigo-400">2026 / Q1</span>
-                            <h3 class="text-lg font-bold text-white">Live2D 骨骼物理綁定與極限動態調試</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">
-                                全面進入 Cubism 物理系統配置。建構前額黑髮與魔術師披風的複合多級單擺（Multi-Joint Pendulum），導入微量反向動力學（IK）算法，確保角色在做 30 度大範圍轉頭時，髮絲依然具備極具張力的立體飄逸感。
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Log Item 2 -->
-                    <div class="relative">
-                        <div class="absolute hidden md:block top-1 left-[-150px] w-28 text-right font-mono text-xs font-bold text-gray-500">
-                            2025 / Q4
-                        </div>
-                        <div class="absolute top-1.5 left-[-6px] w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]"></div>
-                        
-                        <div class="ml-6 space-y-2">
-                            <span class="inline-block md:hidden font-mono text-xs font-bold text-purple-400">2025 / Q4</span>
-                            <h3 class="text-lg font-bold text-white">高清晰度原畫解構與拓撲分層工程</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">
-                                將確立的「哥德魔術師」基礎原畫進行高精度重繪去噪。執行全面的物理分層工作，將五官、睫毛、眼球各高光層、服裝飾品等拆解成獨立物件。總計輸出超高精細度畫布圖層，為高多邊形網格（High-Poly Mesh）建立作好充分準備。
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Log Item 3 -->
-                    <div class="relative">
-                        <div class="absolute hidden md:block top-1 left-[-150px] w-28 text-right font-mono text-xs font-bold text-gray-500">
-                            2025 / Q3
-                        </div>
-                        <div class="absolute top-1.5 left-[-6px] w-3 h-3 rounded-full bg-pink-500 shadow-[0_0_8px_#ec4899]"></div>
-                        
-                        <div class="ml-6 space-y-2">
-                            <span class="inline-block md:hidden font-mono text-xs font-bold text-pink-400">2025 / Q3</span>
-                            <h3 class="text-lg font-bold text-white">概念矩陣建立與 AI 視覺權重訓練</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">
-                                「紅澪☆Kuremi」企劃正式立項。聚焦於打造黑色長髮、手握奧秘魔法、身穿華麗哥德服飾的魔術師形象。在此階段利用神經網絡探索角色面部特徵底層，經過數千次演算法迭代，成功鎖定核心視覺特徵與配色方案。
-                            </p>
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
-        </main>
-
-        <!-- ========================================== -->
-        <!-- FOOTER ARCHITECTURE                        -->
-        <!-- ========================================== -->
-        <footer id="contact" class="w-full bg-gray-950 border-t border-gray-800 pt-16 pb-12 px-6 relative z-10">
-            <div class="max-w-6xl mx-auto grid md:grid-cols-12 gap-8 mb-12">
-                
-                <!-- Brand Footer Left -->
-                <div class="md:col-span-5 space-y-4">
-                    <h3 class="text-lg font-black text-white tracking-widest code-font">AMANO_KUREMI_STUDIO</h3>
-                    <p class="text-gray-500 text-xs md:text-sm leading-relaxed">
-                        致力於探索二維多媒體、AI 視覺二創與高難度 Live2D 機械模型工藝。本網站所有代碼均通過 W3C 驗證與嚴格隱私性安全審查。
-                    </p>
-                    <div class="text-[10px] text-gray-600 font-mono">
-                        LOCATION_REGISTRY: INTERNET_VIRTUAL_NODE
-                    </div>
-                </div>
-
-                <!-- Center Spacing Filler -->
-                <div class="hidden md:col-span-3"></div>
-
-                <!-- Channel Links Right -->
-                <div class="md:col-span-4 space-y-4 text-left md:text-right">
-                    <h4 class="text-xs font-bold font-mono tracking-widest text-gray-400 uppercase">EXTERNAL_REPOS_AND_CHANNELS</h4>
-                    <div class="flex justify-start md:justify-end gap-3">
-                        <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="w-10 h-10 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 hover:bg-red-600 hover:text-white hover:border-red-600 transition shadow" title="YouTube 頻道">
-                            <i class="fa-brands fa-youtube text-base"></i>
-                        </a>
-                        <a href="https://github.com/nekowakuroko" target="_blank" class="w-10 h-10 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition shadow" title="GitHub 倉庫">
-                            <i class="fa-brands fa-github text-base"></i>
-                        </a>
-                    </div>
-                    <p class="text-[11px] text-gray-600 font-mono">
-                        CONTACT_GATEWAY: REDIRECT_TO_YOUTUBE_ABOUT_PAGE
-                    </p>
-                </div>
-            </div>
-
-            <!-- Absolute Legal & Line Counter Bottom -->
-            <div class="max-w-6xl mx-auto pt-8 border-t border-gray-900 flex flex-col sm:flex-row justify-between items-center text-[11px] text-gray-600 font-mono gap-2">
-                <div>&copy; 2026 Amano Kuremi Project Studio. All rights reserved.</div>
-                <div class="text-indigo-500/80">CORE_ENGINE: HTML5_CANVAS_TAILWIND_SPA_OPTIMIZED [LINES: &gt;1000]</div>
-            </div>
-        </footer>
-
-    </div>
-
-    <!-- ========================================== -->
-    <!-- ADVANCED JAVASCRIPT LOGIC BLOCK            -->
-    <!-- ========================================== -->
+    <!-- ==========================================================================
+         CORE GAME ENGINE (零按鈕、全自動化高階網頁街機引擎)
+         ========================================================================== -->
     <script>
-        /**
-         * System Context: Advanced HTML5 Canvas Particle Logic
-         * Description: Emulates a magical dark cyber/gothic stellar ambient field background.
-         */
-        (function() {
-            const canvas = document.getElementById('magicParticleCanvas');
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('stageCanvas');
             const ctx = canvas.getContext('2d');
+
+            // --- 1. 高級二維向量數學庫 ---
+            class Vec2 {
+                constructor(x = 0, y = 0) { this.x = x; this.y = y; }
+                set(x, y) { this.x = x; this.y = y; return this; }
+                add(v) { this.x += v.x; this.y += v.y; return this; }
+                mult(n) { this.x *= n; this.y *= n; return this; }
+                mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+                normalize() { let m = this.mag(); if (m !== 0) { this.x /= m; this.y /= m; } return this; }
+                dist(v) { return Math.sqrt((this.x - v.x)**2 + (this.y - v.y)**2); }
+            }
+
+            // --- 2. 遊戲全局系統大腦變數 ---
+            let state = 'PLAYING'; // PLAYING, GAMEOVER
+            let gameTime = 0;
+            let lastTimestamp = 0;
+            let spawnTimer = 0;
+            let clockTimer = 0;
             
-            let particlesArray = [];
-            const numberOfParticles = 65;
+            let kills = 0;
+            let score = 0;
+            let screenShake = 0;
+            let gameOverCountdown = 3.0; // 死亡後自動重開倒數秒數
 
-            // Handle Dynamic Window Resize Matrix
-            function initCanvasSize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+            let mousePos = new Vec2(450, 260);
+
+            // 戰機載具物件
+            let player = {
+                pos: new Vec2(450, 260),
+                radius: 14,
+                speed: 4.2,
+                hp: 100,
+                maxHp: 100,
+                level: 1,
+                xp: 0,
+                nextXp: 10,
+                weaponLv: 1,
+                teslaLv: 0,
+                shootCooldown: 14,
+                shootTimer: 0,
+                invincible: 0,
+                trail: []
+            };
+
+            // 實體儲存陣列
+            let bullets = [];
+            let enemies = [];
+            let gems = [];
+            let particles = [];
+            let stars = [];
+
+            // 預先生成星空背景粒子
+            for(let i=0; i<40; i++) {
+                stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.5 + 0.5, speed: Math.random()*20 + 10 });
             }
-            initCanvasSize();
-            window.addEventListener('resize', function() {
-                initCanvasSize();
+
+            // 追蹤滑鼠游標坐標
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mousePos.x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+                mousePos.y = ((e.clientY - rect.top) / rect.height) * canvas.height;
             });
-
-            // Particle Blueprint Object Definition
-            class Particle {
-                constructor() {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                    this.size = Math.random() * 2 + 0.5;
-                    this.speedX = Math.random() * 0.3 - 0.15;
-                    this.speedY = Math.random() * 0.3 - 0.15;
-                    this.colorOpacity = Math.random() * 0.4 + 0.1;
-                    // Alternating gothic color palette weights (Indigo / Purple)
-                    this.colorType = Math.random() > 0.5 ? 'indigo' : 'purple';
+            // 支援行動裝置手勢滑動
+            canvas.addEventListener('touchmove', (e) => {
+                if(e.touches.length > 0) {
+                    const rect = canvas.getBoundingClientRect();
+                    mousePos.x = ((e.touches[0].clientX - rect.left) / rect.width) * canvas.width;
+                    mousePos.y = ((e.touches[0].clientY - rect.top) / rect.height) * canvas.height;
                 }
+            }, { passive: true });
 
-                update() {
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-
-                    // Screen Edge Boundary Collision Loops
-                    if (this.x < 0) this.x = canvas.width;
-                    if (this.x > canvas.width) this.x = 0;
-                    if (this.y < 0) this.y = canvas.height;
-                    if (this.y > canvas.height) this.y = 0;
-                }
-
-                draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    if (this.colorType === 'indigo') {
-                        ctx.fillStyle = `rgba(129, 140, 248, ${this.colorOpacity})`;
-                    } else {
-                        ctx.fillStyle = `rgba(192, 132, 252, ${this.colorOpacity})`;
-                    }
-                    ctx.fill();
-                }
+            // 浮動傷害/升級文字粒子生成
+            function createText(x, y, txt, col) {
+                particles.push({ x, y, txt, col, alpha: 1, vy: -1.3 });
             }
 
-            // Populate Particle Space Buffer
-            for (let i = 0; i < numberOfParticles; i++) {
-                particlesArray.push(new Particle());
-            }
-
-            // Realtime Frame Loop Controller
-            function animateParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let i = 0; i < particlesArray.length; i++) {
-                    particlesArray[i].update();
-                    particlesArray[i].draw();
-                }
+            // 刷怪演算法機制
+            function triggerWaveSpawn() {
+                if (enemies.length > 100) return;
+                let ang = Math.random() * Math.PI * 2;
+                let ex = player.pos.x + Math.cos(ang) * 530;
+                let ey = player.pos.y + Math.sin(ang) * 530;
                 
-                // Draw elegant connecting hyper-lines if proximity matches threshold
-                for (let a = 0; a < particlesArray.length; a++) {
-                    for (let b = a; b < particlesArray.length; b++) {
-                        let dx = particlesArray[a].x - particlesArray[b].x;
-                        let dy = particlesArray[a].y - particlesArray[b].y;
-                        let distance = Math.sqrt(dx * dx + dy * dy);
+                let seed = Math.random();
+                let type = 'SWARM';
+                if (gameTime > 50 && seed > 0.75) type = 'ELITE';
+                else if (gameTime > 20 && seed > 0.55) type = 'STRIKER';
 
-                        if (distance < 110) {
-                            let opacity = (1 - (distance / 110)) * 0.06;
-                            ctx.strokeStyle = `rgba(99, 102, 241, ${opacity})`;
-                            ctx.lineWidth = 0.6;
-                            ctx.beginPath();
-                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                            ctx.stroke();
+                enemies.push({
+                    pos: new Vec2(ex, ey),
+                    radius: type==='ELITE'? 17 : (type==='STRIKER'? 9 : 12),
+                    hp: type==='ELITE'? 60 : (type==='STRIKER'? 10 : 18 + gameTime*0.1),
+                    speed: type==='STRIKER'? 2.5 : 1.3 + Math.random()*0.3,
+                    col: type==='ELITE'? '#34d399' : (type==='STRIKER'? '#f43f5e' : '#a5b4fc'),
+                    type: type,
+                    flash: 0
+                });
+            }
+
+            // 全自動升級系統 (完全不需要點擊按鈕！)
+            function processAutoUpgrade() {
+                player.level++;
+                player.xp -= player.nextXp;
+                player.nextXp = Math.floor(player.nextXp * 1.3) + 6;
+
+                // 隨機在現有流派中超載升級
+                let choose = Math.random() > 0.5 ? 'weapon' : 'tesla';
+                if (choose === 'weapon' && player.weaponLv < 3) {
+                    player.weaponLv++;
+                    createText(player.pos.x, player.pos.y - 25, `▲ 武器突變升級 LV.${player.weaponLv}`, '#67e8f9');
+                } else {
+                    player.teslaLv++;
+                    createText(player.pos.x, player.pos.y - 25, `⚡ 特斯拉矩陣擴張 LV.${player.teslaLv}`, '#c084fc');
+                }
+            }
+
+            // 重啟重置戰場引擎
+            function rebootEngine() {
+                state = 'PLAYING';
+                gameTime = 0; clockTimer = 0; spawnTimer = 0; kills = 0; score = 0; screenShake = 0;
+                gameOverCountdown = 3.0;
+
+                player.pos.set(450, 260); player.hp = 100; player.level = 1; player.xp = 0; player.nextXp = 10;
+                player.weaponLv = 1; player.teslaLv = 0; player.invincible = 0;
+                
+                bullets = []; enemies = []; gems = []; particles = [];
+                lastTimestamp = performance.now();
+            }
+
+            // --- 3. THE MAIN ENGINE TICK LOOP (主物理運算核心) ---
+            function tick(timestamp) {
+                if (!lastTimestamp) lastTimestamp = timestamp;
+                let dt = (timestamp - lastTimestamp) / 1000;
+                lastTimestamp = timestamp;
+                if (dt > 0.1) dt = 0.1;
+
+                if (state === 'PLAYING') {
+                    // 計時器邏輯
+                    clockTimer += dt;
+                    if (clockTimer >= 1.0) { clockTimer -= 1.0; gameTime++; }
+
+                    // 生怪速度公式
+                    spawnTimer += dt;
+                    let spawnRate = Math.max(0.15, 0.7 - (gameTime * 0.003));
+                    if (spawnTimer >= spawnRate) { spawnTimer -= spawnRate; triggerWaveSpawn(); }
+
+                    // 玩家戰機緩衝游動跟隨滑鼠
+                    let toMouse = new Vec2(mousePos.x - player.pos.x, mousePos.y - player.pos.y);
+                    let distMouse = toMouse.mag();
+                    if (distMouse > 5) {
+                        toMouse.normalize().mult(player.speed);
+                        player.pos.add(toMouse);
+                    }
+
+                    if (player.invincible > 0) player.invincible--;
+
+                    // 殘影歷史堆疊
+                    player.trail.push({x: player.pos.x, y: player.pos.y});
+                    if (player.trail.length > 5) player.trail.shift();
+
+                    // 自動火控子彈發射
+                    player.shootTimer++;
+                    if (player.shootTimer >= player.shootCooldown) {
+                        player.shootTimer = 0;
+                        let ang = Math.atan2(mousePos.y - player.pos.y, mousePos.x - player.pos.x);
+                        if (player.weaponLv === 1) {
+                            bullets.push({pos: new Vec2(player.pos.x, player.pos.y), vx: Math.cos(ang)*7.5, vy: Math.sin(ang)*7.5});
+                        } else if (player.weaponLv === 2) {
+                            bullets.push({pos: new Vec2(player.pos.x, player.pos.y), vx: Math.cos(ang-0.15)*8, vy: Math.sin(ang-0.15)*8});
+                            bullets.push({pos: new Vec2(player.pos.x, player.pos.y), vx: Math.cos(ang+0.15)*8, vy: Math.sin(ang+0.15)*8});
+                        } else {
+                            bullets.push({pos: new Vec2(player.pos.x, player.pos.y), vx: Math.cos(ang)*8.5, vy: Math.sin(ang)*8.5});
+                            bullets.push({pos: new Vec2(player.pos.x, player.pos.y), vx: Math.cos(ang-0.25)*8.5, vy: Math.sin(ang-0.25)*8.5});
+                            bullets.push({pos: new Vec2(player.pos.x, player.pos.y), vx: Math.cos(ang+0.25)*8.5, vy: Math.sin(ang+0.25)*8.5});
                         }
                     }
+
+                    // 更新常規子彈位置
+                    for(let i=bullets.length-1; i>=0; i--) {
+                        let b = bullets[i]; b.pos.x += b.vx; b.pos.y += b.vy;
+                        if (b.pos.x<0 || b.pos.x>canvas.width || b.pos.y<0 || b.pos.y>canvas.height) bullets.splice(i, 1);
+                    }
+
+                    // 水晶引力磁吸與收集判定
+                    for(let i=gems.length-1; i>=0; i--) {
+                        let g = gems[i];
+                        let gd = g.pos.dist(player.pos);
+                        if (gd < 95) { // 磁吸半徑
+                            let pull = player.pos.copy().sub(g.pos).normalize().mult(player.speed * 1.5);
+                            g.pos.add(pull);
+                        }
+                        if (gd < player.radius + 6) {
+                            player.xp += g.val; score += g.val * 20; gems.splice(i, 1);
+                            if (player.xp >= player.nextXp) processAutoUpgrade();
+                        }
+                    }
+
+                    // 特斯拉隨機追蹤雷射電阻發射
+                    if (player.teslaLv > 0 && enemies.length > 0 && Math.random() < 0.02) {
+                        let target = enemies[Math.floor(Math.random()*enemies.length)];
+                        let tDmg = player.teslaLv * 20;
+                        target.hp -= tDmg; target.flash = 3;
+                        createText(target.pos.x, target.pos.y, tDmg, '#c084fc');
+                        
+                        // 實時繪製一道轉瞬即逝的雷射弧線
+                        ctx.save(); ctx.beginPath(); ctx.moveTo(player.pos.x, player.pos.y); ctx.lineTo(target.pos.x, target.pos.y);
+                        ctx.strokeStyle = 'rgba(168, 85, 247, 0.7)'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.restore();
+
+                        if (target.hp <= 0) {
+                            enemies = enemies.filter(e => e !== target); kills++; score += 50;
+                            gems.push({pos: new Vec2(target.pos.x, target.pos.y), val: 1});
+                        }
+                    }
+
+                    // 仿生蟲移動與碰撞大矩陣
+                    for(let i=enemies.length-1; i>=0; i--) {
+                        let e = enemies[i];
+                        if (e.flash > 0) e.flash--;
+                        
+                        let ed = e.pos.dist(player.pos);
+                        if (ed > 0) {
+                            let dir = player.pos.copy().sub(e.pos).normalize().mult(e.speed);
+                            e.pos.add(dir);
+                        }
+
+                        // 與子彈交火判定
+                        bullets.forEach((b, bIdx) => {
+                            if (b.pos.dist(e.pos) < e.radius + 3) {
+                                bullets.splice(bIdx, 1); e.hp -= 10; e.flash = 4;
+                                createText(e.pos.x, e.pos.y, 10, '#67e8f9');
+                                if (e.hp <= 0) {
+                                    e.dead = true; kills++; score += 40;
+                                    gems.push({pos: new Vec2(e.pos.x, e.pos.y), val: e.type==='ELITE'?3:1});
+                                }
+                            }
+                        });
+
+                        // 怪物撞玩家機體
+                        if (!e.dead && ed < player.radius + e.radius && player.invincible <= 0) {
+                            player.hp -= e.type==='ELITE'? 18 : 8;
+                            player.invincible = 25; screenShake = 6;
+                            if (player.hp <= 0) { player.hp = 0; state = 'GAMEOVER'; }
+                        }
+
+                        if (e.dead) enemies.splice(i, 1);
+                    }
+
+                    // 更新背景星空粒子捲動
+                    stars.forEach(s => {
+                        s.x -= s.speed * dt;
+                        if (s.x < 0) s.x = canvas.width;
+                    });
+
+                    // 更新文字特效粒子
+                    for(let i=particles.length-1; i>=0; i--) {
+                        let p = particles[i]; p.y += p.vy; p.alpha -= 0.03;
+                        if (p.alpha <= 0) particles.splice(i, 1);
+                    }
+
+                } else if (state === 'GAMEOVER') {
+                    // 死亡自動倒數重啟機制
+                    gameOverCountdown -= dt;
+                    if (gameOverCountdown <= 0) { rebootEngine(); }
                 }
-                requestAnimationFrame(animateParticles);
-            }
-            animateParticles();
-        })();
 
-        /**
-         * System Context: Live2D Mockup Parameter Slider Interaction Pipeline
-         * Description: Binds real-time DOM changes from range controls to update virtual matrix telemetry logs.
-         */
-        (function() {
-            // Document Element Query Selectors
-            const inputAngleX = document.getElementById('inputAngleX');
-            const inputAngleY = document.getElementById('inputAngleY');
-            const inputEyeBlink = document.getElementById('inputEyeBlink');
-            const inputPhysics = document.getElementById('inputPhysics');
-
-            const valAngleX = document.getElementById('valAngleX');
-            const valAngleY = document.getElementById('valAngleY');
-            const valEyeBlink = document.getElementById('valEyeBlink');
-            const valPhysics = document.getElementById('valPhysics');
-
-            const matrixM00 = document.getElementById('matrixM00');
-            const matrixM01 = document.getElementById('matrixM01');
-            const matrixDeform = document.getElementById('matrixDeform');
-            const btnResetParams = document.getElementById('btnResetParams');
-
-            // Recalculate Pseudo Matrix Mathematical Pipeline
-            function computeVirtualMatrix() {
-                const ax = parseFloat(inputAngleX.value);
-                const ay = parseFloat(inputAngleY.value);
-                const eb = parseFloat(inputEyeBlink.value);
-                const hp = parseFloat(inputPhysics.value);
-
-                // Emulate mathematical transformations for display
-                const calcM00 = (1.0000 + (ax / 1500) + (hp / 200)).toFixed(4);
-                const calcM01 = (-0.5000 + (ay / 60) - (hp / 400)).toFixed(4);
-                const calcDeform = ((1.0 - eb) * 1.3421).toFixed(4);
-
-                // Update text UI values
-                valAngleX.innerText = (ax >= 0 ? '+' : '') + ax.toFixed(2);
-                valAngleY.innerText = (ay >= 0 ? '+' : '') + ay.toFixed(2);
-                valEyeBlink.innerText = eb.toFixed(2);
-                valPhysics.innerText = (hp >= 0 ? '+' : '') + hp.toFixed(2);
-
-                // Update virtual register dumps
-                matrixM00.innerText = calcM00;
-                matrixM01.innerText = calcM01;
-                matrixDeform.innerText = calcDeform;
-            }
-
-            // Register Reactive Event Observers
-            inputAngleX.addEventListener('input', computeVirtualMatrix);
-            inputAngleY.addEventListener('input', computeVirtualMatrix);
-            inputEyeBlink.addEventListener('input', computeVirtualMatrix);
-            inputPhysics.addEventListener('input', computeVirtualMatrix);
-
-            // Reset Subroutine Trigger Action
-            btnResetParams.addEventListener('click', function() {
-                inputAngleX.value = 0;
-                inputAngleY.value = 0;
-                inputEyeBlink.value = 1;
-                inputPhysics.value = 0.5;
-                computeVirtualMatrix();
+                // --- 4. THE MASTER CANV RENDER (百分之百繪圖渲染層) ---
+                ctx.fillStyle = '#030509';
+                ctx.fillRect(0,0,canvas.width,canvas.height);
                 
-                // Flash temporary console warning log
-                console.log("%c[SYSTEM_NOTICE]: Live2D telemetry register caches have been purged and re-indexed successfully.", "color: #6366f1; font-weight: bold;");
-            });
+                ctx.save();
+                if (screenShake > 0) { screenShake--; ctx.translate((Math.random()-0.5)*5, (Math.random()-0.5)*5); }
 
-            // Initialize Matrix on initial page evaluation
-            computeVirtualMatrix();
-        })();
+                // 畫背景流星
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                stars.forEach(s => ctx.fillRect(s.x, s.y, s.size, s.size));
 
-        // Log beautiful entry diagnostics into developers console for verification
-        console.log("%c=======================================================", "color: #a855f7; font-weight: bold;");
-        console.log("%c AMANO KUREMI OFFIAL SPACE SPA - INITIALIZED SUCCESSFULLY", "color: #ffffff; font-weight: bold; background-color: #312e81; padding: 4px;");
-        console.log("%c Architecture Layer: Clean Static HTML5 + Customized Architecture %c", "color: #gray;", "color: #indigo;");
-        console.log("%c Total Lines Compiled: > 1,000 Lines including Embedded Core Engine", "color: #6366f1;");
-        console.log("%c Security Check: Real Address Masked [ACTIVE PROTECTION MODE]", "color: #emerald; font-weight: bold;");
-        console.log("%c=======================================================", "color: #a855f7; font-weight: bold;");
+                // 畫隨機能量碎塊
+                gems.forEach(g => {
+                    ctx.beginPath(); ctx.arc(g.pos.x, g.pos.y, g.val>1?5:3, 0, Math.PI*2);
+                    ctx.fillStyle = g.val>1?'#ec4899':'#38bdf8'; ctx.fill();
+                });
+
+                // 畫子彈
+                ctx.fillStyle = '#67e8f9';
+                bullets.forEach(b => { ctx.beginPath(); ctx.arc(b.pos.x, b.pos.y, 3, 0, Math.PI*2); ctx.fill(); });
+
+                // 畫蟲群敵軍
+                enemies.forEach(e => {
+                    ctx.beginPath(); ctx.arc(e.pos.x, e.pos.y, e.radius, 0, Math.PI*2);
+                    ctx.fillStyle = e.flash > 0 ? '#fff' : e.col; ctx.fill();
+                    ctx.strokeStyle = '#030509'; ctx.stroke();
+                });
+
+                // 畫玩家三角載具
+                ctx.save(); ctx.translate(player.pos.x, player.pos.y);
+                ctx.rotate(Math.atan2(mousePos.y - player.pos.y, mousePos.x - player.pos.x) + Math.PI/2);
+                ctx.beginPath(); ctx.moveTo(0, -player.radius); ctx.lineTo(player.radius, player.radius); ctx.lineTo(-player.radius, player.radius); ctx.closePath();
+                ctx.fillStyle = player.invincible%4 > 1 ? '#1e1b4b' : '#4f46e5'; ctx.fill();
+                ctx.strokeStyle = '#67e8f9'; ctx.lineWidth = 1.5; ctx.stroke();
+                ctx.restore();
+
+                // 畫飄動損害數字文字
+                particles.forEach(p => {
+                    ctx.save(); ctx.globalAlpha = p.alpha; ctx.font = 'bold 11px monospace';
+                    ctx.fillStyle = p.col; ctx.fillText(p.txt, p.x, p.y); ctx.restore();
+                });
+                ctx.restore();
+
+                // --- 5. PURE CANVAS HUD INTERFACE (全 UI 畫布實時直繪) ---
+                // 經驗進度條背景
+                ctx.fillStyle = '#0f172a'; ctx.fillRect(15, 15, canvas.width - 30, 6);
+                // 經驗填充
+                ctx.fillStyle = '#3b82f6'; ctx.fillRect(15, 15, (canvas.width - 30) * (player.xp / player.nextXp), 6);
+
+                // 左上數據列繪製
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 13px monospace';
+                ctx.fillText(`戰機等級: LV.${player.level}`, 15, 42);
+                
+                // 血條外框與填充
+                ctx.fillStyle = '#1e293b'; ctx.fillRect(15, 52, 120, 8);
+                ctx.fillStyle = '#ef4444'; ctx.fillRect(15, 52, 120 * (player.hp / player.maxHp), 8);
+
+                // 右上數據列
+                let min = Math.floor(gameTime/60).toString().padStart(2,'0');
+                let sec = (gameTime%60).toString().padStart(2,'0');
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#a5b4fc'; ctx.fillText(`模擬時間: ${min}:${sec}`, canvas.width - 15, 42);
+                ctx.fillStyle = '#34d399'; ctx.fillText(`獵殺數: ${kills} // SCORE: ${score}`, canvas.width - 15, 58);
+                ctx.textAlign = 'left'; // 恢復錨點
+
+                // 死亡全畫布遮罩與全自動秒數重新啟動
+                if (state === 'GAMEOVER') {
+                    ctx.fillStyle = 'rgba(3, 5, 9, 0.85)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#f43f5e'; ctx.font = 'bold 36px monospace';
+                    ctx.fillText("機體物理架構解析潰散", canvas.width/2, canvas.height/2 - 20);
+                    
+                    ctx.fillStyle = '#94a3b8'; ctx.font = '14px monospace';
+                    ctx.fillText(`戰術核心損壞 // 系統將在 ${Math.ceil(gameOverCountdown)} 秒內自動重啟模擬...`, canvas.width/2, canvas.height/2 + 20);
+                    ctx.textAlign = 'left';
+                }
+
+                requestAnimationFrame(tick);
+            }
+
+            // 引擎立即強制載入開打
+            rebootEngine();
+        });
     </script>
-
 </body>
 </html>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-8LHS3GQFJK"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-8LHS3GQFJK');
-</script>
