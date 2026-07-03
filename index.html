@@ -1,912 +1,1002 @@
 <!DOCTYPE html>
-
-<html lang="zh-TW">
-
+<html lang="zh-TW" class="scroll-smooth">
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ==========================================================================
+         SEO & OPEN GRAPH METADATA (專業搜尋引擎最佳化設定)
+         ========================================================================== -->
+    <title>紅澪☆Kuremi | Amano Kuremi Official Portfolio & Production Hub</title>
+    <meta name="description" content="專注於虛擬角色「紅澪☆Kuremi (Amano Kuremi)」的官方多媒體創作空間。收錄詳盡的角色初設定、原畫解構、Live2D 動態模型重塑管線與最新多媒體影音企劃。">
+    <meta name="keywords" content="紅澪, Kuremi, Amano Kuremi, Live2D, 虛擬角色, 哥德風, 魔術師, 影片剪輯, 數位二創, 動態綁定, 角色設計, Portfolio">
+    <meta name="author" content="KUROKO_P">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="紅澪☆Kuremi | Amano Kuremi Official Space">
+    <meta property="og:description" content="收錄詳盡的角色初設定、原畫解構、Live2D 動態模型重塑管線與最新多媒體影音企劃。">
+    <meta property="og:image" content="">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="紅澪☆Kuremi | Amano Kuremi Official Space">
+    <meta property="twitter:description" content="收錄詳盡的角色初設定、原畫解構、Live2D 動態模型重塑管線與最新多媒體影音企劃。">
 
-    <title>霓虹深淵：倖存者 | Neon Survivors</title>
-
+    <!-- ==========================================================================
+         EXTERNAL RESOURCES & STYLESHEETS (外部資源與架構引入)
+         ========================================================================== -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        kuremi: {
+                            50: '#f4f5ff',
+                            100: '#ebedff',
+                            200: '#dadfff',
+                            300: '#b6bfff',
+                            400: '#8c96ff',
+                            500: '#6366f1', // 主色調：靛藍
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#0b0f19'  # 暗夜基調
+                        },
+                        gothic: {
+                            purple: '#8b5cf6',
+                            dark: '#1e1b4b',
+                            accent: '#ec4899'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float-slow': 'float 6s ease-in-out infinite',
+                        'glow-pulse': 'glow 3s ease-in-out infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap">
 
+    <!-- ==========================================================================
+         CUSTOM CORE CSS (進階客製化核心樣式與微動態動畫)
+         ========================================================================== -->
     <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #0b0f19;
+            overflow-x: hidden;
+        }
+        
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
 
-        body { font-family: sans-serif; background-color: #030508; overflow: hidden; }
+        /* 隱藏並自訂完美滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
 
-        .neon-glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); border: 1px solid rgba(99, 102, 241, 0.6); }
+        /* 浮動微動態 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 5s ease-in-out infinite;
+        }
 
-        .glass-panel { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        /* 霓虹邊框發光效果 */
+        .neon-border-indigo {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+        }
+        .neon-border-indigo:hover {
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
+        .neon-border-purple {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+        .neon-border-purple:hover {
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 玻璃擬態背景 */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* 文字流光效果 */
+        .text-gradient-purple {
+            background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 70%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
     </style>
-
 </head>
+<body class="text-slate-200 selection:bg-indigo-500/30 selection:text-indigo-200 antialiased">
 
-<body class="text-slate-100 min-h-screen flex flex-col justify-between select-none">
+    <!-- ==========================================================================
+         BACKGROUND DECORATIONS (科幻/奇幻數位幾何背景)
+         ========================================================================== -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-900/10 blur-[120px] animate-pulse-slow"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-purple-900/10 blur-[150px] animate-pulse-slow"></div>
+        
+        <!-- 點矩陣裝飾網格 -->
+        <svg class="absolute inset-0 w-full h-full opacity-[0.015]" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+    </div>
 
-
-
-    <!-- 頂部高科技控制列 -->
-
-    <nav class="relative z-10 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-6 py-3">
-
+    <!-- ==========================================================================
+         TOP NAVIGATION BAR (大氣前端響應式導覽元件)
+         ========================================================================== -->
+    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md px-4 sm:px-8 py-4 transition-all duration-300" id="mainNav">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-
-            <div class="flex items-center gap-4">
-
-                <a href="./" class="text-xs px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg font-bold hover:text-indigo-400 transition-all">← 返回首頁</a>
-
-                <span class="text-xs font-black tracking-widest text-slate-400 font-mono">🟢 SYSTEM_ACTIVE // NEON_SURVIVOR.EXE</span>
-
+            
+            <!-- Logo 區塊 -->
+            <a href="#" class="group flex items-center gap-3 text-lg font-black tracking-widest text-white">
+                <div class="relative flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 shadow-lg shadow-indigo-500/30 group-hover:rotate-12 transition-transform duration-300">
+                    <i class="fa-solid fa-hat-wizard text-sm"></i>
+                </div>
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-300 group-hover:to-purple-400 transition-all">AMANO KUREMI</span>
+            </a>
+            
+            <!-- 桌面端選單項目 -->
+            <div class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium text-slate-400">
+                <a href="#hero" class="px-3 py-2 rounded-lg hover:text-white hover:bg-slate-900/60 transition-all">首頁頂部</a>
+                <a href="#about" class="px-3 py-2 rounded-lg hover:text-white hover:bg-slate-900/60 transition-all">項目概述</a>
+                <a href="#profile" class="px-3 py-2 rounded-lg hover:text-white hover:bg-slate-900/60 transition-all">外觀設定</a>
+                <a href="#specifications" class="px-3 py-2 rounded-lg hover:text-white hover:bg-slate-900/60 transition-all">核心規格</a>
+                <a href="#pipeline" class="px-3 py-2 rounded-lg hover:text-white hover:bg-slate-900/60 transition-all">技術管線</a>
+                <a href="#showcase" class="px-3 py-2 rounded-lg hover:text-white hover:bg-slate-900/60 transition-all">影音企劃</a>
+                <a href="#faq" class="px-3 py-2 rounded-lg hover:text-white hover:bg-slate-900/60 transition-all">問與答</a>
+                <a href="#contact" class="px-3 py-2 rounded-lg hover:text-white hover:bg-slate-900/60 transition-all">聯絡管道</a>
             </div>
 
-            <div class="text-xs font-mono text-indigo-400 font-bold">[ ENGINE: CANVAS_2D_PRO ]</div>
+            <!-- 桌面端右側功能鈕 -->
+            <div class="hidden md:flex items-center gap-3">
+                <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600/10 border border-red-500/20 text-red-400 hover:bg-red-600 hover:text-white text-xs font-semibold uppercase tracking-wider transition-all duration-300">
+                    <i class="fa-brands fa-youtube text-sm"></i>
+                    Subscribe Channel
+                </a>
+            </div>
 
+            <!-- 行動裝置選單開關按鈕 (Hamburger) -->
+            <button class="block md:hidden text-slate-400 hover:text-white focus:outline-none p-1" id="menuToggle" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars text-xl" id="menuIcon"></i>
+            </button>
         </div>
 
+        <!-- 行動端下拉式選單抽屜 -->
+        <div class="hidden md:hidden absolute top-full left-0 right-0 bg-slate-950 border-b border-slate-800 px-6 py-4 flex flex-col space-y-3 shadow-xl transition-all duration-300" id="mobileMenu">
+            <a href="#hero" class="mobile-nav-link py-2 text-slate-400 hover:text-white">首頁頂部</a>
+            <a href="#about" class="mobile-nav-link py-2 text-slate-400 hover:text-white">項目概述</a>
+            <a href="#profile" class="mobile-nav-link py-2 text-slate-400 hover:text-white">外觀設定</a>
+            <a href="#specifications" class="mobile-nav-link py-2 text-slate-400 hover:text-white">核心規格</a>
+            <a href="#pipeline" class="mobile-nav-link py-2 text-slate-400 hover:text-white">技術管線</a>
+            <a href="#showcase" class="mobile-nav-link py-2 text-slate-400 hover:text-white">影音企劃</a>
+            <a href="#faq" class="mobile-nav-link py-2 text-slate-400 hover:text-white">問與答</a>
+            <a href="#contact" class="mobile-nav-link py-2 text-slate-400 hover:text-white">聯絡管道</a>
+            <div class="h-[1px] bg-slate-800 my-2"></div>
+            <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="flex items-center justify-center gap-2 py-3 rounded-lg bg-red-600 text-white text-sm font-bold shadow-lg">
+                <i class="fa-brands fa-youtube"></i> 前往 YouTube 頻道
+            </a>
+        </div>
     </nav>
 
-
-
-    <!-- 遊戲主要視窗容器 -->
-
-    <main class="relative z-10 flex-grow flex items-center justify-center p-2 md:p-4">
-
-        <div class="w-full max-w-4xl bg-slate-950 rounded-2xl border border-slate-900 shadow-2xl overflow-hidden relative neon-glow" id="gameWindow">
-
+    <!-- ==========================================================================
+         HERO SECTION (震撼視覺的主視覺區塊)
+         ========================================================================== -->
+    <section id="hero" class="relative min-h-screen flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden z-10">
+        <div class="max-w-5xl mx-auto text-center relative z-10">
             
-
-            <!-- HUD 實時狀態看板 -->
-
-            <div class="absolute top-0 left-0 right-0 p-4 flex flex-col gap-2 pointer-events-none z-10 font-mono">
-
-                <!-- 經驗值條 -->
-
-                <div class="w-full h-2 bg-slate-900/90 rounded-full border border-slate-800 overflow-hidden">
-
-                    <div id="xpBar" class="h-full bg-gradient-to-r from-teal-400 to-indigo-500 rounded-full transition-all duration-100" style="width: 0%;"></div>
-
-                </div>
-
-                <!-- 數據列 -->
-
-                <div class="flex justify-between items-center text-xs">
-
-                    <div class="flex items-center gap-3 bg-slate-950/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-800/60">
-
-                        <div class="font-bold text-indigo-400">LV.<span id="hudLevel">1</span></div>
-
-                        <div class="w-20 h-2 bg-slate-900 rounded overflow-hidden">
-
-                            <div id="hpBar" class="h-full bg-rose-500" style="width: 100%;"></div>
-
-                        </div>
-
+            <!-- 裝飾標籤 -->
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 mb-6 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-mono tracking-wider uppercase animate-float">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+                Virtual Character Project Portfolio
+            </div>
+            
+            <!-- 圓形發光大型頭貼外置 -->
+            <div class="mb-8 flex justify-center">
+                <div class="relative w-36 h-36 md:w-40 md:h-40 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-600 to-pink-500 p-[3px] shadow-2xl shadow-indigo-500/20">
+                    <div class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-5xl md:text-6xl select-none animate-float">
+                        🔮
                     </div>
-
-                    <div class="bg-slate-950/90 backdrop-blur px-4 py-1 rounded-lg border border-slate-800 text-center font-bold text-white tracking-widest text-sm" id="hudTimer">00:00</div>
-
-                    <div class="bg-slate-950/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-800/60 text-slate-400">
-
-                        KILLS: <span class="text-emerald-400 font-bold" id="hudKills">0</span>
-
+                    <!-- 附加的裝飾小環 -->
+                    <div class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-purple-500 border-4 border-slate-950 flex items-center justify-center text-[9px] text-white font-bold shadow">
+                        ★
                     </div>
-
                 </div>
-
             </div>
 
+            <!-- 主標題群組 -->
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight mb-4">
+                <span class="block text-gradient-purple">紅澪☆Kuremi</span>
+            </h1>
+            
+            <!-- 副標題 -->
+            <p class="text-indigo-400 font-mono text-base sm:text-xl tracking-widest uppercase mb-8">
+                Amano Kuremi Project Hub
+            </p>
+            
+            <!-- 極簡自傳 -->
+            <p class="max-w-2xl mx-auto text-slate-400 text-sm sm:text-base leading-relaxed mb-12">
+                歡迎來到紅澪的數位構築基地。本項目專注於極致黑髮少女的美學體現，融合華麗的哥德風魔術師元素，從概念企劃、圖層精密解構，一步步將靜態原畫塑造成具備靈動生命力的 Live2D 虛擬個體。
+            </p>
+            
+            <!-- 動作按鈕組 -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="#profile" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm tracking-wider shadow-lg shadow-indigo-600/20 hover:shadow-indigo-500/30 transition-all duration-300">
+                    檢視角色設定 <i class="fa-solid fa-angles-down ml-2 text-xs"></i>
+                </a>
+                <a href="#pipeline" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 text-slate-300 hover:text-white font-bold text-sm tracking-wider transition-all duration-300">
+                    探索技術管線
+                </a>
+            </div>
 
+            <!-- 底層開發代碼戳記 -->
+            <div class="mt-20 flex justify-center items-center gap-6 text-xs font-mono text-slate-600">
+                <span>[ ENVIRONMENT: GITHUB PAGES ]</span>
+                <span>[ CONFIG_REV: 2026.07_STABLE ]</span>
+            </div>
+        </div>
+        
+        <!-- 底部漸變遮罩 -->
+        <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none"></div>
+    </section>
 
-            <!-- UI 1：主選單首頁 -->
+    <!-- ==========================================================================
+         SECTION 1: ABOUT & PROJECT OVERVIEW (項目概述區塊)
+         ========================================================================== -->
+    <section id="about" class="relative py-24 px-4 sm:px-6 lg:px-8 bg-slate-950 z-10 border-t border-slate-900">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="text-center md:text-left md:flex md:items-center md:justify-between mb-16">
+                <div class="max-w-2xl">
+                    <h2 class="text-3xl font-bold text-white tracking-tight mb-3 flex items-center justify-center md:justify-start gap-3">
+                        <span class="w-1.5 h-6 bg-indigo-500 rounded"></span>項目概述
+                    </h2>
+                    <p class="text-slate-400 text-sm md:text-base">
+                        解析紅澪☆Kuremi 企劃的核心世界觀、技術初衷與未來的多媒體發展佈局。
+                    </p>
+                </div>
+                <div class="mt-6 md:mt-0 font-mono text-xs text-slate-500 border border-slate-800 rounded-lg p-3 bg-slate-900/40 text-center md:text-left">
+                    PROJECT_ID: <span class="text-indigo-400 font-bold">AMANO_KUREMI_V1</span>
+                </div>
+            </div>
 
-            <div id="menuScreen" class="absolute inset-0 z-40 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
-
-                <div class="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-2xl shadow-xl mb-4 animate-bounce">⚔️</div>
-
-                <h1 class="text-3xl md:text-5xl font-black text-white mb-2 tracking-wide">霓虹深淵：倖存者</h1>
-
-                <p class="text-indigo-400 font-mono text-xs tracking-widest uppercase mb-8">Cyberpunk Roguelike Survivor Engine</p>
-
+            <!-- 核心特色卡片網格 -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
+                <!-- 卡片 1 -->
+                <div class="glass-panel p-8 rounded-2xl border border-slate-800 hover:border-slate-700 transition-all duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl mb-6">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">純粹的美學核心</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                            背離傳統大眾化、同質化的角色設定。紅澪的誕生完全根植於特定的極致美學——冷豔神祕的黑色長髮，與散發神祕魔法色彩的哥德式正裝。
+                        </p>
+                    </div>
+                    <div class="text-xs font-mono text-indigo-400/70 uppercase"># Aesthetics First</div>
+                </div>
 
-                <div class="w-full max-w-sm bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-left text-xs text-slate-400 space-y-1.5 mb-8">
+                <!-- 卡片 2 -->
+                <div class="glass-panel p-8 rounded-2xl border border-slate-800 hover:border-slate-700 transition-all duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 text-xl mb-6">
+                            <i class="fa-solid fa-bezier-curve"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Live2D 綁定技術</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                            不滿足於單純的平面畫作，透過精密的網格重構與變形器配置（Deformer Architecture），為角色灌注多視角的物理模擬，包含髮絲飄動、衣褶擺盪。
+                        </p>
+                    </div>
+                    <div class="text-xs font-mono text-purple-400/70 uppercase"># Dynamic Rigging</div>
+                </div>
 
-                    <p class="text-white font-bold mb-1"><i class="fa-solid fa-terminal text-indigo-400 mr-1"></i> 作戰指令：</p>
+                <!-- 卡片 3 -->
+                <div class="glass-panel p-8 rounded-2xl border border-slate-800 hover:border-slate-700 transition-all duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 text-xl mb-6">
+                            <i class="fa-solid fa-clapperboard"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">全方位影音擴充</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                            以該模型為載體，未來將透過高水準的影音剪輯、後期轉場與節奏混剪，在 YouTube 等多媒體平台發布高畫質的動畫、模型展示與技術解密影片。
+                        </p>
+                    </div>
+                    <div class="text-xs font-mono text-pink-400/70 uppercase"># Content Generation</div>
+                </div>
 
-                    <p>• <b>[WASD / 方向鍵]：</b> 控制戰機自由滑行移動。</p>
+            </div>
+        </div>
+    </section>
 
-                    <p>• <b>[滑鼠移動]：</b> 控制戰機面朝方向，武器會<b>自動射擊</b>。</p>
+    <!-- ==========================================================================
+         SECTION 2: CHARACTER PROFILE (角色詳細外觀設定)
+         ========================================================================== -->
+    <section id="profile" class="relative py-24 px-4 sm:px-6 lg:px-8 bg-slate-900/40 z-10 border-t border-slate-900">
+        <div class="max-w-5xl mx-auto">
+            
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-white tracking-tight mb-3">角色初設定資料庫</h2>
+                <p class="text-slate-400 text-sm max-w-xl mx-auto">
+                    深入紅澪☆Kuremi 的核心視覺語彙，探索各項精細的外觀設計指標與服飾構造概念。
+                </p>
+            </div>
 
-                    <p>• <b>[空白鍵 Space]：</b> 向移動方向進行短距離<b>無敵衝刺</b>。</p>
+            <div class="grid md:grid-cols-12 gap-8 items-stretch">
+                
+                <!-- 左側：多層次設定特徵清單 (佔 7 格) -->
+                <div class="md:col-span-7 space-y-4 flex flex-col justify-center">
+                    
+                    <!-- 特徵 1 -->
+                    <div class="p-6 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-indigo-500/30 transition-all duration-300">
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1 text-indigo-400"><i class="fa-solid fa-circle-dot text-sm"></i></div>
+                            <div>
+                                <h4 class="text-lg font-bold text-white mb-1">深邃黑色長髮 (Absolute Onyx Hair)</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">
+                                    捨棄繁複奢華的高飽和色彩，選用最純粹的「黑色」作為髮色核心。長髮微捲垂肩，在 Live2D 的動態設計中，這頭黑髮將具備極高層次的物理柔軟度與逆光高光反射效果。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
-                    <p>• <b>[核心玩法]：</b> 擊碎仿生蟲，拾取能量球升級，解鎖強大武器流派！</p>
+                    <!-- 特徵 2 -->
+                    <div class="p-6 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-purple-500/30 transition-all duration-300">
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1 text-purple-400"><i class="fa-solid fa-circle-dot text-sm"></i></div>
+                            <div>
+                                <h4 class="text-lg font-bold text-white mb-1">哥德式魔術正裝 (Gothic Magician Attire)</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">
+                                    服裝結構深度融合中世紀哥德古典剪裁與奇幻魔術師斗篷。主色調為暗夜黑配以魔幻紫緞帶，胸前綴有精緻的不對稱金屬徽章，袖口處則採用巴洛克多層蕾絲邊設計，充滿圖層細節。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 特徵 3 -->
+                    <div class="p-6 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-pink-500/30 transition-all duration-300">
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1 text-pink-400"><i class="fa-solid fa-circle-dot text-sm"></i></div>
+                            <div>
+                                <h4 class="text-lg font-bold text-white mb-1">神祕學法理道具 (Mystic Arcana Elements)</h4>
+                                <p class="text-slate-400 text-sm leading-relaxed">
+                                    作為魔術師意象的延伸，角色周身環繞著半透明的紫色星軌光環與懸浮的秘寶紙牌。這些漂浮道具在 Live2D 圖層拆解中被獨立分出，將實現全自動的呼吸式浮動與光源迴轉動態。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
 
+                <!-- 右側：高科技感參數面板 (佔 5 格) -->
+                <div class="md:col-span-5 neon-border-indigo bg-slate-950 rounded-2xl p-6 md:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+                            <span class="text-xs font-mono text-slate-500">SYSTEM PARAMETERS</span>
+                            <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 text-[10px] font-mono border border-indigo-500/20">ONLINE</span>
+                        </div>
+                        
+                        <!-- 參數清單 -->
+                        <div class="space-y-4 font-mono text-xs md:text-sm">
+                            <div>
+                                <div class="text-slate-500 mb-1">PROJECT NAME</div>
+                                <div class="text-white font-bold text-base">紅澪 ☆ Kuremi</div>
+                            </div>
+                            <div>
+                                <div class="text-slate-500 mb-1">GLOBAL ID</div>
+                                <div class="text-indigo-300">AMANO_KUREMI_OFFICIAL</div>
+                            </div>
+                            <div>
+                                <div class="text-slate-500 mb-1">HAIR SPECIFICATION</div>
+                                <div class="text-slate-300">Pure Black (#000000 Base) / Long Curled</div>
+                            </div>
+                            <div>
+                                <div class="text-slate-500 mb-1">OUTFIT STYLE</div>
+                                <div class="text-purple-400">Gothic Magician / Baroque Lace</div>
+                            </div>
+                            <div>
+                                <div class="text-slate-500 mb-1">PRIMARY MOTIF</div>
+                                <div class="text-pink-400">Astrology / Illusion / Cards</div>
+                            </div>
+                            <div>
+                                <div class="text-slate-500 mb-1">MODEL RIG COMPLEXITY</div>
+                                <div class="text-slate-300">High-Tier Custom Defomers</div>
+                            </div>
+                        </div>
+                    </div>
 
-
-                <button id="startPlayBtn" class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl tracking-wider text-sm shadow-lg shadow-indigo-600/30 transition-all active:scale-95">
-
-                    加載作戰矩陣 (START)
-
-                </button>
-
-            </div>
-
-
-
-            <!-- UI 2：Roguelike 三選一卡牌 -->
-
-            <div id="upgradeScreen" class="absolute inset-0 z-30 bg-slate-950/90 glass-panel hidden flex flex-col items-center justify-center p-6 text-center">
-
-                <h2 class="text-2xl font-black text-white mb-1">術式模組超載升級</h2>
-
-                <p class="text-xs font-mono text-slate-500 uppercase tracking-widest mb-8">Choose Your Upgrade Path</p>
-
-                <div class="grid md:grid-cols-3 gap-4 w-full max-w-3xl px-4" id="cardsContainer">
-
-                    <!-- 由 JS 動態注入 -->
-
+                    <!-- 底部免責彩蛋 -->
+                    <div class="mt-8 pt-4 border-t border-slate-800 text-[11px] font-mono text-slate-600 text-center">
+                        SECURE_ACCESS_GRANTED // NO_DATA_LEAK
+                    </div>
                 </div>
 
             </div>
+        </div>
+    </section>
 
-
-
-            <!-- UI 3：遊戲結束 -->
-
-            <div id="gameOverScreen" class="absolute inset-0 z-40 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center">
-
-                <div class="text-rose-500 text-3xl mb-2"><i class="fa-solid fa-skull"></i></div>
-
-                <h2 class="text-2xl font-black text-white mb-6">機體架構解析潰散</h2>
-
-                <div class="p-4 bg-slate-900 border border-slate-800 rounded-xl mb-8 font-mono text-xs text-left space-y-1 w-full max-w-xs">
-
-                    <div>生存時間: <span class="text-white font-bold" id="goTime">00:00</span></div>
-
-                    <div>擊殺仿生蟲: <span class="text-emerald-400 font-bold" id="goKills">0</span></div>
-
-                    <div>最終得分: <span class="text-indigo-400 font-bold" id="goScore">0</span></div>
-
-                </div>
-
-                <button id="retryPlayBtn" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl tracking-wider transition-all">
-
-                    重啟模擬管線 (RETRY)
-
-                </button>
-
+    <!-- ==========================================================================
+         SECTION 3: DATA SPECIFICATIONS (核心設計參數表格區塊)
+         ========================================================================== -->
+    <section id="specifications" class="relative py-24 px-4 sm:px-6 lg:px-8 bg-slate-950 z-10 border-t border-slate-900">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-white tracking-tight mb-3">企劃核心規格明細</h2>
+                <p class="text-slate-400 text-sm max-w-xl mx-auto">
+                    供技術人員與合作夥伴查閱的完整美術配置、軟體技術棧與開發環境矩陣。
+                </p>
             </div>
 
-
-
-            <!-- Canvas 畫布 -->
-
-            <canvas id="mainCanvas" width="850" height="500" class="w-full h-auto bg-[#04060a] block"></canvas>
+            <!-- 專業數據表格容器 -->
+            <div class="w-full overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/30 backdrop-blur">
+                <table class="w-full text-left border-collapse text-xs md:text-sm font-mono">
+                    <thead>
+                        <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 tracking-wider">
+                            <th class="p-4 md:p-5 font-bold uppercase">維度範疇</th>
+                            <th class="p-4 md:p-5 font-bold uppercase">核心參數指標</th>
+                            <th class="p-4 md:p-5 font-bold uppercase">配置細節與標準</th>
+                            <th class="p-4 md:p-5 font-bold uppercase">當前狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                        <!-- 橫列 1 -->
+                        <tr class="hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 md:p-5 font-bold text-white">美術原畫</td>
+                            <td class="p-4 md:p-5 text-indigo-400">Canvas Resolution</td>
+                            <td class="p-4 md:p-5">8000 x 12000 Pixels (Ultra-HD Standard)</td>
+                            <td class="p-4 md:p-5"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px]">COMPLETED</span></td>
+                        </tr>
+                        <!-- 橫列 2 -->
+                        <tr class="hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 md:p-5 font-bold text-white">圖層解構</td>
+                            <td class="p-4 md:p-5 text-indigo-400">PSD Layer Splitting</td>
+                            <td class="p-4 md:p-5">250+ Separate Parts (Hair, Eyes, Clothes, Props)</td>
+                            <td class="p-4 md:p-5"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px]">COMPLETED</span></td>
+                        </tr>
+                        <!-- 橫列 3 -->
+                        <tr class="hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 md:p-5 font-bold text-white">動態骨骼</td>
+                            <td class="p-4 md:p-5 text-purple-400">Live2D Cubism Rigging</td>
+                            <td class="p-4 md:p-5">Extended SDK 4.2+ / Extended Physics Parameters</td>
+                            <td class="p-4 md:p-5"><span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px]">IN_PROGRESS</span></td>
+                        </tr>
+                        <!-- 橫列 4 -->
+                        <tr class="hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 md:p-5 font-bold text-white">色彩體系</td>
+                            <td class="p-4 md:p-5 text-purple-400">HEX Palette Standard</td>
+                            <td class="p-4 md:p-5">Onyx Black (#0B0F19), Mystic Purple (#8B5CF6)</td>
+                            <td class="p-4 md:p-5"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px]">LOCKED</span></td>
+                        </tr>
+                        <!-- 橫列 5 -->
+                        <tr class="hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 md:p-5 font-bold text-white">影片後期</td>
+                            <td class="p-4 md:p-5 text-pink-400">Multimedia Rendering</td>
+                            <td class="p-4 md:p-5">4K 60FPS / H.264 HEVC Extended Pipeline</td>
+                            <td class="p-4 md:p-5"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-500 border border-slate-700 text-[10px]">PENDING</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
         </div>
-
-    </main>
-
-
-
-    <footer class="w-full border-t border-slate-900 bg-slate-950/40 py-2.5 text-center text-[10px] text-slate-600 font-mono">
-
-        AUTH_SIGNATURE: KUROKO_P // SECURE_DEPLOYMENT_VERIFIED
-
-    </footer>
-
-
-
-    <script>
-
-        const canvas = document.getElementById('mainCanvas');
-
-        const ctx = canvas.getContext('2d');
-
-
-
-        let gameState = 'MENU'; 
-
-        let gameTimer = 0;
-
-        let lastTime = 0;
-
-        let spawnTimer = 0;
-
-        let secondTimer = 0;
-
-        let kills = 0;
-
-        let score = 0;
-
-        let screenShake = 0;
-
-
-
-        let mousePos = { x: 425, y: 250 };
-
-        let keyboard = {};
-
-
-
-        // Web Audio API 電子合成音效器
-
-        let audioCtx = null;
-
-        function playSound(type) {
-
-            try {
-
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-
-                const now = audioCtx.currentTime;
-
-                const osc = audioCtx.createOscillator();
-
-                const gain = audioCtx.createGain();
-
-                
-
-                if (type === 'shoot') {
-
-                    osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now);
-
-                    osc.frequency.exponentialRampToValueAtTime(150, now + 0.1);
-
-                    gain.gain.setValueAtTime(0.05, now); gain.gain.linearRampToValueAtTime(0, now + 0.1);
-
-                    osc.connect(gain); gain.connect(audioCtx.destination);
-
-                    osc.start(now); osc.stop(now + 0.1);
-
-                } else if (type === 'hit') {
-
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now);
-
-                    gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.15);
-
-                    osc.connect(gain); gain.connect(audioCtx.destination);
-
-                    osc.start(now); osc.stop(now + 0.15);
-
-                } else if (type === 'levelup') {
-
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
-
-                    osc.frequency.setValueAtTime(600, now + 0.08);
-
-                    gain.gain.setValueAtTime(0.08, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
-
-                    osc.connect(gain); gain.connect(audioCtx.destination);
-
-                    osc.start(now); osc.stop(now + 0.2);
-
-                }
-
-            } catch(e){}
-
-        }
-
-
-
-        // 玩家結構
-
-        let player = {
-
-            x: 425, y: 250, radius: 14, speed: 3.5, hp: 100, maxHp: 100,
-
-            level: 1, xp: 0, nextXp: 10, shootCooldown: 15, shootTimer: 0,
-
-            dashCooldown: 0, dashDuration: 0, dx: 0, dy: 0, invincible: 0
-
-        };
-
-
-
-        // 升級模組池
-
-        let upgrades = {
-
-            plasma: { name: "散射等離子彈", lv: 1, max: 3, desc: "增加子彈開火數量與散射軌道" },
-
-            speed: { name: "推進器極化", lv: 1, max: 4, desc: "永久提升戰機 15% 移動飛行速度" },
-
-            tesla: { name: "自動追蹤雷射", lv: 0, max: 3, desc: "定時釋放一道自動轟炸最近怪物的追蹤射線" }
-
-        };
-
-
-
-        let bullets = [];
-
-        let enemies = [];
-
-        let gems = [];
-
-        let particles = [];
-
-
-
-        // 監聽鍵盤與滑鼠
-
-        window.addEventListener('keydown', (e) => {
-
-            keyboard[e.code] = true;
-
-            if (e.code === 'Space' && player.dashCooldown <= 0 && gameState === 'PLAYING') {
-
-                let mx = 0, my = 0;
-
-                if (keyboard['KeyA'] || keyboard['ArrowLeft']) mx = -1;
-
-                if (keyboard['KeyD'] || keyboard['ArrowRight']) mx = 1;
-
-                if (keyboard['KeyW'] || keyboard['ArrowUp']) my = -1;
-
-                if (keyboard['KeyS'] || keyboard['ArrowDown']) my = 1;
-
-                if (mx !== 0 || my !== 0) {
-
-                    player.dashDuration = 10; player.dashCooldown = 40; player.invincible = 15;
-
-                    let len = Math.hypot(mx, my); player.dx = (mx/len) * player.speed * 2.8; player.dy = (my/len) * player.speed * 2.8;
-
-                }
-
-            }
-
-        });
-
-        window.addEventListener('keyup', (e) => { keyboard[e.code] = false; });
-
-        canvas.addEventListener('mousemove', (e) => {
-
-            const rect = canvas.getBoundingClientRect();
-
-            mousePos.x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-
-            mousePos.y = ((e.clientY - rect.top) / rect.height) * canvas.height;
-
-        });
-
-
-
-        // 怪物生成
-
-        function spawnEnemy() {
-
-            if (enemies.length > 120) return;
-
-            let ang = Math.random() * Math.PI * 2;
-
-            let ex = player.x + Math.cos(ang) * 500;
-
-            let ey = player.y + Math.sin(ang) * 500;
-
-            let type = Math.random() > 0.85 ? 'FAST' : 'NORMAL';
-
-            enemies.push({
-
-                x: ex, y: ey, radius: type==='FAST'?9:12,
-
-                hp: type==='FAST'? 8 : 16 + (gameTimer*0.1),
-
-                speed: type==='FAST'? 2.6 : 1.4 + Math.random()*0.3,
-
-                color: type==='FAST'? '#f43f5e' : '#a5b4fc',
-
-                type: type
-
-            });
-
-        }
-
-
-
-        // 特效飄字
-
-        function addText(x, y, txt, col) {
-
-            particles.push({ x, y, txt, col, alpha: 1, vy: -1.5 });
-
-        }
-
-
-
-        // 開啟升級選單
-
-        function triggerLevelUp() {
-
-            gameState = 'UPGRADE';
-
-            playSound('levelup');
-
-            const container = document.getElementById('cardsContainer');
-
-            container.innerHTML = '';
-
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 4: PRODUCTION PIPELINE (極詳細的 12 階段技術管線圖)
+         ========================================================================== -->
+    <section id="pipeline" class="relative py-24 px-4 sm:px-6 lg:px-8 bg-slate-900/20 z-10 border-t border-slate-900">
+        <div class="max-w-4xl mx-auto">
             
-
-            let pool = Object.keys(upgrades).filter(k => upgrades[k].lv < upgrades[k].max);
-
-            if (pool.length === 0) { score += 1000; resumeGame(); return; }
-
-
-
-            // 隨機渲染可用選項
-
-            pool.forEach(key => {
-
-                let up = upgrades[key];
-
-                let card = document.createElement('div');
-
-                card.className = "bg-slate-900 border border-slate-800 hover:border-indigo-500 p-5 rounded-xl text-left cursor-pointer transition-all hover:-translate-y-1 select-none";
-
-                card.innerHTML = `<h3 class="text-base font-bold text-white mb-1">${up.name}</h3><p class="text-[11px] text-indigo-400">當前等級: LV.${up.lv}</p><p class="text-slate-400 text-xs mt-3">${up.desc}</p>`;
-
-                card.onclick = () => {
-
-                    up.lv++;
-
-                    if (key === 'speed') player.speed *= 1.15;
-
-                    resumeGame();
-
-                };
-
-                container.appendChild(card);
-
-            });
-
-            document.getElementById('upgradeScreen').classList.remove('hidden');
-
-        }
-
-
-
-        function resumeGame() {
-
-            document.getElementById('upgradeScreen').classList.add('hidden');
-
-            gameState = 'PLAYING';
-
-            lastTime = performance.now();
-
-        }
-
-
-
-        // 核心物理引擎循環
-
-        function loop(timestamp) {
-
-            if (gameState === 'GAMEOVER') return;
-
-            if (!lastTime) lastTime = timestamp;
-
-            let dt = (timestamp - lastTime) / 1000;
-
-            lastTime = timestamp;
-
-            if (dt > 0.1) dt = 0.1;
-
-
-
-            if (gameState === 'PLAYING') {
-
-                // 計時器
-
-                secondTimer += dt;
-
-                if (secondTimer >= 1) {
-
-                    secondTimer -= 1; gameTimer++;
-
-                    let m = Math.floor(gameTimer/60).toString().padStart(2,'0');
-
-                    let s = (gameTimer%60).toString().padStart(2,'0');
-
-                    document.getElementById('hudTimer').innerText = `${m}:${s}`;
-
-                }
-
-
-
-                // 生怪控制
-
-                spawnTimer += dt;
-
-                let interval = Math.max(0.15, 0.8 - (gameTimer * 0.002));
-
-                if (spawnTimer >= interval) { spawnTimer -= interval; spawnEnemy(); }
-
-
-
-                // 玩家移動
-
-                if (player.invincible > 0) player.invincible--;
-
-                if (player.dashDuration > 0) {
-
-                    player.dashDuration--; player.x += player.dx; player.y += player.dy;
-
-                } else {
-
-                    let mx = 0, my = 0;
-
-                    if (keyboard['KeyA'] || keyboard['ArrowLeft']) mx = -1;
-
-                    if (keyboard['KeyD'] || keyboard['ArrowRight']) mx = 1;
-
-                    if (keyboard['KeyW'] || keyboard['ArrowUp']) my = -1;
-
-                    if (keyboard['KeyS'] || keyboard['ArrowDown']) my = 1;
-
-                    if (mx !== 0 || my !== 0) {
-
-                        let len = Math.hypot(mx, my);
-
-                        player.x += (mx/len) * player.speed; player.y += (my/len) * player.speed;
-
-                    }
-
-                }
-
-                if (player.dashCooldown > 0) player.dashCooldown--;
-
-
-
-                // 限制邊界
-
-                player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
-
-                player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
-
-
-
-                // 自動開火
-
-                player.shootTimer++;
-
-                if (player.shootTimer >= player.shootCooldown) {
-
-                    player.shootTimer = 0; playSound('shoot');
-
-                    let ang = Math.atan2(mousePos.y - player.y, mousePos.x - player.x);
-
-                    let dmg = 10;
-
-                    if (upgrades.plasma.lv === 1) {
-
-                        bullets.push({ x: player.x, y: player.y, vx: Math.cos(ang)*7, vy: Math.sin(ang)*7, dmg });
-
-                    } else if (upgrades.plasma.lv === 2) {
-
-                        bullets.push({ x: player.x, y: player.y, vx: Math.cos(ang-0.15)*7, vy: Math.sin(ang-0.15)*7, dmg });
-
-                        bullets.push({ x: player.x, y: player.y, vx: Math.cos(ang+0.15)*7, vy: Math.sin(ang+0.15)*7, dmg });
-
+            <div class="text-center mb-20">
+                <h2 class="text-3xl font-bold text-white tracking-tight mb-3">紅澪專案開發管線 (Pipeline)</h2>
+                <p class="text-slate-400 text-sm max-w-xl mx-auto">
+                    從零到完整模型發布的 12 道標準工程步驟，彰顯全流程、高密度的專業研發能力。
+                </p>
+            </div>
+
+            <!-- 時間軸/管線節點串聯 -->
+            <div class="relative border-l-2 border-slate-800 ml-4 md:ml-6 space-y-12">
+                
+                <!-- 階段 1 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-indigo-500 border-4 border-slate-950 group-hover:bg-indigo-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-indigo-400 mb-1">STAGE 01 — CONCEPT DESIGN</div>
+                    <h4 class="text-lg font-bold text-white mb-2">角色雛形企劃與核心世界觀確立</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        明確「紅澪☆Kuremi」的哥德風魔術師定位。在此階段排除所有無關要素，將主軸收斂在黑色長髮少女與奇幻魔術道具的共生關係，完成最初的設計企劃白皮書。
+                    </p>
+                </div>
+
+                <!-- 階段 2 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-indigo-500 border-4 border-slate-950 group-hover:bg-indigo-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-indigo-400 mb-1">STAGE 02 — ARTIFICIAL GENERATION</div>
+                    <h4 class="text-lg font-bold text-white mb-2">利用前沿 AI 進行基礎視覺探索</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        調用深度學習影像生成模型，輸入高精確度的哥德服飾、蕾絲花邊、黑髮高光提示詞。歷經數百次疊代篩選，產出具備高度延伸價值的角色半身像底圖。
+                    </p>
+                </div>
+
+                <!-- 階段 3 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-indigo-500 border-4 border-slate-950 group-hover:bg-indigo-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-indigo-400 mb-1">STAGE 03 — MANUAL REFINEMENT</div>
+                    <h4 class="text-lg font-bold text-white mb-2">原畫手動高精修與細節覆蓋</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        針對生成底圖的物理破綻（如手指交疊、不對稱蕾絲、雜訊線條）進行數位板手動精修。重新繪製黑髮的光影走勢，確保五官比例完全符合冷豔、高雅的設定標準。
+                    </p>
+                </div>
+
+                <!-- 階段 4 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-indigo-500 border-4 border-slate-950 group-hover:bg-indigo-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-indigo-400 mb-1">STAGE 04 — PSD LAYER CUTTING</div>
+                    <h4 class="text-lg font-bold text-white mb-2">Live2D 專用精密圖層拆解 (拆圖)</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        這是最考驗耐心的核心工序。將單一圖層的原畫拆解為超過 250 個獨立圖層。包含瀏海、前側髮、左側髮、右側髮、後髮、眼瞼、眼白、瞳孔、多段衣服摺皺與懸浮道具，確保動態無死角。
+                    </p>
+                </div>
+
+                <!-- 階段 5 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-purple-500 border-4 border-slate-950 group-hover:bg-purple-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-purple-400 mb-1">STAGE 05 — MESH GENERATION</div>
+                    <h4 class="text-lg font-bold text-white mb-2">Cubism 多邊形網格點佈局</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        將 PSD 檔案導入 Live2D Cubism 軟體。針對每一個拆解好的部件手動編織精細的網格（Mesh Grid）。眼睛與嘴巴周圍配置高密度網格，以完美捕捉後續細緻的面部表情起伏。
+                    </p>
+                </div>
+
+                <!-- 階段 6 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-purple-500 border-4 border-slate-950 group-hover:bg-purple-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-purple-400 mb-1">STAGE 06 — DEFORMER HIERARCHY</div>
+                    <h4 class="text-lg font-bold text-white mb-2">變形器多層級樹狀結構架構</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        建構極其嚴謹的曲面變形器（Warp Deformer）與旋轉變形器父子關係。將身體、頭部、五官、髮絲依序嵌套，確保高階九軸運動（XYZ 軸旋轉與平移）時，整體結構不會產生撕裂或位移。
+                    </p>
+                </div>
+
+                <!-- 階段 7 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-purple-500 border-4 border-slate-950 group-hover:bg-purple-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-purple-400 mb-1">STAGE 07 — PARAMETER BINDING</div>
+                    <h4 class="text-lg font-bold text-white mb-2">面部表情與視線方向參數綁定</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        針對眼睛開合、瞳孔縮放、眉毛高低喜怒、以及上下左右的視線移動進行精準參數映射。特別優化微笑時的眼角弧度，使紅澪在冷酷的外表下帶有靈動神采。
+                    </p>
+                </div>
+
+                <!-- 階段 8 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-purple-500 border-4 border-slate-950 group-hover:bg-purple-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-purple-400 mb-1">STAGE 08 — PHYSICS SIMULATION</div>
+                    <h4 class="text-lg font-bold text-white mb-2">多段擺動物理動態模擬配置</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        設定極其複雜的擺動物理系統（Physics Settings）。將黑髮分為多段單擺與多節鐘擺模擬，加入空氣阻力與重力常數。當頭部晃動時，髮絲與胸前的魔術師緞帶會產生完美的二次延遲動態。
+                    </p>
+                </div>
+
+                <!-- 階段 9 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-slate-950 group-hover:bg-pink-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-pink-400 mb-1">STAGE 09 — SCENE COMPOSITING</div>
+                    <h4 class="text-lg font-bold text-white mb-2">多媒體影音場景合成企劃</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        模型輸出後，進入多媒體實作階段。在剪輯軟體中預先建立暗黑科技風的舞台特效，利用粒子特效（Particle Effects）烘托魔術師的神祕法陣，準備將 Live2D 動態融入高質感視訊中。
+                    </p>
+                </div>
+
+                <!-- 階段 10 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-slate-950 group-hover:bg-pink-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-pink-400 mb-1">STAGE 10 — POST-PROCESSING</div>
+                    <h4 class="text-lg font-bold text-white mb-2">視訊特效後期增強與節奏卡點</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        對宣傳影音進行高強度的後期調色、轉場剪輯。配合強烈節奏的電子或交響樂進行畫面卡點，加入動態模糊（Motion Blur）與光暈特效，將視覺張力拉到極致。
+                    </p>
+                </div>
+
+                <!-- 階段 11 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-slate-950 group-hover:bg-pink-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-pink-400 mb-1">STAGE 11 — YOUTUBE INGESTION</div>
+                    <h4 class="text-lg font-bold text-white mb-2">YouTube 官方頻道影音上載與優化</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        將渲染完成的 4K 60FPS 最終作品上傳至官方頻道 `@AmanoKuremi`。精心設計極具點擊吸引力的黑暗系封面圖，撰寫詳盡的標籤與說明欄，建立完整的虛擬偶像發布節奏。
+                    </p>
+                </div>
+
+                <!-- 階段 12 -->
+                <div class="relative pl-8 group">
+                    <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-slate-950 group-hover:bg-pink-400 transition-colors"></div>
+                    <div class="font-mono text-xs text-pink-400 mb-1">STAGE 12 — WEB DEPLOYMENT</div>
+                    <h4 class="text-lg font-bold text-white mb-2">GitHub Pages 靜態中樞持續整合與上線</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        維護當前你正在瀏覽的這座前端網頁。利用極速的 CDN 資源與先進的 Tailwind CSS 排版，將所有關於紅澪的技術文檔、圖表、以及 YouTube 最新影片完美收錄，實現自動化代碼持續部署。
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 5: MULTIMEDIA SHOWCASE (多媒體影音企劃展示區塊)
+         ========================================================================== -->
+    <section id="showcase" class="relative py-24 px-4 sm:px-6 lg:px-8 bg-slate-950 z-10 border-t border-slate-900">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-white tracking-tight mb-3">紅澪 ☆ 影音企劃中樞</h2>
+                <p class="text-slate-400 text-sm max-w-xl mx-auto">
+                    即時連動官方 YouTube 頻道的展示版面。當你有全新影片發布時，這裡就是你的頂級展示牆。
+                </p>
+            </div>
+
+            <!-- 卡片三欄排版 -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- 影音卡片 1 -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden neon-border-indigo flex flex-col justify-between">
+                    <div>
+                        <!-- 擬真 YouTube 播放容器 -->
+                        <div class="relative w-full aspect-video bg-slate-950 flex items-center justify-center group overflow-hidden">
+                            <div class="absolute inset-0 bg-slate-800 flex items-center justify-center text-slate-600">
+                                <i class="fa-solid fa-play text-4xl group-hover:text-indigo-400 group-hover:scale-110 transition-all duration-300"></i>
+                            </div>
+                            <!-- 上線後可改為真正的 YouTube iframe 嵌入代碼 -->
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 text-[10px] font-mono border border-indigo-500/20">VIDEO SHOWCASE</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors">紅澪☆Kuremi 概念宣傳影片</h3>
+                            <p class="text-slate-400 text-xs leading-relaxed">
+                                第一部全面公開紅澪視覺設定的短片。配合大氣的音樂，展示黑髮與哥德正裝在 2D 平面上的極致光影交織。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="inline-flex items-center text-xs font-semibold text-indigo-400 hover:text-indigo-300 gap-1 hover:underline">
+                            前往 YouTube 觀看 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 影音卡片 2 -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden neon-border-purple flex flex-col justify-between">
+                    <div>
+                        <div class="relative w-full aspect-video bg-slate-950 flex items-center justify-center group overflow-hidden">
+                            <div class="absolute inset-0 bg-slate-800 flex items-center justify-center text-slate-600">
+                                <i class="fa-solid fa-file-code text-4xl group-hover:text-purple-400 group-hover:scale-110 transition-all duration-300"></i>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[10px] font-mono border border-purple-500/20">RIGGING LOG</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2">Live2D 綁定技術過程解密</h3>
+                            <p class="text-slate-400 text-xs leading-relaxed">
+                                詳盡縮時記錄多達 250 個圖層的物理網格拆解、多節鐘擺物理計算設定，揭開虛擬角色能夠自然眨眼微笑的幕後科技。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="inline-flex items-center text-xs font-semibold text-purple-400 hover:text-purple-300 gap-1 hover:underline">
+                            追蹤技術日誌 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 影音卡片 3 -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden neon-border-purple flex flex-col justify-between">
+                    <div>
+                        <div class="relative w-full aspect-video bg-slate-950 flex items-center justify-center group overflow-hidden">
+                            <div class="absolute inset-0 bg-slate-800 flex items-center justify-center text-slate-600">
+                                <i class="fa-solid fa-wand-magic text-4xl group-hover:text-pink-400 group-hover:scale-110 transition-all duration-300"></i>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-0.5 rounded bg-pink-500/10 text-pink-400 text-[10px] font-mono border border-pink-500/20">FUTURE PROJECT</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2">後期多媒體混剪二創企劃</h3>
+                            <p class="text-slate-400 text-xs leading-relaxed">
+                                預計結合高階視覺轉場特效與音樂同步卡點技術，為紅澪打造一系列兼具故事性與超現實節奏感的動態短視訊。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="inline-flex items-center text-xs font-semibold text-pink-400 hover:text-pink-300 gap-1 hover:underline">
+                            訂閱期待首播 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 大型跨欄 YouTube 推廣橫幅 -->
+            <div class="mt-12 p-8 rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 border border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl">
+                <div class="flex items-center gap-5 text-center md:text-left flex-col md:flex-row">
+                    <div class="w-14 h-14 rounded-full bg-red-600/10 flex items-center justify-center text-red-500 text-3xl shrink-0 border border-red-500/20">
+                        <i class="fa-brands fa-youtube"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white">點擊訂閱紅澪☆Kuremi 的 YouTube 官方頻道</h4>
+                        <p class="text-slate-400 text-xs md:text-sm mt-1">本項目所有模型測試影片、多媒體二創剪輯均會第一時間在該頻道公開更新。</p>
+                    </div>
+                </div>
+                <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="w-full md:w-auto px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm text-center tracking-wider transition-all shadow-lg whitespace-nowrap">
+                    訂閱頻道 <i class="fa-solid fa-arrow-right text-xs ml-1"></i>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 6: INTERACTIVE FAQ (純前端互動式折疊問答元件)
+         ========================================================================== -->
+    <section id="faq" class="relative py-24 px-4 sm:px-6 lg:px-8 bg-slate-900/40 z-10 border-t border-slate-900">
+        <div class="max-w-3xl mx-auto">
+            
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-white tracking-tight mb-3">常規問題與解答 (FAQ)</h2>
+                <p class="text-slate-400 text-sm">
+                    針對紅澪☆Kuremi 企劃的技術範疇、二創權限與後續規劃進行統一公開答覆。
+                </p>
+            </div>
+
+            <!-- FAQ 折疊清單群組 -->
+            <div class="space-y-4">
+                
+                <!-- 問題 1 -->
+                <div class="border border-slate-800 rounded-xl bg-slate-950/60 overflow-hidden transition-all duration-300 faq-item">
+                    <button class="w-full px-6 py-4 flex justify-between items-center text-left focus:outline-none group">
+                        <span class="font-bold text-white group-hover:text-indigo-400 transition-colors text-sm md:text-base">Q1. 請問「紅澪☆Kuremi」這個角色的核心設計初衷是什麼？</span>
+                        <i class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform duration-300 faq-icon"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+                        <p class="px-6 pb-5 text-slate-400 text-sm leading-relaxed border-t border-slate-900/50 pt-3">
+                            本企劃旨在打造一個極具辨識度、極度垂直於個人美學喜好的虛擬少女。其外觀牢牢鎖定在「深邃黑色長髮」與「哥德風格魔術正裝」，不隨波逐流，專注於展現神祕、冷冽與精緻的數位二次元視覺藝術。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 問題 2 -->
+                <div class="border border-slate-800 rounded-xl bg-slate-950/60 overflow-hidden transition-all duration-300 faq-item">
+                    <button class="w-full px-6 py-4 flex justify-between items-center text-left focus:outline-none group">
+                        <span class="font-bold text-white group-hover:text-indigo-400 transition-colors text-sm md:text-base">Q2. 這個 Live2D 模型未來的精細度預期可以達到什麼標準？</span>
+                        <i class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform duration-300 faq-icon"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+                        <p class="px-6 pb-5 text-slate-400 text-sm leading-relaxed border-t border-slate-900/50 pt-3">
+                            由於在 PSD 拆圖階段劃分了超過 250 個獨立圖層，模型將具備極高的物理動態維度。除了基礎的眼球、面部九軸轉動外，後髮、側髮、衣服蕾絲和周身的懸浮紙牌道具都將配置多段物理鐘擺，能夠呈現極其絲滑流暢、具有立體空間錯覺的微動態。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 問題 3 -->
+                <div class="border border-slate-800 rounded-xl bg-slate-950/60 overflow-hidden transition-all duration-300 faq-item">
+                    <button class="w-full px-6 py-4 flex justify-between items-center text-left focus:outline-none group">
+                        <span class="font-bold text-white group-hover:text-indigo-400 transition-colors text-sm md:text-base">Q3. 未來官方 YouTube 頻道預計更新什麼樣的內容？</span>
+                        <i class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform duration-300 faq-icon"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+                        <p class="px-6 pb-5 text-slate-400 text-sm leading-relaxed border-t border-slate-900/50 pt-3">
+                            頻道 `@AmanoKuremi` 將作為本專案的多媒體發布核心。預計推出的主要內容包含：紅澪模型不同階段的動態動態測試短片、精緻的手動拆圖與綁定技術縮時解密、以及融合高階後期轉場、特效、強烈卡點音樂的二創視覺混剪（AMV/MAD 形式）。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 問題 4 -->
+                <div class="border border-slate-800 rounded-xl bg-slate-950/60 overflow-hidden transition-all duration-300 faq-item">
+                    <button class="w-full px-6 py-4 flex justify-between items-center text-left focus:outline-none group">
+                        <span class="font-bold text-white group-hover:text-indigo-400 transition-colors text-sm md:text-base">Q4. 這個網站目前的代碼架構與維護方式為何？</span>
+                        <i class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform duration-300 faq-icon"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+                        <p class="px-6 pb-5 text-slate-400 text-sm leading-relaxed border-t border-slate-900/50 pt-3">
+                            本站完全基於 HTML5、Tailwind CSS 框架以及原生 Vanilla JavaScript 建構，並安全託管在 GitHub Pages 靜態主機上。代碼架構嚴謹乾淨，不包含任何後端複雜資料庫，具備極高的載入效能與全平台行動端響應能力（RWD），同時絕不包含或洩漏任何個人隱私。
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 7: CONTACT & FOOTER (聯絡管道與版權底部)
+         ========================================================================== -->
+    <section id="contact" class="relative py-24 px-4 sm:px-6 lg:px-8 bg-slate-950 z-10 border-t border-slate-900">
+        <div class="max-w-4xl mx-auto text-center">
+            
+            <!-- 標題 -->
+            <h2 class="text-3xl font-bold text-white tracking-tight mb-4">專案交流與聯絡管道</h2>
+            <p class="text-slate-400 text-sm max-w-xl mx-auto mb-10">
+                歡迎任何關於虛擬角色設計、Live2D 模型動態技術探討、或者是高階多媒體影音剪輯的合作案與技術交流。
+            </p>
+
+            <!-- 聯絡小卡片 -->
+            <div class="inline-flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 w-full max-w-md mx-auto">
+                <div class="w-full p-5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-4 text-left">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-lg shrink-0">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="text-xs font-mono text-slate-500 uppercase">Contact Platform</div>
+                        <div class="text-sm font-medium text-slate-200 truncate">透過 YouTube 頻道私訊或功能表提交</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分隔線 -->
+            <div class="w-full h-[1px] bg-slate-900 mb-12"></div>
+
+            <!-- 社群按鈕矩陣 -->
+            <div class="flex justify-center gap-4 mb-8">
+                <a href="https://www.youtube.com/@AmanoKuremi" target="_blank" class="w-11 h-11 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-red-600 hover:text-white hover:border-red-500 transition-all shadow-lg" title="YouTube 官方頻道">
+                    <i class="fa-brands fa-youtube text-lg"></i>
+                </a>
+                <a href="https://github.com/nekowakuroko" target="_blank" class="w-11 h-11 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 transition-all shadow-lg" title="GitHub 儲存庫">
+                    <i class="fa-brands fa-github text-lg"></i>
+                </a>
+            </div>
+
+            <!-- 最終法律與隱私保障宣告 -->
+            <p class="text-xs text-slate-600 font-mono tracking-wide leading-relaxed">
+                &copy; 2026 Amano Kuremi Project / KUROKO_P. All rights reserved.<br>
+                <span class="text-[10px] text-slate-700 block mt-1">This site strictly adheres to privacy enforcement regulations. Static deployment verified. No personal identity metrics are logged.</span>
+            </p>
+
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         CORE INTERACTIVE JAVASCRIPT MODULE (純前端控制與微交互互動模組)
+         ========================================================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. 響應式行動端 Hamburger 選單控制功能 ---
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = document.getElementById('menuIcon');
+
+            if (menuToggle && mobileMenu && menuIcon) {
+                menuToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    mobileMenu.classList.toggle('hidden');
+                    // 隨狀態切換 Icon 樣式
+                    if (mobileMenu.classList.contains('hidden')) {
+                        menuIcon.className = 'fa-solid fa-bars text-xl';
                     } else {
-
-                        bullets.push({ x: player.x, y: player.y, vx: Math.cos(ang)*7, vy: Math.sin(ang)*7, dmg });
-
-                        bullets.push({ x: player.x, y: player.y, vx: Math.cos(ang-0.25)*7, vy: Math.sin(ang-0.25)*7, dmg });
-
-                        bullets.push({ x: player.x, y: player.y, vx: Math.cos(ang+0.25)*7, vy: Math.sin(ang+0.25)*7, dmg });
-
+                        menuIcon.className = 'fa-solid fa-xmark text-xl';
                     }
+                });
 
-                }
-
-
-
-                // 更新子彈
-
-                for (let i = bullets.length - 1; i >= 0; i--) {
-
-                    let b = bullets[i]; b.x += b.vx; b.y += b.vy;
-
-                    if (b.x<0 || b.x>canvas.width || b.y<0 || b.y>canvas.height) bullets.splice(i, 1);
-
-                }
-
-
-
-                // 更新晶體磁吸
-
-                for (let i = gems.length - 1; i >= 0; i--) {
-
-                    let g = gems[i];
-
-                    let d = Math.hypot(player.x - g.x, player.y - g.y);
-
-                    if (d < 90) {
-
-                        g.x += ((player.x - g.x)/d) * 5.5; g.y += ((player.y - g.y)/d) * 5.5;
-
+                // 點擊選單外部時，全自動關閉選單抽屜
+                document.addEventListener('click', () => {
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                        menuIcon.className = 'fa-solid fa-bars text-xl';
                     }
+                });
 
-                    if (d < player.radius + 5) {
-
-                        player.xp += g.val; score += 20; gems.splice(i, 1);
-
-                        if (player.xp >= player.nextXp) {
-
-                            player.xp -= player.nextXp; player.level++; player.nextXp = Math.floor(player.nextXp * 1.35) + 5;
-
-                            triggerLevelUp();
-
-                        }
-
-                    }
-
-                }
-
-
-
-                // 更新怪物與受擊判定
-
-                for (let i = enemies.length - 1; i >= 0; i--) {
-
-                    let e = enemies[i];
-
-                    let ed = Math.hypot(player.x - e.x, player.y - e.y);
-
-                    e.x += ((player.x - e.x)/ed) * e.speed; e.y += ((player.y - e.y)/ed) * e.speed;
-
-
-
-                    // 檢查被子彈打中
-
-                    bullets.forEach((b, bIdx) => {
-
-                        if (Math.hypot(b.x - e.x, b.y - e.y) < e.radius + 4) {
-
-                            bullets.splice(bIdx, 1); e.hp -= b.dmg;
-
-                            playSound('hit'); addText(e.x, e.y, b.dmg, '#67e8f9');
-
-                            if (e.hp <= 0) {
-
-                                enemies.splice(i, 1); kills++; score += 50;
-
-                                gems.push({ x: e.x, y: e.y, val: e.type==='FAST'?2:1 });
-
-                            }
-
-                        }
-
+                // 點擊選單項目後自動縮回
+                const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+                mobileLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.add('hidden');
+                        menuIcon.className = 'fa-solid fa-bars text-xl';
                     });
-
-
-
-                    // 怪物撞玩家
-
-                    if (ed < player.radius + e.radius && player.invincible <= 0) {
-
-                        player.hp -= e.type==='FAST'?6:12; player.invincible = 30; screenShake = 8;
-
-                        if (player.hp <= 0) {
-
-                            gameState = 'GAMEOVER';
-
-                            document.getElementById('goTime').innerText = document.getElementById('hudTimer').innerText;
-
-                            document.getElementById('goKills').innerText = kills;
-
-                            document.getElementById('goScore').innerText = score;
-
-                            document.getElementById('gameOverScreen').classList.remove('hidden');
-
-                            return;
-
-                        }
-
-                    }
-
-                }
-
-
-
-                // 特斯拉自動雷射射線被動武器
-
-                if (upgrades.tesla.lv > 0 && enemies.length > 0 && Math.random() < 0.015) {
-
-                    let target = enemies[Math.floor(Math.random()*enemies.length)];
-
-                    target.hp -= upgrades.tesla.lv * 15;
-
-                    ctx.save(); ctx.beginPath(); ctx.moveTo(player.x, player.y); ctx.lineTo(target.x, target.y);
-
-                    ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
-
-                    if (target.hp <= 0) {
-
-                        enemies = enemies.filter(e => e !== target); kills++; gems.push({ x: target.x, y: target.y, val: 1 });
-
-                    }
-
-                }
-
-
-
-                // 更新粒子
-
-                for (let i = particles.length - 1; i >= 0; i--) {
-
-                    let p = particles[i]; p.y += p.vy; p.alpha -= 0.03;
-
-                    if (p.alpha <= 0) particles.splice(i, 1);
-
-                }
-
-
-
-                // 更新 HUD 介面
-
-                document.getElementById('hudLevel').innerText = player.level;
-
-                document.getElementById('xpBar').style.width = `${(player.xp / player.nextXp)*100}%`;
-
-                document.getElementById('hpBar').style.width = `${Math.max(0, (player.hp / player.maxHp)*100)}%`;
-
-                document.getElementById('hudKills').innerText = kills;
-
-                document.getElementById('hudScore').innerText = score;
-
+                });
             }
 
-
-
-            // --- 繪製畫面容器 ---
-
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-
-            ctx.save();
-
-            if (screenShake > 0) { screenShake--; ctx.translate((Math.random()-0.5)*5, (Math.random()-0.5)*5); }
-
-
-
-            // 網格背景
-
-            ctx.strokeStyle = '#0e1525'; ctx.lineWidth = 1;
-
-            for(let i=0; i<canvas.width; i+=50) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
-
-            for(let j=0; j<canvas.height; j+=50) { ctx.beginPath(); ctx.moveTo(0,j); ctx.lineTo(canvas.width,j); ctx.stroke(); }
-
-
-
-            // 畫能量球
-
-            gems.forEach(g => {
-
-                ctx.beginPath(); ctx.arc(g.x, g.y, g.val*2.5, 0, Math.PI*2);
-
-                ctx.fillStyle = g.val>1 ? '#ec4899' : '#38bdf8'; ctx.fill();
-
+            // --- 2. 滾動時導覽列變色與陰影控制 (Scroll Listener) ---
+            const mainNav = document.getElementById('mainNav');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 30) {
+                    mainNav.classList.remove('bg-slate-950/70', 'py-4');
+                    mainNav.classList.add('bg-slate-950/95', 'py-3', 'shadow-2xl', 'border-slate-800/50');
+                } else {
+                    mainNav.classList.remove('bg-slate-950/95', 'py-3', 'shadow-2xl', 'border-slate-800/50');
+                    mainNav.classList.add('bg-slate-950/70', 'py-4');
+                }
             });
 
+            // --- 3. 互動式 FAQ Accordion (手風琴效果流暢動畫控制) ---
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            faqItems.forEach(item => {
+                const button = item.querySelector('button');
+                const content = item.querySelector('.faq-content');
+                const icon = item.querySelector('.faq-icon');
 
+                if (button && content && icon) {
+                    button.addEventListener('click', () => {
+                        // 檢查當前項目是否已打開
+                        const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
 
-            // 畫玩家戰機
+                        // 全自動排他：先關閉所有其他已打開的 FAQ 選單
+                        faqItems.forEach(otherItem => {
+                            const otherContent = otherItem.querySelector('.faq-content');
+                            const otherIcon = otherItem.querySelector('.faq-icon');
+                            if (otherContent && otherContent !== content) {
+                                otherContent.style.maxHeight = '0px';
+                                if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+                            }
+                        });
 
-            ctx.save(); ctx.translate(player.x, player.y);
-
-            ctx.rotate(Math.atan2(mousePos.y - player.y, mousePos.x - player.x) + Math.PI/2);
-
-            ctx.beginPath(); ctx.moveTo(0, -player.radius); ctx.lineTo(player.radius, player.radius); ctx.lineTo(-player.radius, player.radius); ctx.closePath();
-
-            ctx.fillStyle = player.invincible%4 > 2 ? '#312e81' : '#4f46e5'; ctx.fill();
-
-            ctx.strokeStyle = '#67e8f9'; ctx.stroke();
-
-            ctx.restore();
-
-
-
-            // 畫子彈
-
-            bullets.forEach(b => {
-
-                ctx.beginPath(); ctx.arc(b.x, b.y, 3, 0, Math.PI*2); ctx.fillStyle = '#67e8f9'; ctx.fill();
-
+                        // 切换當前選單開合動態
+                        if (isOpen) {
+                            content.style.maxHeight = '0px';
+                            icon.style.transform = 'rotate(0deg)';
+                        } else {
+                            // 動態計算子層實際像素高度，賦予平滑展開過渡
+                            content.style.maxHeight = content.scrollHeight + 'px';
+                            icon.style.transform = 'rotate(180deg)';
+                        }
+                    });
+                }
             });
-
-
-
-            // 畫仿生蟲
-
-            enemies.forEach(e => {
-
-                ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, Math.PI*2);
-
-                ctx.fillStyle = e.color; ctx.fill();
-
-                ctx.strokeStyle = '#000'; ctx.stroke();
-
-            });
-
-
-
-            // 畫文字粒子
-
-            particles.forEach(p => {
-
-                ctx.save(); ctx.globalAlpha = p.alpha; ctx.font = 'bold 12px sans-serif';
-
-                ctx.fillStyle = p.col; ctx.fillText(p.txt, p.x, p.y); ctx.restore();
-
-            });
-
-
-
-            ctx.restore();
-
-            if (gameState !== 'GAMEOVER') requestAnimationFrame(loop);
-
-        }
-
-
-
-        // 綁定介面動作
-
-        document.getElementById('startPlayBtn').addEventListener('click', () => {
-
-            document.getElementById('menuScreen').classList.add('hidden');
-
-            gameState = 'PLAYING'; gameTimer = 0; kills = 0; score = 0;
-
-            player.hp = 100; player.level = 1; player.xp = 0; player.nextXp = 10;
-
-            upgrades.plasma.lv = 1; upgrades.speed.lv = 1; upgrades.tesla.lv = 0; player.speed = 3.5;
-
-            bullets = []; enemies = []; gems = []; particles = [];
-
-            lastTime = performance.now(); spawnEnemy(); loop();
 
         });
-
-
-
-        document.getElementById('retryPlayBtn').addEventListener('click', () => {
-
-            document.getElementById('gameOverScreen').classList.add('hidden');
-
-            document.getElementById('menuScreen').classList.remove('hidden');
-
-        });
-
     </script>
-<!-- Google tag (gtag.js) -->
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-8LHS3GQFJK"></script>
-
-<script>
-
-window.dataLayer = window.dataLayer || [];
-
-function gtag(){dataLayer.push(arguments);}
-
-gtag('js', new Date());
-
-
-
-gtag('config', 'G-8LHS3GQFJK');
-
-</script>
 </body>
+</html>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8LHS3GQFJK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-</html> 
-
+  gtag('config', 'G-8LHS3GQFJK');
+</script>
