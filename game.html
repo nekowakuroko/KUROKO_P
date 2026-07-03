@@ -2,314 +2,231 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>賽博迷宮：3D 超載射擊 | Cyber 3D Raycaster FPS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>HyperBadass 3D FPS Game</title>
     <style>
-        body { background-color: #020406; overflow: hidden; font-family: monospace; }
-        canvas { background-color: #000; border: 3px solid #1e293b; box-shadow: 0 0 30px rgba(99, 102, 241, 0.3); }
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; user-select: none; }
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; border: 2px solid rgba(255,255,255,0.7); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; }
+        #ui { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 28px; font-weight: bold; text-shadow: 2px 2px #000; z-index: 10; font-family: monospace; }
+        #instructions { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.85); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; z-index: 20; transition: 0.3s; }
+        #instructions h1 { font-size: 48px; color: #ff3366; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        #instructions p { font-size: 18px; color: #ccc; margin: 5px 0; }
+        .highlight { color: #00ffcc; font-weight: bold; }
     </style>
+    <!-- 引進 Three.js 核心庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
-<body class="min-h-screen flex flex-col justify-between text-slate-400 select-none">
+<body>
+    <div id="crosshair"></div>
+    <div id="ui">SCORE: <span id="score">0</span></div>
+    <div id="instructions">
+        <h1>極限網頁 3D FPS</h1>
+        <p>點擊畫面鎖定滑鼠並開始遊戲</p>
+        <p class="highlight">WASD = 移動 | 滑鼠 = 瞄準 | 左鍵 = 射擊</p>
+    </div>
 
-    <!-- 頂部即時核心日誌列 -->
-    <nav class="border-b border-slate-950 bg-slate-950 px-6 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <a href="./" class="text-xs px-2.5 py-1 bg-slate-900 border border-slate-800 rounded hover:text-indigo-400 transition font-bold">← 回首頁</a>
-            <span class="text-xs text-cyan-400 font-bold animate-pulse">● 3D_RAYCAST_ENGINE_LOADED // INSTANT_START_FPS</span>
-        </div>
-        <span class="text-[10px] text-slate-600 font-mono">[ ZERO_BUTTONS_3D_RENDER ]</span>
-    </nav>
-
-    <!-- 遊戲主 3D 視窗區 -->
-    <main class="flex-grow flex items-center justify-center p-2">
-        <div class="w-full max-w-4xl flex flex-col items-center">
-            <!-- 核心 3D 投影 Canvas 畫布 -->
-            <canvas id="fpsCanvas" width="800" height="450" class="w-full h-auto block rounded-xl"></canvas>
-        </div>
-    </main>
-
-    <!-- 頁尾技術底標 -->
-    <footer class="border-t border-slate-950 bg-slate-950/40 py-2.5 text-center text-[10px] text-slate-700 tracking-wider">
-        CORE_LOG: ENGINE_3D_RAYCAST // INPUT: WASD_TO_MOVE // MOUSE_CLICK_TO_SHOOT // AUTH: KUROKO_P
-    </footer>
-
-    <!-- ==========================================================================
-         CORE 3D FPS ENGINE MODULE (純 Canvas 射線投影第一人稱射擊引擎)
-         ========================================================================== -->
     <script>
-        window.addEventListener('load', () => {
-            const canvas = document.getElementById('fpsCanvas');
-            const ctx = canvas.getContext('2d');
+        // --- 1. 基本宣告 ---
+        let scene, camera, renderer, score = 0;
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        let yaw = 0, pitch = 0; // 視角旋轉控制
+        const targets = [];
+        let gun;
+        const speed = 0.15;
 
-            // --- 1. 賽博矩陣 3D 迷宮地圖設定 (1=牆壁, 0=通道) ---
-            const mapSize = 12;
-            const map = [
-                [1,1,1,1,1,1,1,1,1,1,1,1],
-                [1,0,0,0,0,0,1,0,0,0,0,1],
-                [1,0,1,1,0,0,1,0,1,1,0,1],
-                [1,0,1,0,0,0,0,0,0,1,0,1],
-                [1,0,0,0,0,1,1,1,0,0,0,1],
-                [1,0,1,1,0,1,0,1,0,1,0,1],
-                [1,0,0,1,0,1,0,1,0,1,0,1],
-                [1,1,0,1,0,0,0,0,0,1,0,1],
-                [1,0,0,0,0,1,0,1,0,0,0,1],
-                [1,0,1,1,0,1,0,1,1,1,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,1],
-                [1,1,1,1,1,1,1,1,1,1,1,1]
-            ];
+        const blocker = document.getElementById('instructions');
 
-            // --- 2. 遊戲核心變數與狀態大腦 ---
-            let gameState = 'PLAYING'; // PLAYING, GAMEOVER
-            let gameTimer = 0;
-            let lastTime = 0;
-            let timeAccumulator = 0;
-            let spawnTimer = 0;
+        // --- 2. 初始化 3D 場景 ---
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a16);
+            scene.fog = new THREE.FogExp2(0x0a0a16, 0.05);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.y = 1.6; // 人類平均雙眼高度
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
+
+            // 光源設定
+            const ambientLight = new THREE.AmbientLight(0x666666);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(20, 40, 20);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            // 製造地板 (科技網格風)
+            const floorGeo = new THREE.PlaneGeometry(100, 100, 50, 50);
+            const floorMat = new THREE.MeshLambertMaterial({ color: 0x111122, wireframe: true });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            // 製造一把槍並綁定在攝影機上
+            const gunGeo = new THREE.BoxGeometry(0.08, 0.08, 0.4);
+            const gunMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.2 });
+            gun = new THREE.Mesh(gunGeo, gunMat);
+            gun.position.set(0.15, -0.15, -0.35); // 放在右下角
+            camera.add(gun);
+            scene.add(camera); // 必須把攝影機加入場景，綁定的槍才會顯示
+
+            // 生成第一批隨機目標 (發光的立方體)
+            for (let i = 0; i < 8; i++) {
+                spawnTarget();
+            }
+
+            // 事件監聽
+            window.addEventListener('resize', onWindowResize);
+            setupControls();
+        }
+
+        // --- 3. 生成敵人/目標 ---
+        function spawnTarget() {
+            const geo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+            const mat = new THREE.MeshStandardMaterial({ 
+                color: Math.random() * 0xffffff, 
+                emissive: 0x221122,
+                roughness: 0.1 
+            });
+            const mesh = new THREE.Mesh(geo, mat);
             
-            let score = 0;
-            let kills = 0;
-            let screenShake = 0;
-            let autoRespawnTimer = 3.5; // 死亡自動復活倒數
+            // 隨機分佈在玩家前方與四周
+            mesh.position.x = (Math.random() - 0.5) * 30;
+            mesh.position.y = 1 + Math.random() * 3;
+            mesh.position.z = -10 - Math.random() * 20;
+            
+            scene.add(mesh);
+            targets.push(mesh);
+        }
 
-            // 玩家第一人稱物理參數
-            let player = {
-                x: 2.5,       // 地圖網格 X 坐標
-                y: 2.5,       // 地圖網格 Y 坐標
-                angle: 0,     // 視線朝向角度 (弧度)
-                hp: 100,
-                maxHp: 100,
-                speed: 3.0,   // 前進速度
-                rotSpeed: 2.2, // 視角轉動速度
-                isShooting: 0 // 槍枝開火動畫幀計時
-            };
+        // --- 4. 操作控制 (Pointer Lock & Keyboard) ---
+        function setupControls() {
+            // 點擊畫面請求鎖定滑鼠
+            blocker.addEventListener('click', () => {
+                document.body.requestPointerLock();
+            });
 
-            // 實體儲存緩衝區
-            let enemies = [];
-            let keyboard = {};
-
-            // 監聽鍵盤按鍵
-            window.addEventListener('keydown', (e) => { keyboard[e.code] = true; });
-            window.addEventListener('keyup', (e) => { keyboard[e.code] = false; });
-
-            // 監聽全螢幕滑鼠點擊（點擊畫布任何地方 = 瞬間開火！）
-            window.addEventListener('mousedown', () => {
-                if (gameState !== 'PLAYING' || player.isShooting > 0) return;
-                player.isShooting = 5; // 啟動 5 幀的槍口火光動畫
-                screenShake = 4;       // 槍枝後座力震屏
-
-                // 射擊擊中判定 (Hitscan 物理：判定畫面上正中央是否有怪)
-                for (let i = 0; i < enemies.length; i++) {
-                    let e = enemies[i];
-                    // 如果怪在玩家正前方視線夾角內，且距離夠近，且在畫面中央一帶
-                    if (e.screenX > canvas.width / 2 - 40 && e.screenX < canvas.width / 2 + 40 && e.dist > 0.3 && e.dist < 8) {
-                        e.hp -= 25;
-                        e.isHit = 3; // 閃白回饋
-                        if (e.hp <= 0) {
-                            enemies.splice(i, 1);
-                            kills++;
-                            score += 100;
-                        }
-                        break; // 擊中一隻就收工
-                    }
+            document.addEventListener('pointerlockchange', () => {
+                if (document.pointerLockElement === document.body) {
+                    blocker.style.opacity = '0';
+                    blocker.style.pointerEvents = 'none';
+                } else {
+                    blocker.style.opacity = '1';
+                    blocker.style.pointerEvents = 'auto';
                 }
             });
 
-            // 仿生無人機突襲生怪機制
-            function spawnDrone() {
-                if (enemies.length >= 5) return;
-                // 隨機在玩家周圍的空地上生怪
-                let rx = Math.floor(Math.random() * (mapSize - 2)) + 1;
-                let ry = Math.floor(Math.random() * (mapSize - 2)) + 1;
-                
-                if (map[ry][rx] === 0 && Math.hypot(rx - player.x, ry - player.y) > 2) {
-                    enemies.push({
-                        x: rx + 0.5,
-                        y: ry + 0.5,
-                        hp: 25,
-                        speed: 0.8 + Math.random() * 0.4,
-                        screenX: 0,
-                        dist: 0,
-                        isHit: 0
-                    });
+            // 滑鼠移動控制視角
+            document.addEventListener('mousemove', (e) => {
+                if (document.pointerLockElement !== document.body) return;
+
+                yaw -= e.movementX * 0.0022;
+                pitch -= e.movementY * 0.0022;
+
+                // 限制上下看夾角，避免頭轉過頭翻過去
+                pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
+
+                camera.rotation.order = "YXZ";
+                camera.rotation.y = yaw;
+                camera.rotation.x = pitch;
+            });
+
+            // 鍵盤移動開關
+            const onKeyDown = (e) => {
+                switch (e.code) {
+                    case 'KeyW': moveForward = true; break;
+                    case 'KeyS': moveBackward = true; break;
+                    case 'KeyA': moveLeft = true; break;
+                    case 'KeyD': moveRight = true; break;
                 }
+            };
+
+            const onKeyUp = (e) => {
+                switch (e.code) {
+                    case 'KeyW': moveForward = false; break;
+                    case 'KeyS': moveBackward = false; break;
+                    case 'KeyA': moveLeft = false; break;
+                    case 'KeyD': moveRight = false; break;
+                }
+            };
+
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+
+            // 點擊左鍵開火
+            document.addEventListener('mousedown', (e) => {
+                if (document.pointerLockElement !== document.body || e.button !== 0) return;
+
+                // 觸發槍枝後座力動畫
+                gun.position.z = -0.25; 
+
+                // 建立模擬彈道射線
+                const raycaster = new THREE.Raycaster();
+                const center = new THREE.Vector2(0, 0); // 螢幕正中央
+                raycaster.setFromCamera(center, camera);
+
+                const intersects = raycaster.intersectObjects(targets);
+
+                if (intersects.length > 0) {
+                    const hitObj = intersects[0].object;
+                    
+                    // 打中特效：閃爍並重置位置
+                    hitObj.scale.set(0, 0, 0);
+                    setTimeout(() => {
+                        hitObj.position.x = (Math.random() - 0.5) * 30;
+                        hitObj.position.y = 1 + Math.random() * 3;
+                        hitObj.position.z = camera.position.z - 10 - Math.random() * 20;
+                        hitObj.scale.set(1, 1, 1);
+                    }, 200);
+
+                    score++;
+                    document.getElementById('score').innerText = score;
+                }
+            });
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- 5. 遊戲主迴圈 ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (document.pointerLockElement === document.body) {
+                // 基於當前水平視角 (yaw) 計算移動方向，避免飛天遁地
+                const front = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+                const side = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+
+                if (moveForward) camera.position.addScaledVector(front, speed);
+                if (moveBackward) camera.position.addScaledVector(front, -speed);
+                if (moveLeft) camera.position.addScaledVector(side, -speed);
+                if (moveRight) camera.position.addScaledVector(side, speed);
             }
 
-            // 全自動重置復活大腦
-            function resetEngine() {
-                gameState = 'PLAYING';
-                gameTimer = 0; timeAccumulator = 0; spawnTimer = 0; kills = 0; score = 0; screenShake = 0;
-                autoRespawnTimer = 3.5;
+            // 讓目標方塊自轉與上下漂浮，增加射擊難度
+            const time = performance.now() * 0.001;
+            targets.forEach((target, index) => {
+                target.rotation.x += 0.01;
+                target.rotation.y += 0.02;
+                target.position.y += Math.sin(time + index) * 0.005;
+            });
 
-                player.x = 2.5; player.y = 2.5; player.angle = 0; player.hp = 100; player.isShooting = 0;
-                enemies = [];
-                keyboard = {};
+            // 槍枝平滑復位 (Lerp 後座力)
+            gun.position.z = THREE.MathUtils.lerp(gun.position.z, -0.35, 0.15);
+            gun.position.y = THREE.MathUtils.lerp(gun.position.y, -0.15, 0.15);
 
-                // 初始先送兩隻怪進場
-                spawnDrone(); spawnDrone();
-                lastTime = performance.now();
-            }
+            renderer.render(scene, camera);
+        }
 
-            // --- 3. THE 3D CORE ENGINE LOOP (主物理運算核心) ---
-            function loop(timestamp) {
-                if (!lastTime) lastTime = timestamp;
-                let dt = (timestamp - lastTime) / 1000;
-                lastTime = timestamp;
-                if (dt > 0.1) dt = 0.1;
-
-                if (gameState === 'PLAYING') {
-                    // 計時器
-                    timeAccumulator += dt;
-                    if (timeAccumulator >= 1.0) { timeAccumulator -= 1.0; gameTimer++; }
-
-                    // 定時自動孵化無人機
-                    spawnTimer += dt;
-                    if (spawnTimer >= 3.0) { spawnTimer = 0; spawnDrone(); }
-
-                    // 槍枝動畫開火遞減
-                    if (player.isShooting > 0) player.isShooting--;
-
-                    // 處理鍵盤操控轉向與前進後退
-                    let moveSpeed = player.speed * dt;
-                    let rotSpeed = player.rotSpeed * dt;
-
-                    if (keyboard['KeyA'] || keyboard['ArrowLeft']) { player.angle -= rotSpeed; }
-                    if (keyboard['KeyD'] || keyboard['ArrowRight']) { player.angle += rotSpeed; }
-
-                    let newX = player.x;
-                    let newY = player.y;
-
-                    if (keyboard['KeyW'] || keyboard['ArrowUp']) {
-                        newX += Math.cos(player.angle) * moveSpeed;
-                        newY += Math.sin(player.angle) * moveSpeed;
-                    }
-                    if (keyboard['KeyS'] || keyboard['ArrowDown']) {
-                        newX -= Math.cos(player.angle) * moveSpeed;
-                        newY -= Math.sin(player.angle) * moveSpeed;
-                    }
-
-                    // 簡易滑溜地圖牆壁碰撞阻擋檢測 (Wall Collision)
-                    if (map[Math.floor(player.y)][Math.floor(newX)] === 0) player.x = newX;
-                    if (map[Math.floor(newY)][Math.floor(player.x)] === 0) player.y = newY;
-
-                    // 更新無人機怪獸 AI 行為
-                    for (let i = enemies.length - 1; i >= 0; i--) {
-                        let e = enemies[i];
-                        if (e.isHit > 0) e.isHit--;
-
-                        let edx = player.x - e.x;
-                        let edy = player.y - e.y;
-                        e.dist = Math.hypot(edx, edy);
-
-                        // 朝著玩家方向緩緩飄浮游過來
-                        if (e.dist > 0.2) {
-                            e.x += (edx / e.dist) * e.speed * dt;
-                            e.y += (edy / e.dist) * e.speed * dt;
-                        }
-
-                        // 核心撞擊玩家扣血判定
-                        if (e.dist < 0.35) {
-                            player.hp -= 20;
-                            screenShake = 8; // 受傷激烈震屏
-                            enemies.splice(i, 1); // 撞到就自爆
-                            if (player.hp <= 0) { player.hp = 0; gameState = 'GAMEOVER'; }
-                        }
-                    }
-
-                } else if (gameState === 'GAMEOVER') {
-                    // 全自動倒數復活大腦運作
-                    autoRespawnTimer -= dt;
-                    if (autoRespawnTimer <= 0) { rebootEngine(); return; }
-                }
-
-                // --- 4. THE HIGH-TECH 3D RAYCASTING RENDER (光線投射 3D 渲染矩陣管線) ---
-                ctx.fillStyle = '#0a0f1d'; // 天空與天花板顏色
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#060810'; // 地板深色
-                ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
-
-                ctx.save();
-                if (screenShake > 0) { screenShake--; ctx.translate((Math.random() - 0.5) * 6, (Math.random() - 0.5) * 6); }
-
-                // 3D 投影核心演算法：橫向逐列掃描投影
-                const fov = Math.PI / 3; // 視角範圍 60 度
-                const numRays = 200;     // 發射 200 條射線 (每條寬 4px，兼顧極致流暢度與畫質)
-                const stripWidth = canvas.width / numRays;
-
-                for (let i = 0; i < numRays; i++) {
-                    // 計算目前射線的絕對角度
-                    let rayAngle = (player.angle - fov / 2) + (i / numRays) * fov;
-                    let distance = 0;
-                    let hitWall = false;
-
-                    let cos = Math.cos(rayAngle);
-                    let sin = Math.sin(rayAngle);
-
-                    // 射線步進掃描牆壁
-                    while (!hitWall && distance < 14) {
-                        distance += 0.04;
-                        let checkX = Math.floor(player.x + cos * distance);
-                        let checkY = Math.floor(player.y + sin * distance);
-
-                        if (checkX < 0 || checkX >= mapSize || checkY < 0 || checkY >= mapSize) {
-                            hitWall = true; distance = 14;
-                        } else if (map[checkY][checkX] === 1) {
-                            hitWall = true;
-                        }
-                    }
-
-                    // 修正魚眼失真效應 (Fish-eye correction)
-                    let correctedDist = distance * Math.cos(rayAngle - player.angle);
-                    
-                    // 根據距離計算 3D 投影牆壁線段高度
-                    let wallHeight = Math.min(canvas.height, (canvas.height / (correctedDist + 0.001)));
-
-                    // 打造遠近深淺的賽博霓虹霓虹牆壁漸層
-                    let brightness = Math.max(10, 220 - (correctedDist * 18));
-                    ctx.fillStyle = `rgb(${brightness * 0.3}, ${brightness * 0.4}, ${brightness * 0.9})`;
-                    
-                    // 開始直刷垂直線段
-                    ctx.fillRect(i * stripWidth, (canvas.height - wallHeight) / 2, stripWidth + 1, wallHeight);
-                }
-
-                // --- 5. 3D BILLBOARD SPRITE RENDER (無人機 3D 廣告牌矩陣渲染) ---
-                enemies.forEach(e => {
-                    let ex = e.x - player.x;
-                    let ey = e.y - player.y;
-
-                    // 矩陣坐標旋轉，將怪換算成相對玩家視角的前後坐標
-                    let spriteX = ex * Math.sin(player.angle) - ey * Math.cos(player.angle);
-                    let spriteY = ex * Math.cos(player.angle) + ey * Math.sin(player.angle);
-
-                    // 只有當怪在玩家「正前方」時才進行 3D 縮放投影
-                    if (spriteY > 0.2) {
-                        let spriteSize = Math.min(canvas.height, canvas.height / spriteY);
-                        // 計算畫布上的 X 軸中心點
-                        let screenX = (canvas.width / 2) + (spriteX / spriteY) * (canvas.width / 1.1);
-                        let screenY = canvas.height / 2;
-
-                        e.screenX = screenX; // 存入結構供 Hitscan 點擊判定使用
-
-                        // 開始繪製無人機外殼
-                        ctx.beginPath();
-                        ctx.arc(screenX, screenY, spriteSize * 0.2, 0, Math.PI * 2);
-                        ctx.fillStyle = e.isHit > 0 ? '#ffffff' : '#f43f5e';
-                        ctx.fill();
-                        
-                        // 繪製賽博無人機兩側機械翼
-                        ctx.fillStyle = '#1e293b';
-                        ctx.fillRect(screenX - spriteSize * 0.3, screenY - 2, spriteSize * 0.6, 4);
-
-                        // 繪製怪物血條
-                        ctx.fillStyle = '#334155';
-                        ctx.fillRect(screenX - 20, screenY - spriteSize * 0.3, 40, 3);
-                        ctx.fillStyle = '#ef4444';
-                        ctx.fillRect(screenX - 20, screenY - spriteSize * 0.3, 40 * (e.hp / 25), 3);
-                    }
-                });
-
-                // --- 6. PURE 2D GUN FOREGROUND (第一人稱槍枝與準星繪製) ---
-                // 畫布正中央電子十字準星
-                ctx.strokeStyle = 'rgba(6, 182, 212, 0.6)';
-                ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(canvas.width / 2 - 10, canvas.height / 2); ctx.lineTo(canvas.width / 2 + 10, canvas.height / 2); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(canvas.width / 2, canvas.height / 2 - 10); ctx.lineTo(canvas.width / Normally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
+        // 啟動！
+        init();
+        animate();
+    </script>
+</body>
+</html>
