@@ -2,190 +2,954 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>HyperBadass 3D FPS Game</title>
+    <title>NEON VANGUARD: Cyberpunk FPS Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; user-select: none; }
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; border: 2px solid rgba(255,255,255,0.7); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; }
-        #ui { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 28px; font-weight: bold; text-shadow: 2px 2px #000; z-index: 10; font-family: monospace; }
-        #instructions { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.85); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; z-index: 20; transition: 0.3s; }
-        #instructions h1 { font-size: 48px; color: #ff3366; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        #instructions p { font-size: 18px; color: #ccc; margin: 5px 0; }
-        .highlight { color: #00ffcc; font-weight: bold; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #020208; font-family: 'Orbitron', sans-serif; }
+        
+        /* 遊戲 HUD 介面 */
+        #hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: none; }
+        .hud-panel { position: absolute; padding: 20px; background: linear-gradient(135deg, rgba(10,10,30,0.75) 0%, rgba(5,5,15,0.4) 100%); border: 1px solid rgba(0,255,200,0.3); box-shadow: 0 0 15px rgba(0,255,200,0.1); border-radius: 4px; color: #00ffcc; font-family: 'Share Tech Mono', monospace; }
+        #stats-left { bottom: 20px; left: 20px; width: 280px; }
+        #stats-right { bottom: 20px; right: 20px; width: 280px; text-align: right; }
+        #stats-top { top: 20px; left: 50%; transform: translateX(-50%); text-align: center; min-width: 200px; }
+        
+        .bar-container { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,255,200,0.5); border-radius: 6px; margin-top: 5px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff0077, #00ffcc); transition: width 0.1s ease; box-shadow: 0 0 10px #00ffcc; }
+        #shield-fill { background: linear-gradient(90deg, #0077ff, #00ffff); }
+        
+        .hud-label { font-size: 14px; color: rgba(0,255,200,0.7); text-transform: uppercase; letter-spacing: 1px; }
+        .hud-value { font-size: 32px; font-weight: bold; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        
+        /* 準心 */
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; transform: translate(-50%, -50%); pointer-events: none; z-index: 11; }
+        #crosshair::before, #crosshair::after { content: ''; position: absolute; background: #00ffcc; box-shadow: 0 0 5px #00ffcc; }
+        #crosshair::before { top: 9px; left: 0; width: 20px; height: 2px; }
+        #crosshair::after { top: 0; left: 9px; width: 2px; height: 20px; }
+        #crosshair-dot { position: absolute; top: 8px; left: 8px; width: 4px; height: 4px; background: #ffffff; border-radius: 50%; }
+
+        /* 武器清單 HUD */
+        #weapon-slots { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .weapon-slot { padding: 8px 15px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #888; border-radius: 3px; font-size: 12px; transition: all 0.2s; }
+        .weapon-slot.active { border-color: #ff0055; color: #ff0055; background: rgba(255,0,85,0.1); box-shadow: 0 0 10px rgba(255,0,85,0.3); font-weight: bold; }
+
+        /* 擊殺提示 feed */
+        #kill-feed { position: absolute; top: 100px; left: 20px; display: flex; flex-direction: column; gap: 5px; max-height: 200px; overflow: hidden; color: #ff3366; font-family: 'Share Tech Mono', monospace; font-size: 14px; text-shadow: 0 0 4px rgba(255,51,102,0.5); }
+
+        /* 大螢幕覆蓋層（主選單、暫停、死亡） */
+        .overlay { position: absolute; width: 100%; height: 100%; top: 0; left: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(15,10,35,0.95) 0%, rgba(5,2,15,0.98) 100%); z-index: 100; color: #ffffff; text-align: center; padding: 20px; }
+        .overlay h1 { font-size: 64px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px; background: linear-gradient(45deg, #ff0055, #00ffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(0,255,255,0.3)); }
+        .overlay p { font-size: 18px; color: #8888aa; margin-bottom: 30px; max-width: 600px; line-height: 1.6; font-family: 'Share Tech Mono', monospace; }
+        .btn { padding: 15px 40px; font-size: 20px; font-family: 'Orbitron', sans-serif; font-weight: bold; color: #00ffcc; background: transparent; border: 2px solid #00ffcc; border-radius: 4px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 15px rgba(0,255,200,0.2); text-transform: uppercase; letter-spacing: 2px; }
+        .btn:hover { background: #00ffcc; color: #050515; box-shadow: 0 0 30px #00ffcc; transform: scale(1.05); }
+        
+        #gameover-screen { display: none; background: radial-gradient(circle, rgba(40,5,15,0.96) 0%, rgba(10,0,5,0.99) 100%); }
+        #gameover-screen h1 { background: linear-gradient(45deg, #ff0000, #ff5500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* 傷害閃紅特效 */
+        #damage-flash { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: rgba(255,0,0,0); pointer-events: none; z-index: 5; transition: background 0.1s ease; }
     </style>
-    <!-- 引進 Three.js 核心庫 -->
+    <!-- 三維核心控制庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    <div id="crosshair"></div>
-    <div id="ui">SCORE: <span id="score">0</span></div>
-    <div id="instructions">
-        <h1>極限網頁 3D FPS</h1>
-        <p>點擊畫面鎖定滑鼠並開始遊戲</p>
-        <p class="highlight">WASD = 移動 | 滑鼠 = 瞄準 | 左鍵 = 射擊</p>
+
+    <!-- 傷害閃紅屏 -->
+    <div id="damage-flash"></div>
+
+    <!-- 抬頭顯示器 (HUD) -->
+    <div id="hud">
+        <div id="crosshair">
+            <div id="crosshair-dot"></div>
+        </div>
+        
+        <div id="stats-left" class="hud-panel">
+            <div class="hud-label">⚡ VITALS (HEALTH)</div>
+            <div id="hp-value" class="hud-value">100</div>
+            <div class="bar-container"><div id="hp-fill" class="bar-fill"></div></div>
+            
+            <div class="hud-label" style="margin-top: 15px;">🛡️ DEFENSE (SHIELD)</div>
+            <div id="shield-value" class="hud-value">100</div>
+            <div class="bar-container"><div id="shield-fill" class="bar-fill"></div></div>
+        </div>
+        
+        <div id="stats-right" class="hud-panel">
+            <div class="hud-label">WEAPON MATRIX</div>
+            <div id="weapon-name" class="hud-value" style="color: #ff0055;">PIS-01</div>
+            <div class="hud-label" style="margin-top: 15px;">AMMO CAPACITY</div>
+            <div id="ammo-value" class="hud-value">12 / ∞</div>
+        </div>
+        
+        <div id="stats-top" class="hud-panel">
+            <div class="hud-label">SYSTEM SCORE</div>
+            <div id="score-value" class="hud-value" style="color: #ffff00;">00000</div>
+            <div id="wave-label" class="hud-label" style="margin-top: 5px; color: #ff9900;">WAVE 1</div>
+        </div>
+
+        <div id="weapon-slots">
+            <div id="slot-1" class="weapon-slot active">[1] NEON PISTOL</div>
+            <div id="slot-2" class="weapon-slot">[2] VOLT SHOTGUN</div>
+            <div id="slot-3" class="weapon-slot">[3] PLASMA RIFLE</div>
+        </div>
+
+        <div id="kill-feed"></div>
     </div>
 
+    <!-- 主選單覆蓋層 -->
+    <div id="menu-screen" class="overlay">
+        <h1>NEON VANGUARD</h1>
+        <p>歡迎來到次世代網頁 3D 模擬器。這是一個完全基於矩陣數學與程序音效構建的第一人稱射擊遊戲引擎底層。<br>
+        系統內建 AABB 空間幾何碰撞、有限狀態機 AI 群體以及自動垃圾回收物件池。</p>
+        <button class="btn" id="start-btn">INITIALIZE CORE</button>
+    </div>
+
+    <!-- 死亡結算覆蓋層 -->
+    <div id="gameover-screen" class="overlay">
+        <h1>CONNECTION TERMINATED</h1>
+        <p>玩家生命特徵已消失，核心數據上傳中...<br>最終系統防衛得分：<span id="final-score" style="color: #ffff00; font-weight: bold;">0</span></p>
+        <button class="btn" id="restart-btn">REBOOT SYSTEM</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!--            遊戲邏輯主核心核心腳本            -->
+    <!-- ========================================== -->
     <script>
-        // --- 1. 基本宣告 ---
-        let scene, camera, renderer, score = 0;
-        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-        let yaw = 0, pitch = 0; // 視角旋轉控制
-        const targets = [];
-        let gun;
-        const speed = 0.15;
+        // --- 模組一：全自動音效合成引擎 (Web Audio API) ---
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.masterGain = null;
+            }
+            init() {
+                if (this.ctx) return;
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                this.masterGain.connect(this.ctx.destination);
+                this.startBGM();
+            }
+            playLaser() {
+                if (!this.ctx) return;
+                let t = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(880, t);
+                osc.frequency.exponentialRampToValueAtTime(110, t + 0.15);
+                gain.gain.setValueAtTime(0.4, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start(t);
+                osc.stop(t + 0.15);
+            }
+            playShotgun() {
+                if (!this.ctx) return;
+                let t = this.ctx.currentTime;
+                // 散彈槍結合低頻暴烈聲與噪聲
+                for(let i=0; i<3; i++) {
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = i === 0 ? 'sawtooth' : 'triangle';
+                    osc.frequency.setValueAtTime(300 + Math.random()*200, t);
+                    osc.frequency.linearRampToValueAtTime(40, t + 0.3);
+                    gain.gain.setValueAtTime(0.6, t);
+                    gain.gain.linearRampToValueAtTime(0.01, t + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.masterGain);
+                    osc.start(t);
+                    osc.stop(t + 0.3);
+                }
+            }
+            playPlasma() {
+                if (!this.ctx) return;
+                let t = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, t);
+                osc.frequency.exponentialRampToValueAtTime(600, t + 0.08);
+                gain.gain.setValueAtTime(0.3, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.08);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start(t);
+                osc.stop(t + 0.08);
+            }
+            playExplosion() {
+                if (!this.ctx) return;
+                let t = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(100, t);
+                osc.frequency.linearRampToValueAtTime(10, t + 0.5);
+                gain.gain.setValueAtTime(0.8, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start(t);
+                osc.stop(t + 0.5);
+            }
+            playHurt() {
+                if (!this.ctx) return;
+                let t = this.ctx.currentTime;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, t);
+                osc.frequency.linearRampToValueAtTime(60, t + 0.2);
+                gain.gain.setValueAtTime(0.5, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start(t);
+                osc.stop(t + 0.2);
+            }
+            startBGM() {
+                // 自動生成簡化版 Synthwave 循環底音
+                let scheduleNext = (time, step) => {
+                    let notes = [55, 55, 65.41, 65.41, 73.42, 73.42, 48.99, 48.99];
+                    let freq = notes[step % notes.length];
+                    
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, time);
+                    gain.gain.setValueAtTime(0.15, time);
+                    gain.gain.linearRampToValueAtTime(0.01, time + 0.25);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.masterGain);
+                    osc.start(time);
+                    osc.stop(time + 0.25);
+                    
+                    setTimeout(() => {
+                        if(CONFIG.gameState === "PLAYING") scheduleNext(this.ctx.currentTime + 0.3, step + 1);
+                    }, 300);
+                };
+                scheduleNext(this.ctx.currentTime, 0);
+            }
+        }
+        const audio = new SoundEngine();
 
-        const blocker = document.getElementById('instructions');
+        // --- 模組二：通用全域配置與狀態管理 ---
+        const CONFIG = {
+            gameState: "MENU", // MENU, PLAYING, GAMEOVER
+            player: {
+                hp: 100, maxHp: 100,
+                shield: 100, maxShield: 100,
+                radius: 0.7, height: 1.8, speed: 0.12,
+                velocity: new THREE.Vector3(),
+                canJump: true, isGrounded: true
+            },
+            weapons: [
+                { id: 0, name: "NEON PISTOL", type: "raycast", maxAmmo: 12, ammo: 12, fireRate: 350, dmg: 35, recoil: 0.05 },
+                { id: 1, name: "VOLT SHOTGUN", type: "spread", maxAmmo: 5, ammo: 5, fireRate: 850, dmg: 15, pellets: 6, recoil: 0.18 },
+                { id: 2, name: "PLASMA RIFLE", type: "projectile", maxAmmo: 30, ammo: 30, fireRate: 120, dmg: 20, recoil: 0.02 }
+            ],
+            currentWeaponIdx: 0,
+            lastFireTime: 0,
+            isReloading: false,
+            score: 0, wave: 1,
+            mapScale: 3 // 格子單元大小
+        };
 
-        // --- 2. 初始化 3D 場景 ---
-        function init() {
+        // 地圖矩陣：1 代表霓虹高牆，0 代表可行走空間
+        const MAP_GRID = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,1,1,0,1],
+            [1,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,1],
+            [1,0,1,0,1,1,1,1,1,0,0,1,1,1,1,1,0,1,0,1],
+            [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+            [1,1,1,0,1,0,1,1,1,0,0,1,1,1,0,1,0,1,1,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,0,1,0,0,1,0,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1],
+            [1,0,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+            [1,1,1,0,1,0,1,1,1,1,1,1,1,1,0,1,0,1,1,1],
+            [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+            [1,0,1,0,1,1,1,1,1,0,0,1,1,1,1,1,0,1,0,1],
+            [1,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,1],
+            [1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,1,1,0,1],
+            [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+        const MAP_ROWS = MAP_GRID.length;
+        const MAP_COLS = MAP_GRID[0].length;
+
+        // --- 模組三：3D 視覺與渲染環境初始化 ---
+        let scene, camera, renderer, clock;
+        let yawObject, pitchObject; // 雙軸解耦滑鼠控制結構
+        let weaponGroup, muzzleFlashLight;
+        const wallBoxes = []; // 用於 AABB 嚴格物理碰撞
+
+        // 共用材質優化效能（嚴防垃圾回收內存膨脹）
+        let materials = {}, geometries = {};
+
+        function createProceduralTextures() {
+            // 用 Canvas 動態渲染賽博朋克網格紋理
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            
+            // 牆體紋理
+            ctx.fillStyle = '#0a0a1c';
+            ctx.fillRect(0,0,256,256);
+            ctx.strokeStyle = '#ff0055';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(0,0,256,256);
+            ctx.strokeStyle = 'rgba(0, 255, 200, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 128); ctx.lineTo(256, 128);
+            ctx.moveTo(128, 0); ctx.lineTo(128, 256);
+            ctx.stroke();
+            const wallTex = new THREE.CanvasTexture(canvas);
+
+            // 地板紋理
+            const canvasF = document.createElement('canvas');
+            canvasF.width = 128; canvasF.height = 128;
+            const ctxF = canvasF.getContext('2d');
+            ctxF.fillStyle = '#03030c'; ctxF.fillRect(0,0,128,128);
+            ctxF.strokeStyle = '#0055aa'; ctxF.lineWidth = 1;
+            for(let i=0; i<=128; i+=32) {
+                ctxF.moveTo(i, 0); ctxF.lineTo(i, 128);
+                ctxF.moveTo(0, i); ctxF.lineTo(128, i);
+            }
+            ctxF.stroke();
+            const floorTex = new THREE.CanvasTexture(canvasF);
+            floorTex.wrapS = THREE.RepeatWrapping;
+            floorTex.wrapT = THREE.RepeatWrapping;
+            floorTex.repeat.set(40, 40);
+
+            materials.wall = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 0.4, metalness: 0.2 });
+            materials.floor = new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.6, metalness: 0.1 });
+            materials.ceiling = new THREE.MeshStandardMaterial({ color: 0x05050f, wireframe: true });
+        }
+
+        function initGraphics() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0a16);
-            scene.fog = new THREE.FogExp2(0x0a0a16, 0.05);
+            scene.background = new THREE.Color(0x020206);
+            scene.fog = new THREE.FogExp2(0x020206, 0.04);
+
+            clock = new THREE.Clock();
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.y = 1.6; // 人類平均雙眼高度
+            
+            // 構建人體工學解耦旋轉結構 (防止歐拉角萬向鎖 Bug)
+            pitchObject = new THREE.Object3D();
+            pitchObject.add(camera);
+            yawObject = new THREE.Object3D();
+            yawObject.position.set(4 * CONFIG.mapScale, CONFIG.player.height, 4 * CONFIG.mapScale);
+            yawObject.add(pitchObject);
+            scene.add(yawObject);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.body.appendChild(renderer.domElement);
 
-            // 光源設定
-            const ambientLight = new THREE.AmbientLight(0x666666);
+            // 環境與動態光源
+            const ambientLight = new THREE.AmbientLight(0x1a1a3a);
             scene.add(ambientLight);
 
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            const dirLight = new THREE.DirectionalLight(0x00ffff, 0.6);
             dirLight.position.set(20, 40, 20);
-            dirLight.castShadow = true;
             scene.add(dirLight);
 
-            // 製造地板 (科技網格風)
-            const floorGeo = new THREE.PlaneGeometry(100, 100, 50, 50);
-            const floorMat = new THREE.MeshLambertMaterial({ color: 0x111122, wireframe: true });
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = -Math.PI / 2;
-            scene.add(floor);
+            createProceduralTextures();
+            buildMap();
+            buildProceduralWeapons();
+            
+            // 槍口閃光燈源
+            muzzleFlashLight = new THREE.PointLight(0xffaa00, 0, 5);
+            muzzleFlashLight.position.set(0.2, -0.2, -0.6);
+            pitchObject.add(muzzleFlashLight);
 
-            // 製造一把槍並綁定在攝影機上
-            const gunGeo = new THREE.BoxGeometry(0.08, 0.08, 0.4);
-            const gunMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.2 });
-            gun = new THREE.Mesh(gunGeo, gunMat);
-            gun.position.set(0.15, -0.15, -0.35); // 放在右下角
-            camera.add(gun);
-            scene.add(camera); // 必須把攝影機加入場景，綁定的槍才會顯示
-
-            // 生成第一批隨機目標 (發光的立方體)
-            for (let i = 0; i < 8; i++) {
-                spawnTarget();
-            }
-
-            // 事件監聽
             window.addEventListener('resize', onWindowResize);
-            setupControls();
         }
 
-        // --- 3. 生成敵人/目標 ---
-        function spawnTarget() {
-            const geo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
-            const mat = new THREE.MeshStandardMaterial({ 
-                color: Math.random() * 0xffffff, 
-                emissive: 0x221122,
-                roughness: 0.1 
-            });
-            const mesh = new THREE.Mesh(geo, mat);
-            
-            // 隨機分佈在玩家前方與四周
-            mesh.position.x = (Math.random() - 0.5) * 30;
-            mesh.position.y = 1 + Math.random() * 3;
-            mesh.position.z = -10 - Math.random() * 20;
-            
-            scene.add(mesh);
-            targets.push(mesh);
+        // --- 模組四：地圖構建與幾何對象生成 ---
+        function buildMap() {
+            const size = CONFIG.mapScale;
+            geometries.wall = new THREE.BoxGeometry(size, size * 2, size);
+            geometries.floor = new THREE.PlaneGeometry(100, 100);
+
+            // 地板與天花板
+            const floorMesh = new THREE.Mesh(geometries.floor, materials.floor);
+            floorMesh.rotation.x = -Math.PI / 2;
+            floorMesh.position.y = 0;
+            scene.add(floorMesh);
+
+            const ceilMesh = new THREE.Mesh(geometries.floor, materials.ceiling);
+            ceilMesh.rotation.x = Math.PI / 2;
+            ceilMesh.position.y = size * 2;
+            scene.add(ceilMesh);
+
+            // 解析地圖陣列生成網格牆面
+            for (let r = 0; r < MAP_ROWS; r++) {
+                for (let c = 0; c < MAP_COLS; c++) {
+                    if (MAP_GRID[r][c] === 1) {
+                        const wall = new THREE.Mesh(geometries.wall, materials.wall);
+                        wall.position.set(c * size, size, r * size);
+                        scene.add(wall);
+                        
+                        // 計算 AABB 包圍盒資訊，提供高精度硬核物理碰撞
+                        wallBoxes.push({
+                            minX: wall.position.x - size/2,
+                            maxX: wall.position.x + size/2,
+                            minZ: wall.position.z - size/2,
+                            maxZ: wall.position.z + size/2
+                        });
+                    }
+                }
+            }
         }
 
-        // --- 4. 操作控制 (Pointer Lock & Keyboard) ---
+        function buildProceduralWeapons() {
+            // 利用組合幾何體拼接一把充滿賽博風味的重型模組化槍械
+            weaponGroup = new THREE.Group();
+            
+            const bodyGeo = new THREE.BoxGeometry(0.06, 0.08, 0.3);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x111116, metalness: 0.8, roughness: 0.2 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            weaponGroup.add(body);
+
+            const barrelGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.25);
+            barrelGeo.rotateX(Math.PI / 2);
+            const barrelMat = new THREE.MeshStandardMaterial({ color: 0x22222a, metalness: 0.9, roughness: 0.1 });
+            const barrel = new THREE.Mesh(barrelGeo, barrelMat);
+            barrel.position.set(0, 0.01, -0.2);
+            weaponGroup.add(barrel);
+
+            // 霓虹發光燈條
+            const neonGeo = new THREE.BoxGeometry(0.065, 0.01, 0.2);
+            materials.weaponNeon = new THREE.MeshBasicMaterial({ color: 0xff0055 });
+            const neon = new THREE.Mesh(neonGeo, materials.weaponNeon);
+            neon.position.set(0, 0.03, -0.05);
+            weaponGroup.add(neon);
+
+            // 調整槍械在玩家視野右手邊的相對位置
+            weaponGroup.position.set(0.25, -0.25, -0.45);
+            pitchObject.add(weaponGroup);
+        }
+
+        // --- 模組五：高效物件池管理系統 (Pool Engine) ---
+        const ParticlePool = {
+            active: [],
+            cache: [],
+            spawn(pos, color, count=15) {
+                const geo = new THREE.BoxGeometry(0.08, 0.08, 0.08);
+                const mat = new THREE.MeshBasicMaterial({ color: color });
+                
+                for(let i=0; i<count; i++) {
+                    let p;
+                    if(this.cache.length > 0) {
+                        p = this.cache.pop();
+                        p.mesh.visible = true;
+                        p.mesh.material.color.setHex(color);
+                    } else {
+                        p = {
+                            mesh: new THREE.Mesh(geo, mat),
+                            vel: new THREE.Vector3()
+                        };
+                        scene.add(p.mesh);
+                    }
+                    p.mesh.position.copy(pos);
+                    p.vel.set(
+                        (Math.random()-0.5)*8,
+                        (Math.random())*6 + 2,
+                        (Math.random()-0.5)*8
+                    );
+                    p.life = 0.4; // 生存時間（秒）
+                    this.active.push(p);
+                }
+            },
+            update(dt) {
+                for (let i = this.active.length - 1; i >= 0; i--) {
+                    let p = this.active[i];
+                    p.life -= dt;
+                    p.vel.y -= 9.8 * dt; // 重力模擬
+                    p.mesh.position.addScaledVector(p.vel, dt);
+                    
+                    if(p.life <= 0) {
+                        p.mesh.visible = false;
+                        this.cache.push(p);
+                        this.active.splice(i, 1);
+                    }
+                }
+            },
+            clearAll() {
+                this.active.forEach(p => p.mesh.visible = false);
+                this.cache = this.cache.concat(this.active);
+                this.active = [];
+            }
+        };
+
+        const ProjectilePool = {
+            active: [],
+            cache: [],
+            spawn(pos, dir, speed, dmg) {
+                let b;
+                if(this.cache.length > 0) {
+                    b = this.cache.pop();
+                    b.mesh.visible = true;
+                } else {
+                    const geo = new THREE.SphereGeometry(0.08, 8, 8);
+                    const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+                    b = { mesh: new THREE.Mesh(geo, mat) };
+                    scene.add(b.mesh);
+                }
+                b.mesh.position.copy(pos);
+                b.dir = dir.clone().normalize();
+                b.speed = speed;
+                b.dmg = dmg;
+                b.life = 2.0;
+                this.active.push(b);
+            },
+            update(dt) {
+                for(let i=this.active.length-1; i>=0; i--) {
+                    let b = this.active[i];
+                    b.life -= dt;
+                    b.mesh.position.addScaledVector(b.dir, b.speed * dt);
+                    
+                    // 檢查是否子彈擊中地圖阻擋高牆
+                    let px = b.mesh.position.x;
+                    let pz = b.mesh.position.z;
+                    let hitWall = false;
+                    for(let box of wallBoxes) {
+                        if(px >= box.minX && px <= box.maxX && pz >= box.minZ && pz <= box.maxZ) {
+                            hitWall = true; break;
+                        }
+                    }
+
+                    // 檢查子彈是否擊中玩家
+                    let distToPlayer = b.mesh.position.distanceTo(yawObject.position);
+                    if(distToPlayer < CONFIG.player.radius) {
+                        damagePlayer(b.dmg);
+                        b.life = 0;
+                        ParticlePool.spawn(b.mesh.position, 0xff0055, 10);
+                        audio.playHurt();
+                    }
+                    
+                    if(b.life <= 0 || hitWall) {
+                        if(hitWall) ParticlePool.spawn(b.mesh.position, 0x00ffff, 6);
+                        b.mesh.visible = false;
+                        this.cache.push(b);
+                        this.active.splice(i, 1);
+                    }
+                }
+            },
+            clearAll() {
+                this.active.forEach(b => b.mesh.visible = false);
+                this.cache = this.cache.concat(this.active);
+                this.active = [];
+            }
+        };
+
+        // --- 模組六：有限狀態機 AI 敵人群體 (FSM Enemy System) ---
+        const EnemyManager = {
+            enemies: [],
+            waveConfig: [
+                { count: 4, speed: 1.5, type: "CHASER" },
+                { count: 6, speed: 1.8, type: "CHASER" },
+                { count: 5, speed: 1.5, type: "SPITTER" } // 遠程噴射兵怪種
+            ],
+            spawnEnemy() {
+                const isSpitter = Math.random() > 0.6 && CONFIG.wave >= 2;
+                
+                // 找尋地圖合法空地隨機生成敵人
+                let r, c;
+                do {
+                    r = Math.floor(Math.random() * (MAP_ROWS - 2)) + 1;
+                    c = Math.floor(Math.random() * (MAP_COLS - 2)) + 1;
+                } while (MAP_GRID[r][c] !== 0 || (Math.abs(c*CONFIG.mapScale - yawObject.position.x) < 6));
+
+                const size = 1.0;
+                const geo = isSpitter ? new THREE.CylinderGeometry(0, 0.6, 1.4, 4) : new THREE.BoxGeometry(size, size*1.5, size);
+                const color = isSpitter ? 0x9900ff : 0x00ff66;
+                const mat = new THREE.MeshStandardMaterial({ 
+                    color: color, 
+                    emissive: color, 
+                    emissiveIntensity: 0.3,
+                    metalness: 0.7,
+                    roughness: 0.2
+                });
+                
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set(c * CONFIG.mapScale, size*0.75, r * CONFIG.mapScale);
+                scene.add(mesh);
+
+                this.enemies.push({
+                    mesh: mesh,
+                    hp: isSpitter ? 60 : 100,
+                    type: isSpitter ? "SPITTER" : "CHASER",
+                    speed: isSpitter ? 1.5 : 2.2 + (CONFIG.wave*0.2),
+                    shootTimer: Math.random() * 2,
+                    state: "CHASE" // FSM: CHASE, ATTACK, DEAD
+                });
+            },
+            update(dt) {
+                const playerPos = yawObject.position;
+                
+                for(let i=this.enemies.length-1; i>=0; i--) {
+                    let e = this.enemies[i];
+                    if(e.state === "DEAD") continue;
+
+                    let dist = e.mesh.position.distanceTo(playerPos);
+                    
+                    // 朝向玩家矩陣面
+                    e.mesh.lookAt(playerPos.x, e.mesh.position.y, playerPos.z);
+
+                    if(e.type === "CHASER") {
+                        // 近戰怪轉移邏輯
+                        if(dist > 1.2) {
+                            let dir = new THREE.Vector3().subVectors(playerPos, e.mesh.position);
+                            dir.y = 0; dir.normalize();
+                            
+                            // 預判牆壁做簡易滑動防卡死
+                            let nextX = e.mesh.position.x + dir.x * e.speed * dt;
+                            let nextZ = e.mesh.position.z + dir.z * e.speed * dt;
+                            if(!checkWallCollision(nextX, e.mesh.position.z, 0.5)) e.mesh.position.x = nextX;
+                            if(!checkWallCollision(e.mesh.position.x, nextZ, 0.5)) e.mesh.position.z = nextZ;
+                        } else {
+                            // 自爆撕咬式扣血
+                            damagePlayer(25 * dt);
+                            if(Math.random() > 0.85) audio.playHurt();
+                        }
+                    } 
+                    else if(e.type === "SPITTER") {
+                        // 遠程怪AI狀態機邏輯
+                        if(dist > 12) {
+                            // 太遠則靠近
+                            let dir = new THREE.Vector3().subVectors(playerPos, e.mesh.position).normalize();
+                            e.mesh.position.addScaledVector(dir, e.speed * dt);
+                        } else if(dist < 6) {
+                            // 太近則拉開拋物線退後
+                            let dir = new THREE.Vector3().subVectors(e.mesh.position, playerPos).normalize();
+                            dir.y = 0;
+                            e.mesh.position.addScaledVector(dir, e.speed * dt);
+                        }
+
+                        // 定時遠程開火射擊彈幕
+                        e.shootTimer += dt;
+                        if(e.shootTimer >= 2.0) {
+                            e.shootTimer = 0;
+                            let firePos = e.mesh.position.clone().add(new THREE.Vector3(0, 0.5, 0));
+                            let fireDir = new THREE.Vector3().subVectors(playerPos, firePos).normalize();
+                            ProjectilePool.spawn(firePos, fireDir, 14, 15);
+                        }
+                    }
+                }
+
+                // 檢查是否全滅，波次自動升級進階
+                if(this.enemies.length === 0 && CONFIG.gameState === "PLAYING") {
+                    CONFIG.wave++;
+                    document.getElementById('wave-label').innerText = "WAVE " + CONFIG.wave;
+                    let nextSpawnCount = 4 + CONFIG.wave * 2;
+                    for(let k=0; k<Math.min(nextSpawnCount, 15); k++) {
+                        this.spawnEnemy();
+                    }
+                }
+            },
+            hitEnemy(mesh, dmg) {
+                let e = this.enemies.find(x => x.mesh === mesh);
+                if(e) {
+                    e.hp -= dmg;
+                    ParticlePool.spawn(e.mesh.position, 0x00ff66, 8);
+                    
+                    if(e.hp <= 0) {
+                        e.state = "DEAD";
+                        ParticlePool.spawn(e.mesh.position, 0xff0055, 30);
+                        audio.playExplosion();
+                        scene.remove(e.mesh);
+                        this.enemies = this.enemies.filter(x => x !== e);
+                        
+                        CONFIG.score += e.type === "SPITTER" ? 250 : 100;
+                        updateHUD();
+                        pushKillFeed("SYSTEM PURGED: +1 TARGET");
+                    }
+                }
+            },
+            clearAll() {
+                this.enemies.forEach(e => scene.remove(e.mesh));
+                this.enemies = [];
+            }
+        };
+
+        // --- 模組七：無 Bug 滑動幾何碰撞偵測機制 ---
+        function checkWallCollision(x, z, radius) {
+            for (let i = 0; i < wallBoxes.length; i++) {
+                let box = wallBoxes[i];
+                // 使用 AABB 擴展圓形包圍盒碰撞演算法
+                if (x + radius > box.minX && x - radius < box.maxX &&
+                    z + radius > box.minZ && z - radius < box.maxZ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // --- 模組八：硬核第一人稱滑鼠視角鎖定控制系統 ---
+        const keysPressed = {};
+        
         function setupControls() {
-            // 點擊畫面請求鎖定滑鼠
-            blocker.addEventListener('click', () => {
+            const startBtn = document.getElementById('start-btn');
+            const restartBtn = document.getElementById('restart-btn');
+
+            startBtn.addEventListener('click', () => {
+                document.body.requestPointerLock();
+            });
+
+            restartBtn.addEventListener('click', () => {
+                resetGame();
                 document.body.requestPointerLock();
             });
 
             document.addEventListener('pointerlockchange', () => {
                 if (document.pointerLockElement === document.body) {
-                    blocker.style.opacity = '0';
-                    blocker.style.pointerEvents = 'none';
+                    document.getElementById('menu-screen').style.display = 'none';
+                    document.getElementById('gameover-screen').style.display = 'none';
+                    document.getElementById('hud').style.display = 'block';
+                    CONFIG.gameState = "PLAYING";
+                    audio.init();
                 } else {
-                    blocker.style.opacity = '1';
-                    blocker.style.pointerEvents = 'auto';
+                    if (CONFIG.gameState !== "GAMEOVER") {
+                        document.getElementById('menu-screen').style.display = 'flex';
+                        document.getElementById('hud').style.display = 'none';
+                        CONFIG.gameState = "MENU";
+                    }
                 }
             });
 
-            // 滑鼠移動控制視角
+            // 滑鼠精準無萬向鎖頭部旋轉控制
             document.addEventListener('mousemove', (e) => {
-                if (document.pointerLockElement !== document.body) return;
+                if (CONFIG.gameState !== "PLAYING") return;
 
-                yaw -= e.movementX * 0.0022;
-                pitch -= e.movementY * 0.0022;
+                const sensitivity = 0.002;
+                yawObject.rotation.y -= e.movementX * sensitivity;
+                pitchObject.rotation.x -= e.movementY * sensitivity;
 
-                // 限制上下看夾角，避免頭轉過頭翻過去
-                pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
-
-                camera.rotation.order = "YXZ";
-                camera.rotation.y = yaw;
-                camera.rotation.x = pitch;
+                // 物理限制極端視角（防轉斷頭Bug）
+                pitchObject.rotation.x = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, pitchObject.rotation.x));
             });
 
-            // 鍵盤移動開關
-            const onKeyDown = (e) => {
-                switch (e.code) {
-                    case 'KeyW': moveForward = true; break;
-                    case 'KeyS': moveBackward = true; break;
-                    case 'KeyA': moveLeft = true; break;
-                    case 'KeyD': moveRight = true; break;
+            // 鍵盤開關捕獲
+            document.addEventListener('keydown', (e) => {
+                keysPressed[e.code] = true;
+                // 切換武器熱鍵 [1, 2, 3]
+                if(e.code === 'Digit1') switchWeapon(0);
+                if(e.code === 'Digit2') switchWeapon(1);
+                if(e.code === 'Digit3') switchWeapon(2);
+                if(e.code === 'KeyR' && !CONFIG.isReloading) reloadWeapon();
+                if(e.code === 'Space' && CONFIG.player.canJump) {
+                    CONFIG.player.velocity.y = 5.5; // 給予向上推力
+                    CONFIG.player.canJump = false;
+                    CONFIG.player.isGrounded = false;
                 }
-            };
+            });
+            document.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
 
-            const onKeyUp = (e) => {
-                switch (e.code) {
-                    case 'KeyW': moveForward = false; break;
-                    case 'KeyS': moveBackward = false; break;
-                    case 'KeyA': moveLeft = false; break;
-                    case 'KeyD': moveRight = false; break;
-                }
-            };
-
-            document.addEventListener('keydown', onKeyDown);
-            document.addEventListener('keyup', onKeyUp);
-
-            // 點擊左鍵開火
+            // 射擊觸發監聽
             document.addEventListener('mousedown', (e) => {
-                if (document.pointerLockElement !== document.body || e.button !== 0) return;
-
-                // 觸發槍枝後座力動畫
-                gun.position.z = -0.25; 
-
-                // 建立模擬彈道射線
-                const raycaster = new THREE.Raycaster();
-                const center = new THREE.Vector2(0, 0); // 螢幕正中央
-                raycaster.setFromCamera(center, camera);
-
-                const intersects = raycaster.intersectObjects(targets);
-
-                if (intersects.length > 0) {
-                    const hitObj = intersects[0].object;
-                    
-                    // 打中特效：閃爍並重置位置
-                    hitObj.scale.set(0, 0, 0);
-                    setTimeout(() => {
-                        hitObj.position.x = (Math.random() - 0.5) * 30;
-                        hitObj.position.y = 1 + Math.random() * 3;
-                        hitObj.position.z = camera.position.z - 10 - Math.random() * 20;
-                        hitObj.scale.set(1, 1, 1);
-                    }, 200);
-
-                    score++;
-                    document.getElementById('score').innerText = score;
+                if (CONFIG.gameState === "PLAYING" && e.button === 0) {
+                    fireWeapon();
                 }
             });
+        }
+
+        // --- 模組九：武器射擊、擴散射線與後座力演算法 ---
+        function switchWeapon(idx) {
+            if(idx === CONFIG.currentWeaponIdx || CONFIG.isReloading) return;
+            CONFIG.currentWeaponIdx = idx;
+            
+            // 更新 UI
+            for(let i=0; i<3; i++) {
+                document.getElementById(`slot-${i+1}`).classList.remove('active');
+            }
+            document.getElementById(`slot-${idx+1}`).classList.add('active');
+            
+            // 變更發光光線顏色以示識別
+            const colors = [0xff0055, 0x00ffff, 0xffff00];
+            materials.weaponNeon.color.setHex(colors[idx]);
+            
+            updateHUD();
+        }
+
+        function reloadWeapon() {
+            const w = CONFIG.weapons[CONFIG.currentWeaponIdx];
+            if(w.ammo === w.maxAmmo) return;
+            
+            CONFIG.isReloading = true;
+            document.getElementById('ammo-value').innerText = "RELOADING";
+            
+            setTimeout(() => {
+                w.ammo = w.maxAmmo;
+                CONFIG.isReloading = false;
+                updateHUD();
+            }, 1200); // 1.2秒更換彈匣時間
+        }
+
+        function fireWeapon() {
+            const now = performance.now();
+            const w = CONFIG.weapons[CONFIG.currentWeaponIdx];
+
+            if (now - CONFIG.lastFireTime < w.fireRate || CONFIG.isReloading) return;
+            if (w.ammo <= 0) {
+                reloadWeapon();
+                return;
+            }
+
+            w.ammo--;
+            CONFIG.lastFireTime = now;
+            updateHUD();
+
+            // 槍口動態動能突進（模擬後座力衝擊）
+            weaponGroup.position.z = -0.32;
+            muzzleFlashLight.intensity = 4.0;
+            setTimeout(() => { muzzleFlashLight.intensity = 0; }, 40);
+
+            // 根據武器類別分支處理射擊核心射線
+            if (w.id === 0) { // 霓虹手槍
+                audio.playLaser();
+                executeRaycastShot(w.dmg, 0);
+            } 
+            else if (w.id === 1) { // 伏特散彈槍
+                audio.playShotgun();
+                for (let i = 0; i < w.pellets; i++) {
+                    executeRaycastShot(w.dmg, 0.06); // 帶有隨機錐形擴散誤差值
+                }
+            } 
+            else if (w.id === 2) { // 等離子步槍
+                audio.playPlasma();
+                // 生成具有物理軌跡實體子彈
+                let spawnPos = yawObject.position.clone();
+                // 將子彈生成位置挪前防止射入自己腹部
+                let camDir = new THREE.Vector3();
+                camera.getWorldDirection(camDir);
+                spawnPos.addScaledVector(camDir, 0.6);
+                spawnPos.y -= 0.2;
+                
+                ProjectilePool.spawn(spawnPos, camDir, 28, w.dmg);
+            }
+        }
+
+        function executeRaycastShot(damage, spread) {
+            const raycaster = new THREE.Raycaster();
+            
+            // 計算中心點與隨機擴散向量
+            const targetParam = new THREE.Vector2(
+                (Math.random() - 0.5) * spread * 2,
+                (Math.random() - 0.5) * spread * 2
+            );
+            
+            raycaster.setFromCamera(targetParam, camera);
+
+            // 抓取當前所有活著的敵方Mesh進行交叉碰撞比對
+            const targetMeshes = EnemyManager.enemies.map(e => e.mesh);
+            const intersects = raycaster.intersectObjects(targetMeshes);
+
+            if (intersects.length > 0) {
+                const hitObj = intersects[0].object;
+                EnemyManager.hitEnemy(hitObj, damage);
+                ParticlePool.spawn(intersects[0].point, 0xffffff, 8);
+            } else {
+                // 如果沒打中怪物，看是否打中牆壁
+                // 由於場景物件不多，可以直接對全部場景進行射線檢測
+                const allWalls = scene.children.filter(c => c.geometry === geometries.wall);
+                const wallIntersects = raycaster.intersectObjects(allWalls);
+                if(wallIntersects.length > 0) {
+                    ParticlePool.spawn(wallIntersects[0].point, 0xff0055, 4);
+                }
+            }
+        }
+
+        // --- 模組十：玩家狀態變更機制 ---
+        function damagePlayer(amount) {
+            if(CONFIG.gameState !== "PLAYING") return;
+            
+            if(CONFIG.player.shield > 0) {
+                CONFIG.player.shield -= amount * 0.7; // 護盾吸收 70% 傷害
+                CONFIG.player.hp -= amount * 0.3;
+            } else {
+                CONFIG.player.hp -= amount;
+            }
+
+            if(CONFIG.player.shield < 0) CONFIG.player.shield = 0;
+            
+            // 螢幕邊緣急速閃紅視覺警示
+            const flash = document.getElementById('damage-flash');
+            flash.style.background = 'rgba(255,0,0,0.3)';
+            setTimeout(() => { flash.style.background = 'rgba(255,0,0,0)'; }, 80);
+
+            if(CONFIG.player.hp <= 0) {
+                CONFIG.player.hp = 0;
+                triggerGameOver();
+            }
+            updateHUD();
+        }
+
+        function triggerGameOver() {
+            CONFIG.gameState = "GAMEOVER";
+            document.exitPointerLock();
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('gameover-screen').style.display = 'flex';
+            document.getElementById('final-score').innerText = CONFIG.score;
+        }
+
+        function resetGame() {
+            CONFIG.player.hp = 100;
+            CONFIG.player.shield = 100;
+            CONFIG.score = 0;
+            CONFIG.wave = 1;
+            CONFIG.currentWeaponIdx = 0;
+            CONFIG.weapons.forEach(w => w.ammo = w.maxAmmo);
+            
+            yawObject.position.set(4 * CONFIG.mapScale, CONFIG.player.height, 4 * CONFIG.mapScale);
+            pitchObject.rotation.set(0,0,0);
+            yawObject.rotation.set(0,0,0);
+            
+            EnemyManager.clearAll();
+            ParticlePool.clearAll();
+            ProjectilePool.clearAll();
+            
+            // 重啟第一波
+            for(let i=0; i<4; i++) EnemyManager.spawnEnemy();
+            
+            document.getElementById('wave-label').innerText = "WAVE 1";
+            switchWeapon(0);
+            updateHUD();
+        }
+
+        // --- 模組十一：UI 與動態 HUD 更新器 ---
+        function updateHUD() {
+            document.getElementById('hp-value').innerText = Math.ceil(CONFIG.player.hp);
+            document.getElementById('hp-fill').style.width = `${(CONFIG.player.hp / CONFIG.player.maxHp) * 100}%`;
+            
+            document.getElementById('shield-value').innerText = Math.ceil(CONFIG.player.shield);
+            document.getElementById('shield-fill').style.width = `${(CONFIG.player.shield / CONFIG.player.maxShield) * 100}%`;
+
+            const w = CONFIG.weapons[CONFIG.currentWeaponIdx];
+            document.getElementById('weapon-name').innerText = w.name;
+            document.getElementById('ammo-value').innerText = CONFIG.isReloading ? "RELOADING" : `${w.ammo} / ${w.maxAmmo}`;
+            
+            // 格式化分數補零顯示 (例如 00350)
+            document.getElementById('score-value').innerText = String(CONFIG.score).padStart(5, '0');
+        }
+
+        function pushKillFeed(text) {
+            const feed = document.getElementById('kill-feed');
+            const el = document.createElement('div');
+            el.innerText = text;
+            feed.appendChild(el);
+            setTimeout(() => { el.remove(); }, 3000);
         }
 
         function onWindowResize() {
@@ -194,39 +958,98 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // --- 5. 遊戲主迴圈 ---
-        function animate() {
-            requestAnimationFrame(animate);
+        // --- 模組十二：超低延遲主循環引擎線程 (Main Game Loop) ---
+        function runEngine() {
+            requestAnimationFrame(runEngine);
 
-            if (document.pointerLockElement === document.body) {
-                // 基於當前水平視角 (yaw) 計算移動方向，避免飛天遁地
-                const front = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-                const side = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+            // 獲取高精度高幀率時間步長
+            let dt = clock.getDelta();
+            
+            // 防護性鎖定：防止切換頁面大卡頓導致物理穿牆（時間膨脹崩潰Bug）
+            if (dt > 0.1) dt = 0.1;
 
-                if (moveForward) camera.position.addScaledVector(front, speed);
-                if (moveBackward) camera.position.addScaledVector(front, -speed);
-                if (moveLeft) camera.position.addScaledVector(side, -speed);
-                if (moveRight) camera.position.addScaledVector(side, speed);
+            if (CONFIG.gameState === "PLAYING") {
+                // 1. 玩家自然護盾超緩慢回充機制
+                if (CONFIG.player.shield < CONFIG.player.maxShield) {
+                    CONFIG.player.shield += dt * 2.5;
+                    updateHUD();
+                }
+
+                // 2. 第一人稱物理位移與滑動碰撞核心
+                const frontVec = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
+                const sideVec = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
+                
+                let moveDir = new THREE.Vector3();
+                if (keysPressed['KeyW']) moveDir.add(frontVec);
+                if (keysPressed['KeyS']) moveDir.addScaledVector(frontVec, -1);
+                if (keysPressed['KeyA']) moveDir.addScaledVector(sideVec, -1);
+                if (keysPressed['KeyD']) moveDir.add(sideVec);
+                
+                moveDir.normalize();
+
+                // 處理重力與跳躍垂直位移
+                if (!CONFIG.player.isGrounded) {
+                    CONFIG.player.velocity.y -= 15.0 * dt; // 重力加速度模擬
+                }
+                yawObject.position.y += CONFIG.player.velocity.y * dt;
+
+                // 落地邊界彈性檢測
+                if (yawObject.position.y <= CONFIG.player.height) {
+                    yawObject.position.y = CONFIG.player.height;
+                    CONFIG.player.velocity.y = 0;
+                    CONFIG.player.isGrounded = true;
+                    CONFIG.player.canJump = true;
+                }
+
+                // 分離式二軸滑動物理位移核心（精確防範卡牆穿模角）
+                let posX = yawObject.position.x + moveDir.x * CONFIG.player.speed;
+                let posZ = yawObject.position.z + moveDir.z * CONFIG.player.speed;
+                let radius = CONFIG.player.radius;
+
+                if (!checkWallCollision(posX, yawObject.position.z, radius)) {
+                    yawObject.position.x = posX;
+                }
+                if (!checkWallCollision(yawObject.position.x, posZ, radius)) {
+                    yawObject.position.z = posZ;
+                }
+
+                // 3. 第一人稱視覺呼吸燈搖擺動畫 (Head Bobbing)
+                if (moveDir.lengthSq() > 0 && CONFIG.player.isGrounded) {
+                    const timer = performance.now() * 0.012;
+                    weaponGroup.position.y = -0.25 + Math.sin(timer) * 0.015;
+                    weaponGroup.position.x = 0.25 + Math.cos(timer * 0.5) * 0.01;
+                } else {
+                    // 靜止時自然收斂回原點
+                    weaponGroup.position.y = THREE.MathUtils.lerp(weaponGroup.position.y, -0.25, 0.1);
+                    weaponGroup.position.x = THREE.MathUtils.lerp(weaponGroup.position.x, 0.25, 0.1);
+                }
+
+                // 4. 槍枝後座力插值自動平滑復位 (Linear Interpolation)
+                weaponGroup.position.z = THREE.MathUtils.lerp(weaponGroup.position.z, -0.45, 10 * dt);
+
+                // 5. 更新所有高效對象池子系統
+                ParticlePool.update(dt);
+                ProjectilePool.update(dt);
+                EnemyManager.update(dt);
             }
 
-            // 讓目標方塊自轉與上下漂浮，增加射擊難度
-            const time = performance.now() * 0.001;
-            targets.forEach((target, index) => {
-                target.rotation.x += 0.01;
-                target.rotation.y += 0.02;
-                target.position.y += Math.sin(time + index) * 0.005;
-            });
-
-            // 槍枝平滑復位 (Lerp 後座力)
-            gun.position.z = THREE.MathUtils.lerp(gun.position.z, -0.35, 0.15);
-            gun.position.y = THREE.MathUtils.lerp(gun.position.y, -0.15, 0.15);
-
+            // 執行渲染管線繪製
             renderer.render(scene, camera);
         }
 
-        // 啟動！
-        init();
-        animate();
+        // --- 核心入口啟動點 ---
+        window.onload = () => {
+            initGraphics();
+            setupControls();
+            
+            // 預先生成第一波敵人
+            for(let i=0; i<4; i++) {
+                EnemyManager.spawnEnemy();
+            }
+            
+            // 啟動主渲染循環
+            runEngine();
+        };
     </script>
 </body>
 </html>
