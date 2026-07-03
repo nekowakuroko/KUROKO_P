@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>NEON VANGUARD: EVOLUTION Engine</title>
+    <title>NEON VANGUARD: EVOLUTION Engine v3.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
@@ -236,7 +236,6 @@
                 radius: 0.6, height: 1.7, speed: 8.0,
                 velocity: new THREE.Vector3(),
                 canJump: true, isGrounded: true,
-                // 噴射衝刺系統子狀態
                 dashCooldown: 0, dashTimer: 0, dashSpeed: 32.0, maxDashCooldown: 1.5,
                 dashDir: new THREE.Vector3()
             },
@@ -247,7 +246,6 @@
             ],
             currentWeaponIdx: 0, lastFireTime: 0, isReloading: false,
             score: 0, wave: 1, mapScale: 4.0,
-            // 連殺計時器
             combo: { count: 0, timer: 0, maxTime: 3.0 }
         };
 
@@ -279,7 +277,7 @@
         // --- 模組三：3D 視覺與高階建模初始化 ---
         let scene, camera, renderer, clock;
         let yawObject, pitchObject; 
-        let weaponGroup, muzzleFlashLight, scopeMesh;
+        let weaponGroup, muzzleFlashLight;
         let materials = {}, geometries = {};
 
         function createProceduralTextures() {
@@ -297,7 +295,9 @@
             const ctxF = canvasF.getContext('2d');
             ctxF.fillStyle = '#020207'; ctxF.fillRect(0,0,256,256);
             ctxF.strokeStyle = '#220055'; ctxF.lineWidth = 2;
-            for(let i=0; i<=256; i+64) {
+            
+            // 修正點一：將無窮迴圈修正為 i += 64
+            for(let i=0; i<=256; i+=64) {
                 ctxF.strokeRect(i, 0, 64, 256); ctxF.strokeRect(0, i, 256, 64);
             }
             const floorTex = new THREE.CanvasTexture(canvasF);
@@ -375,14 +375,12 @@
                         wall.position.set(wx, (size * 1.8)/2, wz);
                         scene.add(wall);
                         
-                        // 在牆壁的四個角落動態添加發光的霓虹光柱，增加視覺立體層次
                         if(c > 0 && c < MAP_COLS-1 && r > 0 && r < MAP_ROWS-1) {
                             const p1 = new THREE.Mesh(geometries.pillar, pillarMat);
                             p1.position.set(wx - size/2, (size*1.8)/2, wz - size/2);
                             scene.add(p1);
                         }
                     } else {
-                        // 裝飾性擺設：在走道角落隨機放置賽博機械箱
                         if(Math.random() > 0.94 && r>1 && c>1) {
                             const boxGeo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
                             const boxMat = new THREE.MeshStandardMaterial({ color: 0x1a1a26, metalness: 0.8, roughness: 0.1 });
@@ -395,36 +393,29 @@
             }
         }
 
-        // 核心改版：重型雙管突擊粒子槍模型組裝
         function buildProceduralWeapons() {
             weaponGroup = new THREE.Group();
             
-            // 主槍身框架
             const body = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.09, 0.34), new THREE.MeshStandardMaterial({ color: 0x0f0f14, metalness: 0.8, roughness: 0.3 }));
             weaponGroup.add(body);
 
-            // 頂部多層次戰術導軌架
             const rail = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.28), new THREE.MeshStandardMaterial({ color: 0x252530 }));
             rail.position.set(0, 0.055, -0.02); weaponGroup.add(rail);
 
-            // 雙生平行粒子槍管
             const barrelMat = new THREE.MeshStandardMaterial({ color: 0x3a3a4b, metalness: 0.9, roughness: 0.1 });
             const b1 = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.3), barrelMat);
             b1.rotateX(Math.PI/2); b1.position.set(0.018, 0.01, -0.22);
             const b2 = b1.clone(); b2.position.x = -0.018;
             weaponGroup.add(b1); weaponGroup.add(b2);
 
-            // 全息環形瞄準鏡 (Holographic Sight Frame)
             const scopeRing = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.004, 6, 16), new THREE.MeshBasicMaterial({ color: 0x00ffcc, transparent: true, opacity: 0.8 }));
             scopeRing.position.set(0, 0.09, 0.04);
             weaponGroup.add(scopeRing);
             
-            // 瞄準鏡中心的十字發光點
             const centerDot = new THREE.Mesh(new THREE.SphereGeometry(0.003, 4, 4), new THREE.MeshBasicMaterial({ color: 0xff0055 }));
             centerDot.position.set(0, 0.09, 0.04);
             weaponGroup.add(centerDot);
 
-            // 槍體側邊散熱霓虹發光片
             materials.weaponNeon = new THREE.MeshBasicMaterial({ color: 0xff0055 });
             const neonPanel = new THREE.Mesh(new THREE.BoxGeometry(0.076, 0.02, 0.18), materials.weaponNeon);
             neonPanel.position.set(0, -0.01, -0.02); weaponGroup.add(neonPanel);
@@ -486,7 +477,6 @@
                 if(!type) type = Math.random() > 0.5 ? "HEALTH" : "AMMO";
                 const group = new THREE.Group();
                 
-                // 核心發光水晶幾何體
                 const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.25, 0), new THREE.MeshStandardMaterial({
                     color: type === "HEALTH" ? 0xff0055 : 0x00ffaa,
                     emissive: type === "HEALTH" ? 0xff0055 : 0x00ffaa,
@@ -494,7 +484,6 @@
                 }));
                 group.add(crystal);
 
-                // 環繞全息發光環
                 const ring = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.015, 4, 12), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent:true, opacity:0.5 }));
                 ring.rotation.x = Math.PI/2; group.add(ring);
 
@@ -509,17 +498,14 @@
                 for(let i = this.pickups.length-1; i>=0; i--) {
                     let p = this.pickups[i];
                     p.mesh.rotation.y += dt * 1.5;
-                    p.mesh.position.y = 0.5 + Math.sin(time * 2 + i) * 0.08; // 浮空律動
-                    p.ring.rotation.y -= dt * 2.0;
+                    p.mesh.position.y = 0.5 + Math.sin(time * 2 + i) * 0.08;
 
-                    // 玩家接近觸發拾取邏輯
                     if(p.mesh.position.distanceTo(pPos) < 1.1) {
                         audio.playPickup();
                         if(p.type === "HEALTH") {
                             CONFIG.player.hp = Math.min(CONFIG.player.maxHp, CONFIG.player.hp + 30);
                             pushKillFeed("✨ MATRIX HEALED: +30 HP");
                         } else {
-                            // 所有武器彈藥回滿，護盾加滿
                             CONFIG.player.shield = CONFIG.player.maxShield;
                             CONFIG.weapons.forEach(w => w.ammo = w.maxAmmo);
                             pushKillFeed("🔋 CORE RECHARGED: FULL AMMO & SHIELD");
@@ -533,7 +519,7 @@
             clearAll() { this.pickups.forEach(p => scene.remove(p.mesh)); this.pickups = []; }
         };
 
-        // --- 模組七：有限狀態機 AI 敵人高階建模系統 ---
+        // --- 模組七：有限狀態機 AI 敵人系統 ---
         const EnemyManager = {
             enemies: [],
             spawnEnemy() {
@@ -549,19 +535,17 @@
                 
                 if (isSpitter) {
                     eType = "SPITTER";
-                    // 浮空無人機高級建模：中心核心球 + 外部雙圓形旋轉外殼 + 兩側側翼推進器
                     const core = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), new THREE.MeshStandardMaterial({ color: 0x9900ff, emissive: 0x9900ff }));
                     eGroup.add(core);
                     const shieldRing = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.03, 4, 16), new THREE.MeshBasicMaterial({ color: 0xcc00ff, wireframe: true }));
                     eGroup.add(shieldRing);
-                    eGroup.userData = { rotator: shieldRing }; // 保存引用以便進行物件動畫旋轉
+                    eGroup.userData = { rotator: shieldRing };
                     
                     const wingL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.4), new THREE.MeshStandardMaterial({color:0x221133}));
                     wingL.position.x = -0.6; eGroup.add(wingL);
                     const wingR = wingL.clone(); wingR.position.x = 0.6; eGroup.add(wingR);
                     eGroup.position.set(c * CONFIG.mapScale, 1.4, r * CONFIG.mapScale);
                 } else {
-                    // 機械蜘蛛爬行者幾何建模：扁平中心甲殼 + 四支關節足爪
                     const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.2, 5), new THREE.MeshStandardMaterial({ color: 0x00ff66, metalness: 0.8 }));
                     eGroup.add(body);
                     for(let i=0; i<4; i++) {
@@ -588,7 +572,6 @@
                     let dist = e.mesh.position.distanceTo(playerPos);
                     e.mesh.lookAt(playerPos.x, e.mesh.position.y, playerPos.z);
 
-                    // 執行各物件特有幾何旋轉動畫
                     if(e.mesh.userData.rotator) {
                         e.mesh.userData.rotator.rotation.x += dt * 3.0;
                         e.mesh.userData.rotator.rotation.y += dt * 1.5;
@@ -603,7 +586,6 @@
                             if(!checkGridCollision(nextX, e.mesh.position.z, 0.5)) e.mesh.position.x = nextX;
                             if(!checkGridCollision(e.mesh.position.x, nextZ, 0.5)) e.mesh.position.z = nextZ;
                             
-                            // 機械腿部的微幅爬行律動
                             e.mesh.children.forEach((child, idx) => {
                                 if(idx > 0) child.rotation.x = Math.sin(performance.now()*0.01 + idx)*0.3;
                             });
@@ -636,7 +618,6 @@
                 }
             },
             hitEnemy(mesh, dmg) {
-                // 由於怪物是由 Group 堆疊組成，需要向上搜尋其最頂層 Group 父節點
                 let topGroup = mesh;
                 while (topGroup.parent && topGroup.parent !== scene) {
                     topGroup = topGroup.parent;
@@ -649,18 +630,16 @@
                         e.state = "DEAD"; ParticlePool.spawn(e.mesh.position, 0xff0055, 25);
                         audio.playExplosion();
                         
-                        // 隨機在怪物死亡地點爆出浮空補給箱
                         if(Math.random() > 0.5) PickupManager.spawn(e.mesh.position);
 
                         scene.remove(e.mesh);
                         this.enemies = this.enemies.filter(x => x !== e);
                         
-                        // 更新 Combo 連殺核心狀態
                         CONFIG.combo.count++;
                         CONFIG.combo.timer = CONFIG.combo.maxTime;
                         
                         let baseScore = e.type === "SPITTER" ? 200 : 100;
-                        CONFIG.score += baseScore * CONFIG.combo.count; // 越連殺越高分！
+                        CONFIG.score += baseScore * CONFIG.combo.count;
                         
                         updateHUD();
                         pushKillFeed(`PURGED: +${baseScore * CONFIG.combo.count} (COMBO X${CONFIG.combo.count})`);
@@ -670,7 +649,7 @@
             clearAll() { this.enemies.forEach(e => scene.remove(e.mesh)); this.enemies = []; }
         };
 
-        // --- 模組八：O(1) 高精準網格反推幾何碰撞偵測機制 ---
+        // --- 模組八::網格碰撞偵測 ---
         function checkGridCollision(x, z, radius) {
             const size = CONFIG.mapScale;
             const points = [
@@ -686,7 +665,7 @@
             return false;
         }
 
-        // --- 模組九：2D 全息雷達小地圖繪製系統 (Minimap Subsystem) ---
+        // --- 模組九：2D 全息雷達小地圖繪製系統 ---
         let minimapCanvas, minimapCtx;
         function initMinimapCanvas() {
             minimapCanvas = document.getElementById('minimap');
@@ -702,56 +681,49 @@
             const scale = CONFIG.mapScale;
             const px = yawObject.position.x; const pz = yawObject.position.z;
 
-            // 中心映射：將雷達視角鎖定在玩家正中央
             ctx.save();
             ctx.translate(w/2, h/2);
             
-            // 繪製迷宮阻擋高牆 (灰色區域)
             ctx.fillStyle = "rgba(0, 255, 200, 0.08)";
             for(let r=0; r<MAP_ROWS; r++) {
                 for(let c=0; c<MAP_COLS; c++) {
                     if(MAP_GRID[r][c] === 1) {
-                        // 計算相對玩家的位置偏移
-                        let rx = (c * scale - px) * 6; // 6為地圖雷達放大倍率
+                        let rx = (c * scale - px) * 6;
                         let rz = (r * scale - pz) * 6;
                         ctx.fillRect(rx - 8, rz - 8, 16, 16);
                     }
                 }
             }
 
-            // 繪製地圖浮空物資箱 (發光綠點)
             ctx.fillStyle = "#00ffaa";
             PickupManager.pickups.forEach(p => {
                 let rx = (p.mesh.position.x - px) * 6; let rz = (p.mesh.position.z - pz) * 6;
                 ctx.beginPath(); ctx.arc(rx, rz, 3, 0, Math.PI*2); ctx.fill();
             });
 
-            // 繪製敵軍位置 (閃爍紅點)
+            // 修正點二：將未定義變數 p 改回正確的 e 變數，修復崩潰問題
             ctx.fillStyle = "#ff0055";
             EnemyManager.enemies.forEach(e => {
-                let rx = (e.mesh.position.x - px) * 6; let rz = (p.mesh.position.z - pz) * 6;
-                // 用時間差製造雷達呼吸燈般閃爍感
                 if(Math.floor(performance.now() * 0.006) % 2 === 0) {
-                    let ex = (e.mesh.position.x - px) * 6; let ez = (e.mesh.position.z - pz) * 6;
+                    let ex = (e.mesh.position.x - px) * 6;
+                    let ez = (e.mesh.position.z - pz) * 6;
                     ctx.beginPath(); ctx.arc(ex, ez, 4, 0, Math.PI*2); ctx.fill();
                 }
             });
 
             ctx.restore();
 
-            // 繪製位於雷達正中央的玩家箭頭本身
             ctx.save(); ctx.translate(w/2, h/2);
-            ctx.rotate(-yawObject.rotation.y - Math.PI); // 跟隨視角旋轉
+            ctx.rotate(-yawObject.rotation.y - Math.PI);
             ctx.fillStyle = "#ffffff";
             ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(-4, 4); ctx.lineTo(4, 4); ctx.closePath(); ctx.fill();
             
-            // 繪製扇形手電筒視角掃描區
             ctx.fillStyle = "rgba(0, 255, 200, 0.15)";
             ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0, 0, 30, -Math.PI/4 - Math.PI/2, Math.PI/4 - Math.PI/2); ctx.closePath(); ctx.fill();
             ctx.restore();
         }
 
-        // --- 模組十：滑鼠視角鎖定與噴射衝刺多重監聽 ---
+        // --- 模組十：控制監聽 ---
         const keysPressed = {};
         function setupControls() {
             document.getElementById('start-btn').addEventListener('click', () => { document.body.requestPointerLock(); });
@@ -783,7 +755,6 @@
                 if(k === 'a') keysPressed['KeyA'] = true; if(k === 'd') keysPressed['KeyD'] = true;
                 if(k === ' ') keysPressed['Space'] = true;
 
-                // 核心爆發功能：按下 LeftShift 觸發多向噴射衝刺 (Dash)
                 if(e.code === 'ShiftLeft' && CONFIG.player.dashCooldown <= 0 && CONFIG.player.dashTimer <= 0) {
                     triggerDash();
                 }
@@ -809,7 +780,6 @@
             });
         }
 
-        // 核心爆發功能實作：多向噴射衝刺
         function triggerDash() {
             const f = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
             const s = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
@@ -818,22 +788,19 @@
             if (keysPressed['KeyW']) dDir.add(f); if (keysPressed['KeyS']) dDir.addScaledVector(f, -1);
             if (keysPressed['KeyA']) dDir.addScaledVector(s, -1); if (keysPressed['KeyD']) dDir.add(s);
             
-            // 如果玩家按著方向鍵就朝方向衝刺，若沒按則默認朝前方衝刺
             if(dDir.lengthSq() === 0) dDir.copy(f);
             dDir.normalize();
 
             CONFIG.player.dashDir.copy(dDir);
-            CONFIG.player.dashTimer = 0.2; // 衝刺持續 0.2 秒
+            CONFIG.player.dashTimer = 0.2;
             CONFIG.player.dashCooldown = CONFIG.player.maxDashCooldown;
             
             audio.playDash();
             pushKillFeed("🚀 THRUSTER DASH ENGAGED!");
-            
-            // 爆發視覺特效：拉伸攝影機視野 FOV
             camera.fov = 95; camera.updateProjectionMatrix();
         }
 
-        // --- 模組十一：武器管理與全息雷射發射 ---
+        // --- 模組十一：武器管理與開火 ---
         function switchWeapon(idx) {
             if(idx === CONFIG.currentWeaponIdx || CONFIG.isReloading) return;
             CONFIG.currentWeaponIdx = idx;
@@ -875,7 +842,6 @@
             const param = new THREE.Vector2((Math.random() - 0.5) * spread * 2, (Math.random() - 0.5) * spread * 2);
             raycaster.setFromCamera(param, camera);
 
-            // 提取所有活著的怪獸的網格群組做遞迴射線碰撞
             const targetMeshes = EnemyManager.enemies.map(e => e.mesh);
             const intersects = raycaster.intersectObjects(targetMeshes, true);
 
@@ -889,9 +855,9 @@
             }
         }
 
-        // --- 模組十二：狀態變更機制 ---
+        // --- 模組十二：狀態變更 ---
         function damagePlayer(amount) {
-            if(CONFIG.gameState !== "PLAYING" || CONFIG.player.dashTimer > 0) return; // 衝刺期間享有完全無敵幀
+            if(CONFIG.gameState !== "PLAYING" || CONFIG.player.dashTimer > 0) return;
             
             if(CONFIG.player.shield > 0) {
                 CONFIG.player.shield -= amount * 0.75; CONFIG.player.hp -= amount * 0.25;
@@ -947,13 +913,12 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // --- 模組十三：高刷新物理與狀態計時主迴圈引擎 ---
+        // --- 模組十三：主引擎運作迴圈 ---
         function runEngine() {
             requestAnimationFrame(runEngine);
             let dt = clock.getDelta(); if (dt > 0.08) dt = 0.08;
 
             if (CONFIG.gameState === "PLAYING") {
-                // 1. 連殺 Combo 計時收斂判定
                 if(CONFIG.combo.timer > 0) {
                     CONFIG.combo.timer -= dt;
                     const cBox = document.getElementById('combo-box');
@@ -964,24 +929,20 @@
                     }
                 }
 
-                // 2. 護盾防禦微幅回充
                 if (CONFIG.player.shield < CONFIG.player.maxShield) {
                     CONFIG.player.shield += dt * 3.0; updateHUD();
                 }
 
-                // 3. 噴射衝刺冷卻計時器
                 if (CONFIG.player.dashCooldown > 0) {
                     CONFIG.player.dashCooldown -= dt;
                     let ratio = Math.max(0, (1 - CONFIG.player.dashCooldown / CONFIG.player.maxDashCooldown) * 100);
                     document.getElementById('dash-fill').style.width = `${ratio}%`;
                 }
 
-                // 4. 位移向量運算（分流一般位移與 Dash 位移）
                 let moveDir = new THREE.Vector3();
                 let radius = CONFIG.player.radius;
 
                 if(CONFIG.player.dashTimer > 0) {
-                    // 噴射衝刺狀態中
                     CONFIG.player.dashTimer -= dt;
                     let dStep = CONFIG.player.dashSpeed * dt;
                     let nextX = yawObject.position.x + CONFIG.player.dashDir.x * dStep;
@@ -990,12 +951,10 @@
                     if (!checkGridCollision(nextX, yawObject.position.z, radius)) yawObject.position.x = nextX;
                     if (!checkGridCollision(yawObject.position.x, nextZ, radius)) yawObject.position.z = nextZ;
                     
-                    // 衝刺結束時平滑復位 FOV
                     if(CONFIG.player.dashTimer <= 0) {
                         camera.fov = 75; camera.updateProjectionMatrix();
                     }
                 } else {
-                    // 標準一般位移狀態下
                     const fVec = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
                     const sVec = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yawObject.rotation.y);
                     
@@ -1019,7 +978,6 @@
                     if (!checkGridCollision(yawObject.position.x, nextZ, radius)) yawObject.position.z = nextZ;
                 }
 
-                // 5. 槍體第一人稱呼吸晃動與後座力平滑插值
                 if (moveDir.lengthSq() > 0 && CONFIG.player.isGrounded) {
                     const time = performance.now() * 0.012;
                     weaponGroup.position.y = -0.24 + Math.sin(time) * 0.014;
@@ -1030,19 +988,16 @@
                 }
                 weaponGroup.position.z = THREE.MathUtils.lerp(weaponGroup.position.z, -0.42, 10 * dt);
 
-                // 6. 更新各個子系統物件管理池
                 ParticlePool.update(dt);
                 ProjectilePool.update(dt);
                 EnemyManager.update(dt);
                 PickupManager.update(dt);
                 
-                // 7. 每幀重新調用繪製全息雷達
                 drawMinimap();
             }
             renderer.render(scene, camera);
         }
 
-        // 入口啟動
         window.onload = () => {
             initGraphics();
             setupControls();
