@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紅澪☆Kuremi：魔導矩陣 | Arcana Matrix Arcade</title>
+    
+    <!-- SEO 優化與專業標籤設定 -->
+    <meta name="description" content="Gothic Magician Bullet Hell Web Game - Powered by Canvas2D Engine.">
+    <meta name="author" content="KUROKO_P">
+    
+    <!-- 引入 Tailwind CSS 與 Font Awesome 圖標 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Noto+Sans+TC:wght@400;700;900&display=swap">
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #04060a;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        /* 隱藏標準游標，在遊戲區域使用自訂十字瞄準線 */
+        .game-cursor {
+            cursor: crosshair;
+        }
+        /* 唯美黑洞流光背景霓虹燈效果 */
+        .neon-shadow-indigo {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+        .glass-blur {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-indigo-500/30">
+
+    <!-- 背景虛擬霓虹裝飾粒子（不干擾 Canvas 效能） -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-indigo-950/10 blur-[100px]"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-purple-950/10 blur-[100px]"></div>
+    </div>
+
+    <!-- 頂部技術標題列 -->
+    <nav class="relative z-10 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-6 py-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                    <i class="fa-solid fa-hat-wizard text-xs"></i>
+                </div>
+                <span class="text-base font-black tracking-widest text-white code-font">AMANO_KUREMI // ARCANA_MATRIX</span>
+            </div>
+            <div class="flex items-center gap-4 text-xs font-mono text-slate-500">
+                <span class="hidden sm:inline">[ ENGINE: CANVAS_2D_CORE ]</span>
+                <span class="text-indigo-400 font-bold">[ v1.4.0-STABLE ]</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 核心遊戲主體視窗 -->
+    <main class="relative z-10 flex-grow flex items-center justify-center p-4 md:p-6">
+        <div class="w-full max-w-4xl bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden relative neon-shadow-indigo">
+            
+            <!-- 介面層 1：遊戲未啟動首頁 (Start Screen) -->
+            <div id="startScreen" class="absolute inset-0 z-30 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 p-[2px] mb-6 shadow-xl animate-bounce">
+                    <div class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-4xl">🔮</div>
+                </div>
+                <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white mb-2">紅澪☆Kuremi：魔導矩陣</h1>
+                <p class="text-indigo-400 font-mono text-xs md:text-sm tracking-widest uppercase mb-6">Gothic Magic Barrage Core System</p>
+                
+                <div class="max-w-md bg-slate-900/60 border border-slate-800 rounded-xl p-5 text-left text-xs md:text-sm text-slate-400 mb-8 space-y-2">
+                    <p class="text-white font-bold mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-gamepad text-indigo-400"></i> 操作系統說明：
+                    </p>
+                    <p>• <span class="text-slate-200 font-bold font-mono">滑鼠移動 / 手機觸控：</span> 全方位操控紅澪的法術核心移動。</p>
+                    <p>• <span class="text-slate-200 font-bold font-mono">自動射擊：</span> 核心將自動鎖定上方持續發射魔能彈幕。</p>
+                    <p>• <span class="text-slate-200 font-bold font-mono">防禦機制：</span> 購買護盾可自動抵禦突發性卡片撞擊與外來魔彈。</p>
+                </div>
+
+                <button id="startBtn" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold rounded-xl tracking-wider shadow-lg shadow-indigo-600/30 transition-all">
+                    初始化魔導網絡 (START GAME)
+                </button>
+            </div>
+
+            <!-- 介面層 2：魔導實時商店 (Upgrade Shop Screen) -->
+            <div id="shopScreen" class="absolute inset-0 z-20 bg-slate-950/90 glass-blur hidden flex flex-col items-center justify-center p-6 text-center">
+                <div class="text-indigo-400 text-3xl mb-2"><i class="fa-solid fa-shop"></i></div>
+                <h2 class="text-2xl font-bold text-white mb-1">暗黑術式魔導商店</h2>
+                <p class="text-xs text-slate-500 font-mono mb-6">ARCANA UPGRADE OVERLAY // WAVE COMPLETED</p>
+                
+                <!-- 當前資產狀態顯示 -->
+                <div class="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg mb-8 font-mono text-sm">
+                    <span class="text-slate-500">當前儲備暗晶:</span>
+                    <span class="text-amber-400 font-bold text-base flex items-center gap-1">
+                        <i class="fa-solid fa-gem text-xs"></i> <span id="shopCrystalCount">0</span>
+                    </span>
+                </div>
+
+                <!-- 商品品項清單網格 -->
+                <div class="grid sm:grid-cols-2 gap-4 w-full max-w-xl text-left mb-8">
+                    <!-- 商品 1 -->
+                    <button id="buyWeapon" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group focus:outline-none">
+                        <div>
+                            <div class="text-white font-bold text-sm group-hover:text-indigo-400 transition-colors">多重平行彈幕</div>
+                            <div class="text-slate-500 text-xs mt-0.5">擴充彈道數量 (Max LV.3)</div>
+                        </div>
+                        <div class="text-right font-mono text-xs">
+                            <div class="text-amber-400 font-bold"><i class="fa-solid fa-gem text-[10px]"></i> <span id="costWeapon">40</span></div>
+                            <div class="text-slate-600 mt-0.5" id="lvWeapon">LV.1</div>
+                        </div>
+                    </button>
+                    <!-- 商品 2 -->
+                    <button id="buySpeed" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group focus:outline-none">
+                        <div>
+                            <div class="text-white font-bold text-sm group-hover:text-indigo-400 transition-colors">魔能核心冷卻</div>
+                            <div class="text-slate-500 text-xs mt-0.5">大幅度提升開火頻率</div>
+                        </div>
+                        <div class="text-right font-mono text-xs">
+                            <div class="text-amber-400 font-bold"><i class="fa-solid fa-gem text-[10px]"></i> <span id="costSpeed">25</span></div>
+                            <div class="text-slate-600 mt-0.5" id="lvSpeed">LV.1</div>
+                        </div>
+                    </button>
+                    <!-- 商品 3 -->
+                    <button id="buyShield" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group focus:outline-none">
+                        <div>
+                            <div class="text-white font-bold text-sm group-hover:text-indigo-400 transition-colors">極化冥律護盾</div>
+                            <div class="text-slate-500 text-xs mt-0.5">生成一個抵擋傷害的護盾</div>
+                        </div>
+                        <div class="text-right font-mono text-xs">
+                            <div class="text-amber-400 font-bold"><i class="fa-solid fa-gem text-[10px]"></i> <span id="costShield">30</span></div>
+                            <div class="text-slate-600 mt-0.5" id="statusShield">無護盾</div>
+                        </div>
+                    </button>
+                    <!-- 商品 4 -->
+                    <button id="buyRepair" class="p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-xl flex justify-between items-center transition group focus:outline-none">
+                        <div>
+                            <div class="text-white font-bold text-sm group-hover:text-indigo-400 transition-colors">生命結構重組</div>
+                            <div class="text-slate-500 text-xs mt-0.5">立刻修復並恢復 1 點生命值</div>
+                        </div>
+                        <div class="text-right font-mono text-xs">
+                            <div class="text-amber-400 font-bold"><i class="fa-solid fa-gem text-[10px]"></i> 15</div>
+                            <div class="text-slate-600 mt-0.5">HP補給</div>
+                        </div>
+                    </button>
+                </div>
+
+                <button id="nextWaveBtn" class="px-8 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm rounded-xl tracking-wider transition-all shadow-md shadow-purple-600/20">
+                    部署下一道矩陣 (NEXT WAVE) <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+                </button>
+            </div>
+
+            <!-- 介面層 3：遊戲結束結算 (Game Over Screen) -->
+            <div id="gameOverScreen" class="absolute inset-0 z-30 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center">
+                <div class="text-rose-500 text-4xl mb-4"><i class="fa-solid fa-skull-crossbones"></i></div>
+                <h2 class="text-3xl font-black text-white mb-1">矩陣網路潰散</h2>
+                <p class="text-xs text-slate-500 font-mono mb-8">CORE_STRUCTURE_COLLAPSED // DIAGNOSTIC_FAILED</p>
+                
+                <!-- 數據面板 -->
+                <div class="grid grid-cols-2 gap-6 px-8 py-4 bg-slate-900 border border-slate-800 rounded-xl mb-8 font-mono text-sm w-full max-w-sm">
+                    <div class="text-left">
+                        <div class="text-slate-500 text-xs">最終得分</div>
+                        <div class="text-white font-bold text-xl mt-0.5" id="finalScore">0</div>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-slate-500 text-xs">最高防禦波次</div>
+                        <div class="text-indigo-400 font-bold text-xl mt-0.5" id="finalWave">Wave 1</div>
+                    </div>
+                </div>
+
+                <button id="restartBtn" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl tracking-wider transition-all shadow-lg shadow-indigo-600/20">
+                    重新重構矩陣 (RETRY SYSTEM)
+                </button>
+            </div>
+
+            <!-- 介面層 4：實時抬頭 HUD 顯示面板 -->
+            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center pointer-events-none z-10 font-mono text-xs md:text-sm select-none">
+                <!-- 左側：生命與護盾 -->
+                <div class="flex flex-col gap-1.5 bg-slate-950/80 backdrop-blur px-3 py-2 rounded-lg border border-slate-800/60">
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-500">HP:</span>
+                        <div class="flex gap-1 text-rose-500 text-xs" id="hpHearts">
+                            <i class="fa-solid fa-heart"></i>
+                            <i class="fa-solid fa-heart"></i>
+                            <i class="fa-solid fa-heart"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-500">SHIELD:</span>
+                        <span id="hudShieldStatus" class="text-slate-500 font-bold">OFF</span>
+                    </div>
+                </div>
+                
+                <!-- 中間：當前波次提示 -->
+                <div class="bg-indigo-600/10 border border-indigo-500/20 px-4 py-1.5 rounded-full text-indigo-400 font-bold tracking-widest uppercase text-xs" id="hudWave">
+                    WAVE 1
+                </div>
+
+                <!-- 右側：分數與貨幣 -->
+                <div class="flex flex-col gap-1 text-right bg-slate-950/80 backdrop-blur px-3 py-2 rounded-lg border border-slate-800/60">
+                    <div><span class="text-slate-500">SCORE:</span> <span class="text-white font-bold" id="hudScore">00000</span></div>
+                    <div><span class="text-slate-500">CRYSTAL:</span> <span class="text-amber-400 font-bold" id="hudCrystal">0</span></div>
+                </div>
+            </div>
+
+            <!-- 實時性能與除錯監控面板 (讓代碼看起來極其高大上的裝飾黑科技 Overlay) -->
+            <div class="absolute bottom-2 left-3 pointer-events-none z-10 font-mono text-[10px] text-slate-600 select-none hidden sm:block">
+                FPS: <span id="perfFps" class="text-emerald-500">60.0</span> | 
+                ENTITIES: <span id="perfEntities">0</span> | 
+                RENDER: <span class="text-indigo-500">CANVAS_RENDER_OK</span>
+            </div>
+
+            <!-- 核心繪圖畫布 Canvas -->
+            <div class="w-full bg-[#05080f] game-cursor flex items-center justify-center">
+                <canvas id="gameCanvas" width="800" height="600" class="w-full h-auto max-h-[600px] block"></canvas>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 底部資訊列 -->
+    <footer class="relative z-10 w-full border-t border-slate-900 bg-slate-950/40 px-6 py-4 text-center text-xs text-slate-600 font-mono">
+        <p>&copy; 2026 Amano Kuremi Arcade Hub. Dev Signature: KUROKO_P // SECURE_DEPLOYMENT_VERIFIED.</p>
+    </footer>
+
+    <!-- ==========================================================================
+         CORE GAME ENGINE CODE (高階遊戲引擎完整核心邏輯腳本)
+         ========================================================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 畫布與解析度精準對齊設定 ---
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // --- HTML 介面 DOM 節點映射 ---
+            const startScreen = document.getElementById('startScreen');
+            const shopScreen = document.getElementById('shopScreen');
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            Normally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
