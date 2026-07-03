@@ -1,794 +1,315 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="scroll-smooth">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>霓虹深淵：極限倖存者 | Neon Abyss: Ultimate Survivor</title>
-    
-    <!-- ==========================================================================
-         EXTERNAL FRAMEWORKS & ADVANCED ARCADE ARCHITECTURE CONFIG
-         ========================================================================== -->
-    <!-- Tailwind CSS 實時原子排版框架 -->
+    <title>賽博迷宮：3D 超載射擊 | Cyber 3D Raycaster FPS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome 經典高解析街機圖標庫 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Google 賽博龐克專用等寬字型 -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Noto+Sans+TC:wght@400;700;900&display=swap">
-
     <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #020408;
-            overflow: hidden;
-        }
-        .code-font {
-            font-family: 'Fira Code', monospace;
-        }
-        /* 賽博龐克超飽和霓虹發光特效 */
-        .neon-shadow-indigo {
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.35);
-            border: 2px solid rgba(99, 102, 241, 0.6);
-        }
-        .neon-text-teal {
-            text-shadow: 0 0 10px rgba(103, 232, 249, 0.6);
-        }
-        /* 街機復古陰極射線管掃描線（CRT Scanlines Overlay） */
-        .crt-scanlines {
-            position: relative;
-        }
-        .crt-scanlines::after {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.18) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
-            z-index: 99;
-            background-size: 100% 4px, 6px 100%;
-            pointer-events: none;
-        }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
+        body { background-color: #020406; overflow: hidden; font-family: monospace; }
+        canvas { background-color: #000; border: 3px solid #1e293b; box-shadow: 0 0 30px rgba(99, 102, 241, 0.3); }
     </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col justify-between crt-scanlines select-none">
+<body class="min-h-screen flex flex-col justify-between text-slate-400 select-none">
 
-    <!-- 頂部引擎實時監控控制列 -->
-    <nav class="relative z-50 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-6 py-3.5">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <a href="./" class="text-xs px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg font-bold hover:text-indigo-400 transition-all shadow-md">
-                    <i class="fa-solid fa-arrow-left mr-1"></i> 返回主頁大廳
-                </a>
-                <div class="h-4 w-[1px] bg-slate-800"></div>
-                <span class="text-xs font-black tracking-widest text-white code-font flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    ENGINE_CORE // RUNTIME_STABLE
-                </span>
-            </div>
-            <div class="flex items-center gap-6 text-xs font-mono">
-                <span class="text-slate-500 hidden sm:inline">[ SUBSYSTEM: AUDIO_SYNTH_READY ]</span>
-                <span class="text-indigo-400 font-bold">[ MATRIX_BUILD_v2.8.0 ]</span>
-            </div>
+    <!-- 頂部即時核心日誌列 -->
+    <nav class="border-b border-slate-950 bg-slate-950 px-6 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <a href="./" class="text-xs px-2.5 py-1 bg-slate-900 border border-slate-800 rounded hover:text-indigo-400 transition font-bold">← 回首頁</a>
+            <span class="text-xs text-cyan-400 font-bold animate-pulse">● 3D_RAYCAST_ENGINE_LOADED // INSTANT_START_FPS</span>
         </div>
+        <span class="text-[10px] text-slate-600 font-mono">[ ZERO_BUTTONS_3D_RENDER ]</span>
     </nav>
 
-    <!-- 遊戲主引擎控制台視窗 -->
-    <main class="relative z-10 flex-grow flex items-center justify-center p-2 md:p-4">
-        <div class="w-full max-w-5xl bg-slate-950 rounded-2xl shadow-2xl overflow-hidden relative neon-shadow-indigo" id="stageFrame">
-            
-            <!-- HUD 頂部實時戰術抬頭面板 -->
-            <div class="absolute top-0 left-0 right-0 p-4 flex flex-col gap-3 pointer-events-none z-10 font-mono select-none">
-                <!-- 頂部：多段量子經驗進度條 (XP Progress) -->
-                <div class="w-full h-2.5 bg-slate-900/90 rounded-full border border-slate-800/80 p-[1px] overflow-hidden relative">
-                    <div id="xpBarInner" class="h-full bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 rounded-full transition-all duration-700" style="width: 0%;"></div>
-                </div>
-                
-                <!-- 二層：核心戰術計量面板 -->
-                <div class="flex justify-between items-center">
-                    <!-- 左方：機體生命結構與防禦盾 -->
-                    <div class="flex items-center gap-3 bg-slate-950/80 backdrop-blur px-4 py-2 rounded-xl border border-slate-800/60">
-                        <div class="text-xs bg-indigo-600 px-2 py-0.5 rounded text-white font-bold">LV.<span id="hudLevel">1</span></div>
-                        <div class="flex flex-col gap-1">
-                            <div class="flex items-center gap-1">
-                                <span class="text-[10px] text-slate-500 w-8">STRUCT:</span>
-                                <div class="w-24 h-2.5 bg-slate-900 rounded-sm border border-slate-800 overflow-hidden">
-                                    <div id="hpBarInner" class="h-full bg-gradient-to-r from-rose-500 to-pink-500" style="width: 100%;"></div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <span class="text-[10px] text-slate-500 w-8">SHIELD:</span>
-                                <div class="w-24 h-2.5 bg-slate-900 rounded-sm border border-slate-800 overflow-hidden">
-                                    <div id="shieldBarInner" class="h-full bg-cyan-500" style="width: 0%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 中間：大氣主計時器 -->
-                    <div class="bg-slate-950/90 backdrop-blur px-6 py-2 rounded-xl border border-slate-800 text-center">
-                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">ELAPSED TIME</div>
-                        <div class="text-xl font-black text-white tracking-widest text-gradient" id="hudTimer">00:00</div>
-                    </div>
-
-                    <!-- 右方：戰略擊殺數與分數統計 -->
-                    <div class="flex items-center gap-5 bg-slate-950/80 backdrop-blur px-4 py-2 rounded-xl border border-slate-800/60 text-right text-xs">
-                        <div><span class="text-slate-500">KILLS:</span> <span class="text-emerald-400 font-bold" id="hudKills">0</span></div>
-                        <div><span class="text-slate-500">SCORE:</span> <span class="text-white font-bold" id="hudScore">0</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- UI 1：作戰終端啟動首頁 (Main Title Menu) -->
-            <div id="menuScreen" class="absolute inset-0 z-40 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center">
-                <div class="w-20 h-20 rounded-2xl bg-indigo-600 flex items-center justify-center text-3xl shadow-xl shadow-indigo-500/30 mb-6 animate-pulse">🌌</div>
-                <h1 class="text-4xl md:text-6xl font-black tracking-tight text-white mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-indigo-400">霓虹深淵：極限倖存者</h1>
-                <p class="text-indigo-400 font-mono text-xs md:text-sm tracking-widest uppercase mb-8">Class-Based Class-Heavy Canvas Roguelike Engine</p>
-                
-                <!-- 載具戰機機體選擇面板 -->
-                <div class="w-full max-w-2xl grid grid-cols-2 gap-4 mb-8">
-                    <!-- 機體 1 -->
-                    <button id="selectShipA" class="p-4 bg-slate-900/60 border-2 border-indigo-600 rounded-xl text-left transition group focus:outline-none">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-white font-bold text-sm group-hover:text-indigo-400 transition-colors">星軌開拓者 (Vanguard)</span>
-                            <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded font-mono">推薦</span>
-                        </div>
-                        <p class="text-slate-500 text-xs leading-relaxed">配置高密度的電漿武器，極速滑行，基礎移動速度與推進冷卻表現優異。</p>
-                    </button>
-                    <!-- 機體 2 -->
-                    <button id="selectShipB" class="p-4 bg-slate-900/30 border border-slate-800 hover:border-purple-500/50 rounded-xl text-left transition group focus:outline-none">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-slate-300 font-bold text-sm group-hover:text-purple-400 transition-colors">絕區驅動者 (Overdrive)</span>
-                            <span class="text-[10px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-mono">裝甲型</span>
-                        </div>
-                        <p class="text-slate-500 text-xs leading-relaxed">初始配置高剛性重裝甲。大幅降低受擊傷害，且初始磁吸收集範圍更加寬廣。</p>
-                    </button>
-                </div>
-
-                <button id="initCoreBtn" class="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black rounded-xl tracking-widest text-base shadow-lg shadow-indigo-600/30 transition-all uppercase">
-                    初始化作戰矩陣 (LOAD SYSTEM)
-                </button>
-            </div>
-
-            <!-- UI 2：Roguelike 三選一核心強化選單 (Upgrade Overlay) -->
-            <div id="upgradeScreen" class="absolute inset-0 z-30 bg-slate-950/90 glass-panel hidden flex flex-col items-center justify-center p-6 text-center animate-fade-in">
-                <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl mb-3 animate-spin">
-                    <i class="fa-solid fa-microchip"></i>
-                </div>
-                <h2 class="text-2xl md:text-3xl font-black text-white mb-1">超載術式核心變革</h2>
-                <p class="text-xs font-mono text-slate-500 uppercase tracking-widest mb-10">Matrix Overflow // Choose Your Weapon Path</p>
-                
-                <div class="grid md:grid-cols-3 gap-6 w-full max-w-4xl px-4" id="cardsContainer">
-                    <!-- 由 JavaScript 模組自動動態注入 -->
-                </div>
-            </div>
-
-            <!-- UI 3：戰場解析崩潰 (Game Over Overlay) -->
-            <div id="gameOverScreen" class="absolute inset-0 z-40 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center">
-                <div class="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center text-2xl mb-4 shadow-lg shadow-rose-500/10">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <h2 class="text-3xl font-black text-white mb-2">機體物理架構解析崩潰</h2>
-                <p class="text-xs font-mono text-slate-500 uppercase tracking-widest mb-8">SURVIVOR_STRUCTURE_COLLAPSED // PIPELINE_TERMINATED</p>
-                
-                <div class="grid grid-cols-3 gap-4 p-6 bg-slate-900 border border-slate-800 rounded-2xl mb-10 font-mono text-xs md:text-sm text-left w-full max-w-xl shadow-inner">
-                    <div>
-                        <div class="text-slate-500 text-[11px]">存活總時間</div>
-                        <div class="text-white font-bold text-lg mt-0.5" id="goTime">00:00</div>
-                    </div>
-                    <div>
-                        <div class="text-slate-500 text-[11px]">獵殺仿生蟲</div>
-                        <div class="text-emerald-400 font-bold text-lg mt-0.5" id="goKills">0</div>
-                    </div>
-                    <div>
-                        <div class="text-slate-500 text-[11px]">最終戰略總分</div>
-                        <div class="text-indigo-400 font-bold text-lg mt-0.5" id="goScore">000</div>
-                    </div>
-                </div>
-
-                <button id="rebootEngineBtn" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl tracking-wider transition-all shadow-lg">
-                    重啟模擬管線 (REBOOT SIMULATION)
-                </button>
-            </div>
-
-            <!-- 性能監控彩蛋 -->
-            <div class="absolute bottom-2 left-4 pointer-events-none z-10 font-mono text-[10px] text-slate-600 select-none hidden sm:block">
-                SYS_TICK: <span id="perfFps" class="text-emerald-500">60.0</span> | OBJECTS: <span id="perfEntities">0</span>
-            </div>
-
-            <!-- 繪圖主要畫布 Canvas -->
-            <canvas id="canvas2d" width="960" height="540" class="w-full h-auto bg-[#030509] block"></canvas>
-            
+    <!-- 遊戲主 3D 視窗區 -->
+    <main class="flex-grow flex items-center justify-center p-2">
+        <div class="w-full max-w-4xl flex flex-col items-center">
+            <!-- 核心 3D 投影 Canvas 畫布 -->
+            <canvas id="fpsCanvas" width="800" height="450" class="w-full h-auto block rounded-xl"></canvas>
         </div>
     </main>
 
-    <!-- 頁尾 -->
-    <footer class="w-full border-t border-slate-900 bg-slate-950/40 py-3.5 text-center text-[10px] text-slate-600 font-mono tracking-widest">
-        ENGINE_LOG: CORE_PIPELINE_ACTIVE // COMPILED: MODERN_ES6_CLASSES // PRIVACY_ENFORCED // AUTH: KUROKO_P.
+    <!-- 頁尾技術底標 -->
+    <footer class="border-t border-slate-950 bg-slate-950/40 py-2.5 text-center text-[10px] text-slate-700 tracking-wider">
+        CORE_LOG: ENGINE_3D_RAYCAST // INPUT: WASD_TO_MOVE // MOUSE_CLICK_TO_SHOOT // AUTH: KUROKO_P
     </footer>
 
     <!-- ==========================================================================
-         CORE GAME ENGINE MODULE (高階物件導向 100% 完整街機遊戲引擎)
+         CORE 3D FPS ENGINE MODULE (純 Canvas 射線投影第一人稱射擊引擎)
          ========================================================================== -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('fpsCanvas');
+            const ctx = canvas.getContext('2d');
 
-            // --- 1. 二維物理向量幾何核心數學庫 (Vector2D Class) ---
-            class Vector2D {
-                constructor(x = 0, y = 0) {
-                    this.x = x; this.y = y;
-                }
-                set(x, y) { this.x = x; this.y = y; return this; }
-                add(v) { this.x += v.x; this.y += v.y; return this; }
-                sub(v) { this.x -= v.x; this.y -= v.y; return this; }
-                mult(n) { this.x *= n; this.y *= n; return this; }
-                div(n) { this.x /= n; this.y /= n; return this; }
-                mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
-                normalize() { let m = this.mag(); if (m !== 0) this.div(m); return this; }
-                copy() { return new Vector2D(this.x, this.y); }
-                dist(v) { return Math.sqrt((this.x - v.x)**2 + (this.y - v.y)**2); }
-            }
+            // --- 1. 賽博矩陣 3D 迷宮地圖設定 (1=牆壁, 0=通道) ---
+            const mapSize = 12;
+            const map = [
+                [1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,0,0,0,0,0,1,0,0,0,0,1],
+                [1,0,1,1,0,0,1,0,1,1,0,1],
+                [1,0,1,0,0,0,0,0,0,1,0,1],
+                [1,0,0,0,0,1,1,1,0,0,0,1],
+                [1,0,1,1,0,1,0,1,0,1,0,1],
+                [1,0,0,1,0,1,0,1,0,1,0,1],
+                [1,1,0,1,0,0,0,0,0,1,0,1],
+                [1,0,0,0,0,1,0,1,0,0,0,1],
+                [1,0,1,1,0,1,0,1,1,1,0,1],
+                [1,0,0,0,0,0,0,0,0,0,0,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1]
+            ];
 
-            // --- 2. 瀏覽器底層音效合成模組 (SoundSynthesizer Class) ---
-            class SoundSynthesizer {
-                constructor() {
-                    this.ctx = null;
-                }
-                init() {
-                    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                play(type) {
-                    this.init();
-                    if (!this.ctx || this.ctx.state === 'suspended') this.ctx.resume();
-                    try {
-                        const now = this.ctx.currentTime;
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        
-                        if (type === 'laser') {
-                            osc.type = 'triangle'; osc.frequency.setValueAtTime(700, now);
-                            osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-                            gain.gain.setValueAtTime(0.04, now); gain.gain.linearRampToValueAtTime(0, now + 0.1);
-                        } else if (type === 'hit') {
-                            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(120, now);
-                            gain.gain.setValueAtTime(0.08, now); gain.gain.linearRampToValueAtTime(0, now + 0.12);
-                        } else if (type === 'boom') {
-                            osc.type = 'sine'; osc.frequency.setValueAtTime(180, now);
-                            osc.frequency.linearRampToValueAtTime(20, now + 0.25);
-                            gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                        } else if (type === 'levelup') {
-                            osc.type = 'sine'; osc.frequency.setValueAtTime(330, now);
-                            osc.frequency.setValueAtTime(550, now + 0.06);
-                            osc.frequency.setValueAtTime(770, now + 0.12);
-                            gain.gain.setValueAtTime(0.06, now); gain.gain.linearRampToValueAtTime(0, now + 0.22);
-                        }
-                        osc.connect(gain); gain.connect(this.ctx.destination);
-                        osc.start(now); osc.stop(now + 0.3);
-                    } catch(e){}
-                }
-            }
-            const synth = new SoundSynthesizer();
-
-            // --- 3. 戰機載具基礎類別 (Player Class) ---
-            class PlayerShip {
-                constructor(x, y, shipType) {
-                    this.pos = new Vector2D(x, y);
-                    this.vel = new Vector2D(0, 0);
-                    this.radius = 15;
-                    this.shipType = shipType;
-
-                    // 根據選擇的機體配置不同的核心基礎物理參數
-                    if (shipType === 'VANGUARD') {
-                        this.maxHp = 100; this.hp = 100; this.speed = 3.8; this.armor = 0; this.magnet = 80;
-                    } else {
-                        this.maxHp = 130; this.hp = 130; this.speed = 3.0; this.armor = 4; this.magnet = 120;
-                    }
-
-                    this.maxShield = 50; this.shield = 0;
-                    this.level = 1; this.xp = 0; this.nextXp = 10;
-                    
-                    this.shootTimer = 0; this.shootCooldown = 16;
-                    this.invincible = 0; this.dashTimer = 0; this.dashCooldown = 0;
-                    this.dx = 0; this.dy = 0;
-                    this.trail = [];
-                }
-
-                update(keys) {
-                    if (this.invincible > 0) this.invincible--;
-                    if (this.dashCooldown > 0) this.dashCooldown--;
-
-                    // 處理高速無敵衝刺物理
-                    if (this.dashTimer > 0) {
-                        this.dashTimer--; this.pos.x += this.dx; this.pos.y += this.dy;
-                    } else {
-                        // 處理常規 WASD 移動
-                        let mx = 0, my = 0;
-                        if (keys['KeyW'] || keys['ArrowUp']) my = -1;
-                        if (keys['KeyS'] || keys['ArrowDown']) my = 1;
-                        if (keys['KeyA'] || keys['ArrowLeft']) mx = -1;
-                        if (keys['KeyD'] || keys['ArrowRight']) mx = 1;
-                        
-                        if (mx !== 0 || my !== 0) {
-                            let dir = new Vector2D(mx, my).normalize().mult(this.speed);
-                            this.pos.add(dir);
-                        }
-                    }
-
-                    // 邊界物理碰撞阻擋限制
-                    this.pos.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.pos.x));
-                    this.pos.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.pos.y));
-
-                    // 記錄位置歷史以渲染運動殘影
-                    this.trail.push({x: this.pos.x, y: this.pos.y});
-                    if (this.trail.length > 5) this.trail.shift();
-
-                    // 自動武器射擊計時器
-                    this.shootTimer++;
-                    if (this.shootTimer >= this.shootCooldown && gameState === 'PLAYING') {
-                        this.shootTimer = 0; this.fireWeapon();
-                    }
-                }
-
-                triggerDash(keys) {
-                    if (this.dashCooldown > 0 || this.dashTimer > 0) return;
-                    let mx = 0, my = 0;
-                    if (keys['KeyW'] || keys['ArrowUp']) my = -1;
-                    if (keys['KeyS'] || keys['ArrowDown']) my = 1;
-                    if (keys['KeyA'] || keys['ArrowLeft']) mx = -1;
-                    if (keys['KeyD'] || keys['ArrowRight']) mx = 1;
-                    
-                    if (mx !== 0 || my !== 0) {
-                        synth.play('laser');
-                        this.dashTimer = 10; this.dashCooldown = 45; this.invincible = 15;
-                        let dir = new Vector2D(mx, my).normalize().mult(this.speed * 3.0);
-                        this.dx = dir.x; this.dy = dir.y;
-                    }
-                }
-
-                fireWeapon() {
-                    synth.play('laser');
-                    let ang = Math.atan2(mousePos.y - this.pos.y, mousePos.x - this.pos.x);
-                    let pLv = upgradesPool.plasma.lv;
-                    
-                    // 根據武器等級衍生不同彈道
-                    if (pLv === 1) {
-                        projectiles.push(new Projectile(this.pos.x, this.pos.y, Math.cos(ang)*7.5, Math.sin(ang)*7.5, 10));
-                    } else if (pLv === 2) {
-                        projectiles.push(new Projectile(this.pos.x, this.pos.y, Math.cos(ang-0.15)*8, Math.sin(ang-0.15)*8, 11));
-                        projectiles.push(new Projectile(this.pos.x, this.pos.y, Math.cos(ang+0.15)*8, Math.sin(ang+0.15)*8, 11));
-                    } else {
-                        projectiles.push(new Projectile(this.pos.x, this.pos.y, Math.cos(ang)*8.5, Math.sin(ang)*8.5, 12));
-                        projectiles.push(new Projectile(this.pos.x, this.pos.y, Math.cos(ang-0.28)*8.5, Math.sin(ang-0.28)*8.5, 12));
-                        projectiles.push(new Projectile(this.pos.x, this.pos.y, Math.cos(ang+0.28)*8.5, Math.sin(ang+0.28)*8.5, 12));
-                    }
-                }
-
-                draw() {
-                    // 繪製殘影
-                    this.trail.forEach((t, i) => {
-                        ctx.beginPath(); ctx.arc(t.x, t.y, this.radius * (i/this.trail.length), 0, Math.PI*2);
-                        ctx.fillStyle = `rgba(99, 102, 241, ${0.07 * (i/this.trail.length)})`; ctx.fill();
-                    });
-
-                    // 繪製載具三角核心
-                    ctx.save(); ctx.translate(this.pos.x, this.pos.y);
-                    ctx.rotate(Math.atan2(mousePos.y - this.pos.y, mousePos.x - this.pos.x) + Math.PI/2);
-                    ctx.beginPath(); ctx.moveTo(0, -this.radius); ctx.lineTo(this.radius, this.radius); ctx.lineTo(-this.radius, this.radius); ctx.closePath();
-                    ctx.fillStyle = this.invincible%4 > 1 ? '#22256b' : '#4f46e5'; ctx.fill();
-                    ctx.strokeStyle = this.shipType==='VANGUARD'?'#67e8f9':'#c084fc'; ctx.lineWidth = 2; ctx.stroke();
-                    
-                    // 護盾渲染效果
-                    if (this.shield > 0) {
-                        ctx.beginPath(); ctx.arc(0, 0, this.radius + 10, 0, Math.PI*2);
-                        ctx.strokeStyle = `rgba(6, 182, 212, ${0.3 + Math.random()*0.3})`; ctx.stroke();
-                    }
-                    ctx.restore();
-                }
-            }
-
-            // --- 4. 戰略武器子彈與量子雷射射線 (Projectile Class) ---
-            class Projectile {
-                constructor(x, y, vx, vy, dmg) {
-                    this.pos = new Vector2D(x, y);
-                    this.vel = new Vector2D(vx, vy);
-                    this.radius = 3.5;
-                    this.dmg = dmg;
-                    this.dead = false;
-                }
-                update() {
-                    this.pos.add(this.vel);
-                    if (this.pos.x < 0 || this.pos.x > canvas.width || this.pos.y < 0 || this.pos.y > canvas.height) {
-                        this.dead = true;
-                    }
-                }
-                draw() {
-                    ctx.beginPath(); ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI*2);
-                    ctx.fillStyle = '#67e8f9'; ctx.fill();
-                }
-            }
-
-            // --- 5. 賽博仿生蟲群模組 (Enemy Class) ---
-            class BionicEnemy {
-                constructor(x, y, type) {
-                    this.pos = new Vector2D(x, y);
-                    this.type = type; // NORMAL, STRIKER, ELITE
-                    this.dead = false;
-                    this.hitFlash = 0;
-
-                    if (type === 'STRIKER') {
-                        this.radius = 9; this.hp = 10 + (gameTimer*0.1); this.speed = 2.6; this.color = '#f43f5e';
-                    } else if (type === 'ELITE') {
-                        this.radius = 18; this.hp = 70 + (gameTimer*0.8); this.speed = 0.9; this.color = '#34d399';
-                    } else {
-                        this.radius = 12; this.hp = 20 + (gameTimer*0.2); this.speed = 1.5; this.color = '#a5b4fc';
-                    }
-                }
-
-                update(pPos) {
-                    if (this.hitFlash > 0) this.hitFlash--;
-                    
-                    // 朝玩家方向追蹤物理模擬
-                    let dir = new Vector2D(pPos.x - this.pos.x, pPos.y - this.pos.y);
-                    let dist = dir.mag();
-                    if (dist > 0) {
-                        this.pos.add(dir.normalize().mult(this.speed));
-                    }
-                }
-
-                draw() {
-                    ctx.beginPath(); ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI*2);
-                    ctx.fillStyle = this.hitFlash > 0 ? '#fff' : this.color; ctx.fill();
-                    ctx.strokeStyle = '#020408'; ctx.stroke();
-                }
-            }
-
-            // --- 6. 掉落晶體與通用粒子類別 (Loot & Particle Classes) ---
-            class EnergyGem {
-                constructor(x, y, isBig) {
-                    this.pos = new Vector2D(x, y);
-                    this.isBig = isBig;
-                    this.val = isBig ? 4 : 1;
-                    this.color = isBig ? '#ec4899' : '#38bdf8';
-                    this.dead = false;
-                }
-                draw() {
-                    ctx.beginPath(); ctx.arc(this.pos.x, this.pos.y, this.isBig?6:3.5, 0, Math.PI*2);
-                    ctx.fillStyle = this.color; ctx.fill();
-                }
-            }
-
-            class TextParticle {
-                constructor(x, y, txt, color) {
-                    this.pos = new Vector2D(x, y);
-                    this.txt = txt; this.color = color;
-                    this.alpha = 1.0; this.dead = false;
-                }
-                update() {
-                    this.pos.y -= 1.2; this.alpha -= 0.03;
-                    if (this.alpha <= 0) this.dead = true;
-                }
-                draw() {
-                    ctx.save(); ctx.globalAlpha = this.alpha;
-                    ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = this.color;
-                    ctx.fillText(this.txt, this.pos.x, this.pos.y); ctx.restore();
-                }
-            }
-
-            // --- 7. 全局核心引擎變數與儲存配置區塊 ---
-            let gameState = 'MENU'; 
+            // --- 2. 遊戲核心變數與狀態大腦 ---
+            let gameState = 'PLAYING'; // PLAYING, GAMEOVER
             let gameTimer = 0;
             let lastTime = 0;
+            let timeAccumulator = 0;
             let spawnTimer = 0;
-            let secondTimer = 0;
-            let kills = 0;
+            
             let score = 0;
+            let kills = 0;
             let screenShake = 0;
-            let selectedShipModel = 'VANGUARD';
+            let autoRespawnTimer = 3.5; // 死亡自動復活倒數
 
-            let mousePos = { x: 480, y: 270 };
-            let keys = {};
-
-            let player = null;
-            let projectiles = [];
-            let enemies = [];
-            let gems = [];
-            let particles = [];
-
-            // Roguelike 升級卡牌池核心明細
-            let upgradesPool = {
-                plasma: { name: "三向等離子突擊炮", lv: 1, max: 3, desc: "擴張左右發射軌道，最大化前方扇形覆蓋面積" },
-                speed: { name: "磁場推進力超載", lv: 1, max: 4, desc: "將戰體引擎加壓，永久增幅 15% 基礎滑行速度" },
-                tesla: { name: "自動連鎖雷射矩陣", lv: 0, max: 3, desc: "組裝副炮，定時釋放連鎖量子雷射，追蹤擊碎最近目標" },
-                shield: { name: "極化光能反轉護盾", lv: 0, max: 3, desc: "解鎖護盾值上限，並立刻生成高強度吸收傷害防護罩" }
+            // 玩家第一人稱物理參數
+            let player = {
+                x: 2.5,       // 地圖網格 X 坐標
+                y: 2.5,       // 地圖網格 Y 坐標
+                angle: 0,     // 視線朝向角度 (弧度)
+                hp: 100,
+                maxHp: 100,
+                speed: 3.0,   // 前進速度
+                rotSpeed: 2.2, // 視角轉動速度
+                isShooting: 0 // 槍枝開火動畫幀計時
             };
 
-            // 旋轉雷射用的自增角度參數
-            let teslaPulseTimer = 0;
+            // 實體儲存緩衝區
+            let enemies = [];
+            let keyboard = {};
 
-            // 監聽鍵盤與滑鼠事件響應
-            window.addEventListener('keydown', (e) => {
-                keys[e.code] = true;
-                if (e.code === 'Space' && player && gameState === 'PLAYING') {
-                    e.preventDefault(); player.triggerDash(keys);
+            // 監聽鍵盤按鍵
+            window.addEventListener('keydown', (e) => { keyboard[e.code] = true; });
+            window.addEventListener('keyup', (e) => { keyboard[e.code] = false; });
+
+            // 監聽全螢幕滑鼠點擊（點擊畫布任何地方 = 瞬間開火！）
+            window.addEventListener('mousedown', () => {
+                if (gameState !== 'PLAYING' || player.isShooting > 0) return;
+                player.isShooting = 5; // 啟動 5 幀的槍口火光動畫
+                screenShake = 4;       // 槍枝後座力震屏
+
+                // 射擊擊中判定 (Hitscan 物理：判定畫面上正中央是否有怪)
+                for (let i = 0; i < enemies.length; i++) {
+                    let e = enemies[i];
+                    // 如果怪在玩家正前方視線夾角內，且距離夠近，且在畫面中央一帶
+                    if (e.screenX > canvas.width / 2 - 40 && e.screenX < canvas.width / 2 + 40 && e.dist > 0.3 && e.dist < 8) {
+                        e.hp -= 25;
+                        e.isHit = 3; // 閃白回饋
+                        if (e.hp <= 0) {
+                            enemies.splice(i, 1);
+                            kills++;
+                            score += 100;
+                        }
+                        break; // 擊中一隻就收工
+                    }
                 }
             });
-            window.addEventListener('keyup', (e) => { keys[e.code] = false; });
-            
-            canvas.addEventListener('mousemove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                mousePos.x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-                mousePos.y = ((e.clientY - rect.top) / rect.height) * canvas.height;
-            });
 
-            // 戰體選擇按鈕連動邏輯
-            document.getElementById('selectShipA').addEventListener('click', () => {
-                selectedShipModel = 'VANGUARD';
-                document.getElementById('selectShipA').className = "p-4 bg-slate-900/60 border-2 border-indigo-600 rounded-xl text-left transition group focus:outline-none";
-                document.getElementById('selectShipB').className = "p-4 bg-slate-900/30 border border-slate-800 hover:border-purple-500/50 rounded-xl text-left transition group focus:outline-none";
-            });
-            document.getElementById('selectShipB').addEventListener('click', () => {
-                selectedShipModel = 'OVERDRIVE';
-                document.getElementById('selectShipB').className = "p-4 bg-slate-900/60 border-2 border-purple-600 rounded-xl text-left transition group focus:outline-none";
-                document.getElementById('selectShipA').className = "p-4 bg-slate-900/30 border border-slate-800 hover:border-indigo-500/50 rounded-xl text-left transition group focus:outline-none";
-            });
-
-            // --- 8. ROGUELIKE 卡牌分發與控制核心 (Level Up System) ---
-            function openUpgradeModal() {
-                gameState = 'UPGRADE';
-                synth.play('levelup');
-                const container = document.getElementById('cardsContainer');
-                container.innerHTML = ''; // 刷空
-
-                // 過濾未滿級的強化選項
-                let filterPool = Object.keys(upgradesPool).filter(k => upgradesPool[k].lv < upgradesPool[k].max);
-                if (filterPool.length === 0) { score += 2000; closeUpgradeModal(); return; }
-
-                filterPool.forEach(key => {
-                    let up = upgradesPool[key];
-                    let card = document.createElement('div');
-                    card.className = "bg-slate-900/90 border border-slate-800 hover:border-indigo-500 p-6 rounded-2xl text-left cursor-pointer transition-all hover:-translate-y-1 select-none flex flex-col justify-between";
-                    card.innerHTML = `<div><h3 class="text-base font-bold text-white mb-1">${up.name}</h3><p class="text-[10px] text-indigo-400 font-mono">RANK: LV.${up.lv}</p><p class="text-slate-400 text-xs mt-3 leading-relaxed">${up.desc}</p></div><div class="mt-6 text-center text-xs text-indigo-500 font-bold">[ 注入矩陣 ]</div>`;
-                    
-                    card.onclick = () => {
-                        up.lv++;
-                        // 套用對應功能升級物理屬性
-                        if (key === 'speed') player.speed *= 1.15;
-                        if (key === 'shield') {
-                            player.maxShield += 25; player.shield = player.maxShield;
-                        }
-                        closeUpgradeModal();
-                    };
-                    container.appendChild(card);
-                });
-                document.getElementById('upgradeScreen').classList.remove('hidden');
-            }
-
-            function closeUpgradeModal() {
-                document.getElementById('upgradeScreen').classList.add('hidden');
-                gameState = 'PLAYING';
-                lastTime = performance.now(); // 防防斷秒延遲
-            }
-
-            // 出生蟲群位置計算器
-            function spawnSystemEnemy() {
-                if (enemies.length > 150) return;
-                let angle = Math.random() * Math.PI * 2;
-                let ex = player.pos.x + Math.cos(angle) * 520;
-                let ey = player.pos.y + Math.sin(angle) * 520;
+            // 仿生無人機突襲生怪機制
+            function spawnDrone() {
+                if (enemies.length >= 5) return;
+                // 隨機在玩家周圍的空地上生怪
+                let rx = Math.floor(Math.random() * (mapSize - 2)) + 1;
+                let ry = Math.floor(Math.random() * (mapSize - 2)) + 1;
                 
-                let rate = Math.random();
-                let type = 'NORMAL';
-                if (gameTimer > 75 && rate > 0.8) type = 'ELITE';
-                else if (gameTimer > 30 && rate > 0.6) type = 'STRIKER';
-
-                enemies.push(new BionicEnemy(ex, ey, type));
+                if (map[ry][rx] === 0 && Math.hypot(rx - player.x, ry - player.y) > 2) {
+                    enemies.push({
+                        x: rx + 0.5,
+                        y: ry + 0.5,
+                        hp: 25,
+                        speed: 0.8 + Math.random() * 0.4,
+                        screenX: 0,
+                        dist: 0,
+                        isHit: 0
+                    });
+                }
             }
 
-            // --- 9. 主物理引擎大循環與渲染矩陣控制 (Game Loop & Runtime) ---
+            // 全自動重置復活大腦
+            function resetEngine() {
+                gameState = 'PLAYING';
+                gameTimer = 0; timeAccumulator = 0; spawnTimer = 0; kills = 0; score = 0; screenShake = 0;
+                autoRespawnTimer = 3.5;
+
+                player.x = 2.5; player.y = 2.5; player.angle = 0; player.hp = 100; player.isShooting = 0;
+                enemies = [];
+                keyboard = {};
+
+                // 初始先送兩隻怪進場
+                spawnDrone(); spawnDrone();
+                lastTime = performance.now();
+            }
+
+            // --- 3. THE 3D CORE ENGINE LOOP (主物理運算核心) ---
             function loop(timestamp) {
-                if (gameState === 'GAMEOVER') return;
                 if (!lastTime) lastTime = timestamp;
                 let dt = (timestamp - lastTime) / 1000;
                 lastTime = timestamp;
                 if (dt > 0.1) dt = 0.1;
 
                 if (gameState === 'PLAYING') {
-                    // 秒數常規計時器
-                    secondTimer += dt;
-                    if (secondTimer >= 1.0) {
-                        secondTimer -= 1.0; gameTimer++;
-                        let m = Math.floor(gameTimer/60).toString().padStart(2, '0');
-                        let s = (gameTimer%60).toString().padStart(2, '0');
-                        document.getElementById('hudTimer').innerText = `${m}:${s}`;
-                    }
+                    // 計時器
+                    timeAccumulator += dt;
+                    if (timeAccumulator >= 1.0) { timeAccumulator -= 1.0; gameTimer++; }
 
-                    // 怪物孵化計時器（時間越久孵化越瘋狂）
+                    // 定時自動孵化無人機
                     spawnTimer += dt;
-                    let interval = Math.max(0.12, 0.75 - (gameTimer*0.003));
-                    if (spawnTimer >= interval) { spawnTimer -= interval; spawnSystemEnemy(); }
+                    if (spawnTimer >= 3.0) { spawnTimer = 0; spawnDrone(); }
 
-                    // 刷新玩家狀態
-                    player.update(keys);
+                    // 槍枝動畫開火遞減
+                    if (player.isShooting > 0) player.isShooting--;
 
-                    // 刷新子彈位置
-                    for(let i=projectiles.length-1; i>=0; i--) {
-                        let b = projectiles[i]; b.update();
-                        if (b.dead) projectiles.splice(i, 1);
+                    // 處理鍵盤操控轉向與前進後退
+                    let moveSpeed = player.speed * dt;
+                    let rotSpeed = player.rotSpeed * dt;
+
+                    if (keyboard['KeyA'] || keyboard['ArrowLeft']) { player.angle -= rotSpeed; }
+                    if (keyboard['KeyD'] || keyboard['ArrowRight']) { player.angle += rotSpeed; }
+
+                    let newX = player.x;
+                    let newY = player.y;
+
+                    if (keyboard['KeyW'] || keyboard['ArrowUp']) {
+                        newX += Math.cos(player.angle) * moveSpeed;
+                        newY += Math.sin(player.angle) * moveSpeed;
+                    }
+                    if (keyboard['KeyS'] || keyboard['ArrowDown']) {
+                        newX -= Math.cos(player.angle) * moveSpeed;
+                        newY -= Math.sin(player.angle) * moveSpeed;
                     }
 
-                    // 能量球吸附與等級回饋機制
-                    for(let i=gems.length-1; i>=0; i--) {
-                        let g = gems[i];
-                        let d = g.pos.dist(player.pos);
-                        if (d < player.magnet) {
-                            // 磁吸倍速向量前進
-                            let pull = player.pos.copy().sub(g.pos).normalize().mult(player.speed * 1.6);
-                            g.pos.add(pull);
-                        }
-                        if (d < player.radius + g.radius) {
-                            player.xp += g.val; score += g.val * 15; gems.splice(i, 1);
-                            
-                            // 超載升級
-                            if (player.xp >= player.nextXp) {
-                                player.xp -= player.nextXp; player.level++;
-                                player.nextXp = Math.floor(player.nextXp * 1.35) + 6;
-                                document.getElementById('hudLevel').innerText = player.level;
-                                openUpgradeModal();
-                            }
-                            // 連動 HUD 條
-                            document.getElementById('xpBarInner').style.width = `${(player.xp / player.nextXp)*100}%`;
-                        }
-                    }
+                    // 簡易滑溜地圖牆壁碰撞阻擋檢測 (Wall Collision)
+                    if (map[Math.floor(player.y)][Math.floor(newX)] === 0) player.x = newX;
+                    if (map[Math.floor(newY)][Math.floor(player.x)] === 0) player.y = newY;
 
-                    // 處理連鎖特斯拉自動副炮被動武器
-                    if (upgradesPool.tesla.lv > 0 && enemies.length > 0) {
-                        teslaPulseTimer++;
-                        if (teslaPulseTimer >= 60) { // 每秒自動觸發一次
-                            teslaPulseTimer = 0;
-                            let maxTargets = upgradesPool.tesla.lv * 2;
-                            let hitCount = 0;
-                            // 抓隨機範圍內蟲子連鎖電擊
-                            for (let k = 0; k < enemies.length; k++) {
-                                let target = enemies[k];
-                                if (player.pos.dist(target.pos) < 220) {
-                                    let tDmg = upgradesPool.tesla.lv * 18;
-                                    target.hp -= tDmg; target.hitFlash = 3;
-                                    addText(target.pos.x, target.pos.y, tDmg, '#c084fc');
-                                    
-                                    // 畫電弧線
-                                    ctx.save(); ctx.beginPath(); ctx.moveTo(player.pos.x, player.pos.y); ctx.lineTo(target.pos.x, target.pos.y);
-                                    ctx.strokeStyle = 'rgba(192, 132, 252, 0.8)'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
-
-                                    if (target.hp <= 0) {
-                                        target.dead = true; kills++; score += 50;
-                                        gems.push(new EnergyGem(target.pos.x, target.pos.y, false));
-                                    }
-                                    hitCount++; if (hitCount >= maxTargets) break;
-                                }
-                            }
-                            enemies = enemies.filter(e => !e.dead);
-                        }
-                    }
-
-                    // 仿生蟲核心碰撞與受傷回饋
+                    // 更新無人機怪獸 AI 行為
                     for (let i = enemies.length - 1; i >= 0; i--) {
-                        let e = enemies[i]; e.update(player.pos);
+                        let e = enemies[i];
+                        if (e.isHit > 0) e.isHit--;
 
-                        // 檢測子彈擊中
-                        projectiles.forEach((b, bIdx) => {
-                            if (b.pos.dist(e.pos) < e.radius + b.radius) {
-                                projectiles.splice(bIdx, 1);
-                                e.hp -= b.dmg; e.hitFlash = 4;
-                                synth.play('hit'); addText(e.pos.x, e.pos.y, b.dmg, '#67e8f9');
-                                
-                                if (e.hp <= 0) {
-                                    e.dead = true; kills++; score += 40;
-                                    gems.push(new EnergyGem(e.pos.x, e.pos.y, e.type==='ELITE'));
-                                }
-                            }
-                        });
+                        let edx = player.x - e.x;
+                        let edy = player.y - e.y;
+                        e.dist = Math.hypot(edx, edy);
 
-                        // 蟲子撞擊玩家機組受傷
-                        if (!e.dead && e.pos.dist(player.pos) < player.radius + e.radius && player.invincible <= 0) {
-                            player.invincible = 24; screenShake = 8; synth.play('boom');
-                            let rawDmg = e.type === 'ELITE' ? 22 : (e.type === 'STRIKER' ? 8 : 14);
-                            let finalDmg = Math.max(2, rawDmg - player.armor);
-                            
-                            // 扣盾優先機制
-                            if (player.shield > 0) {
-                                player.shield -= finalDmg; if (player.shield < 0) { player.hp += player.shield; player.shield = 0; }
-                            } else {
-                                player.hp -= finalDmg;
-                            }
-
-                            // 實時連動 HUD
-                            document.getElementById('hpBarInner').style.width = `${Math.max(0, (player.hp / player.maxHp)*100)}%`;
-                            document.getElementById('shieldBarInner').style.width = `${(player.shield / player.maxHp)*100}%`;
-                            document.getElementById('hudHpText').innerText = `${Math.max(0, player.hp)}/${player.maxHp}`;
-
-                            if (player.hp <= 0) {
-                                gameState = 'GAMEOVER';
-                                document.getElementById('goTime').innerText = document.getElementById('hudTimer').innerText;
-                                document.getElementById('goKills').innerText = kills;
-                                document.getElementById('goScore').innerText = score;
-                                document.getElementById('gameOverScreen').classList.remove('hidden');
-                                return;
-                            }
+                        // 朝著玩家方向緩緩飄浮游過來
+                        if (e.dist > 0.2) {
+                            e.x += (edx / e.dist) * e.speed * dt;
+                            e.y += (edy / e.dist) * e.speed * dt;
                         }
-                        if (e.dead) enemies.splice(i, 1);
+
+                        // 核心撞擊玩家扣血判定
+                        if (e.dist < 0.35) {
+                            player.hp -= 20;
+                            screenShake = 8; // 受傷激烈震屏
+                            enemies.splice(i, 1); // 撞到就自爆
+                            if (player.hp <= 0) { player.hp = 0; gameState = 'GAMEOVER'; }
+                        }
                     }
 
-                    // 刷新文字粒子
-                    for (let i = particles.length - 1; i >= 0; i--) {
-                        let p = particles[i]; p.update();
-                        if (p.dead) particles.splice(i, 1);
-                    }
-
-                    // 實時更新除錯計數器
-                    document.getElementById('perfEntities').innerText = projectiles.length + enemies.length + gems.length;
-                    document.getElementById('hudKills').innerText = kills;
-                    document.getElementById('hudScore').innerText = score;
+                } else if (gameState === 'GAMEOVER') {
+                    // 全自動倒數復活大腦運作
+                    autoRespawnTimer -= dt;
+                    if (autoRespawnTimer <= 0) { rebootEngine(); return; }
                 }
 
-                // --- 10. 全螢幕渲染管線 (Render Canvas Workflow) ---
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // --- 4. THE HIGH-TECH 3D RAYCASTING RENDER (光線投射 3D 渲染矩陣管線) ---
+                ctx.fillStyle = '#0a0f1d'; // 天空與天花板顏色
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#060810'; // 地板深色
+                ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+
                 ctx.save();
-                
-                // 矩陣震屏技術映射
-                if (screenShake > 0) { screenShake--; ctx.translate((Math.random()-0.5)*6, (Math.random()-0.5)*6); }
+                if (screenShake > 0) { screenShake--; ctx.translate((Math.random() - 0.5) * 6, (Math.random() - 0.5) * 6); }
 
-                // 渲染科幻網格背景層
-                ctx.strokeStyle = '#080d1a'; ctx.lineWidth = 1;
-                for(let i=0; i<canvas.width; i+=60) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
-                for(let j=0; j<canvas.height; j+=60) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke(); }
+                // 3D 投影核心演算法：橫向逐列掃描投影
+                const fov = Math.PI / 3; // 視角範圍 60 度
+                const numRays = 200;     // 發射 200 條射線 (每條寬 4px，兼顧極致流暢度與畫質)
+                const stripWidth = canvas.width / numRays;
 
-                // 批次繪製能量晶體
-                gems.forEach(g => g.draw());
-                // 批次繪製子彈
-                projectiles.forEach(b => b.draw());
-                // 批次繪製仿生蟲
-                enemies.forEach(e => e.draw());
-                // 繪製玩家載具核心
-                if (player) player.draw();
-                // 批次繪製浮動損害數字
-                particles.forEach(p => p.draw());
+                for (let i = 0; i < numRays; i++) {
+                    // 計算目前射線的絕對角度
+                    let rayAngle = (player.angle - fov / 2) + (i / numRays) * fov;
+                    let distance = 0;
+                    let hitWall = false;
 
-                ctx.restore();
-                if (gameState !== 'GAMEOVER') requestAnimationFrame(loop);
-            }
+                    let cos = Math.cos(rayAngle);
+                    let sin = Math.sin(rayAngle);
 
-            // --- 11. 啟動按鈕點擊加載事件 ---
-            document.getElementById('startPlayBtn').addEventListener('click', () => {
-                document.getElementById('menuScreen').classList.add('hidden');
-                
-                // 重設初始化遊戲大腦與機體
-                gameState = 'PLAYING'; gameTimer = 0; kills = 0; score = 0;
-                player = new PlayerShip(480, 270, selectedShipModel);
-                
-                // 刷空所有殘餘陣列
-                projectiles = []; enemies = []; gems = []; particles = [];
-                Object.keys(upgradesPool).forEach(k => { upgradesPool[k].lv = k==='shield'||k==='tesla'?0:1; });
-                
-                document.getElementById('hudLevel').innerText = 1;
-                document.getElementById('xpBarInner').style.width = '0%';
-                document.getElementById('hpBarInner').style.width = '100%';
-                document.getElementById('shieldBarInner').style.width = '0%';
-                document.getElementById('hudHpText').innerText = `${player.hp}/${player.maxHp}`;
-                document.getElementById('hudTimer').innerText = '00:00';
+                    // 射線步進掃描牆壁
+                    while (!hitWall && distance < 14) {
+                        distance += 0.04;
+                        let checkX = Math.floor(player.x + cos * distance);
+                        let checkY = Math.floor(player.y + sin * distance);
 
-                lastTime = performance.now();
-                spawnSystemEnemy();
-                loop();
-            });
+                        if (checkX < 0 || checkX >= mapSize || checkY < 0 || checkY >= mapSize) {
+                            hitWall = true; distance = 14;
+                        } else if (map[checkY][checkX] === 1) {
+                            hitWall = true;
+                        }
+                    }
 
-            document.getElementById('rebootEngineBtn').addEventListener('click', () => {
-                document.getElementById('gameOverScreen').classList.add('hidden');
-                document.getElementById('menuScreen').classList.remove('hidden');
-            });
+                    // 修正魚眼失真效應 (Fish-eye correction)
+                    let correctedDist = distance * Math.cos(rayAngle - player.angle);
+                    
+                    // 根據距離計算 3D 投影牆壁線段高度
+                    let wallHeight = Math.min(canvas.height, (canvas.height / (correctedDist + 0.001)));
 
-        });
-    </script>
-</body>
-</html>
+                    // 打造遠近深淺的賽博霓虹霓虹牆壁漸層
+                    let brightness = Math.max(10, 220 - (correctedDist * 18));
+                    ctx.fillStyle = `rgb(${brightness * 0.3}, ${brightness * 0.4}, ${brightness * 0.9})`;
+                    
+                    // 開始直刷垂直線段
+                    ctx.fillRect(i * stripWidth, (canvas.height - wallHeight) / 2, stripWidth + 1, wallHeight);
+                }
+
+                // --- 5. 3D BILLBOARD SPRITE RENDER (無人機 3D 廣告牌矩陣渲染) ---
+                enemies.forEach(e => {
+                    let ex = e.x - player.x;
+                    let ey = e.y - player.y;
+
+                    // 矩陣坐標旋轉，將怪換算成相對玩家視角的前後坐標
+                    let spriteX = ex * Math.sin(player.angle) - ey * Math.cos(player.angle);
+                    let spriteY = ex * Math.cos(player.angle) + ey * Math.sin(player.angle);
+
+                    // 只有當怪在玩家「正前方」時才進行 3D 縮放投影
+                    if (spriteY > 0.2) {
+                        let spriteSize = Math.min(canvas.height, canvas.height / spriteY);
+                        // 計算畫布上的 X 軸中心點
+                        let screenX = (canvas.width / 2) + (spriteX / spriteY) * (canvas.width / 1.1);
+                        let screenY = canvas.height / 2;
+
+                        e.screenX = screenX; // 存入結構供 Hitscan 點擊判定使用
+
+                        // 開始繪製無人機外殼
+                        ctx.beginPath();
+                        ctx.arc(screenX, screenY, spriteSize * 0.2, 0, Math.PI * 2);
+                        ctx.fillStyle = e.isHit > 0 ? '#ffffff' : '#f43f5e';
+                        ctx.fill();
+                        
+                        // 繪製賽博無人機兩側機械翼
+                        ctx.fillStyle = '#1e293b';
+                        ctx.fillRect(screenX - spriteSize * 0.3, screenY - 2, spriteSize * 0.6, 4);
+
+                        // 繪製怪物血條
+                        ctx.fillStyle = '#334155';
+                        ctx.fillRect(screenX - 20, screenY - spriteSize * 0.3, 40, 3);
+                        ctx.fillStyle = '#ef4444';
+                        ctx.fillRect(screenX - 20, screenY - spriteSize * 0.3, 40 * (e.hp / 25), 3);
+                    }
+                });
+
+                // --- 6. PURE 2D GUN FOREGROUND (第一人稱槍枝與準星繪製) ---
+                // 畫布正中央電子十字準星
+                ctx.strokeStyle = 'rgba(6, 182, 212, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(canvas.width / 2 - 10, canvas.height / 2); ctx.lineTo(canvas.width / 2 + 10, canvas.height / 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(canvas.width / 2, canvas.height / 2 - 10); ctx.lineTo(canvas.width / Normally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
