@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON RAMPAGE: 2D ROGUELIKE ENGINE v5.0</title>
+    <title>NEON RAMPAGE: 2D ROGUELIKE ENGINE v5.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         /* ==========================================================================
@@ -40,7 +40,7 @@
         }
 
         /* ==========================================================================
-           2. 2D 輕量化頂部與頂側 HUD 樣式
+           2. 2D 戰術抬頭顯示器 (Minimalist HUD Layout)
            ========================================================================== */
         #hud {
             position: absolute;
@@ -55,9 +55,10 @@
 
         .hud-panel {
             position: absolute;
-            padding: 10px 20px;
-            background: rgba(20, 25, 31, 0.85);
-            border: 1px solid rgba(255, 70, 85, 0.2);
+            padding: 12px 20px;
+            background: rgba(20, 25, 31, 0.93);
+            border-left: 4px solid #ff4655;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             color: #ffffff;
             font-family: 'Share Tech Mono', monospace;
         }
@@ -81,21 +82,24 @@
         }
 
         #stats-top-left {
-            top: 20px;
-            left: 20px;
-            border-radius: 4px;
+            top: 25px;
+            left: 25px;
+            border-radius: 0 4px 4px 0;
         }
 
         #stats-top-right {
-            top: 20px;
-            right: 20px;
+            top: 25px;
+            right: 25px;
             text-align: right;
-            border-radius: 4px;
+            border-left: none;
+            border-right: 4px solid #ff4655;
+            border-radius: 4px 0 0 4px;
         }
 
         .stat-line {
             font-size: 14px;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
+            letter-spacing: 0.5px;
         }
 
         .highlight-red { color: #ff4655; font-weight: bold; }
@@ -104,36 +108,37 @@
         /* Boss 大血條 */
         #boss-hp-container {
             position: absolute;
-            top: 70px;
+            top: 80px;
             left: 50%;
             transform: translateX(-50%);
-            width: 50%;
-            height: 16px;
-            background: rgba(0,0,0,0.6);
-            border: 2px solid #ff4655;
+            width: 55%;
+            height: 14px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid #ff4655;
             display: none;
             z-index: 11;
+            box-shadow: 0 0 15px rgba(255,70,85,0.2);
         }
 
         #boss-hp-fill {
             height: 100%;
             width: 100%;
             background: linear-gradient(90deg, #ff0055, #ff4655);
-            box-shadow: 0 0 12px #ff4655;
+            box-shadow: 0 0 10px #ff4655;
         }
 
         #boss-label {
             position: absolute;
-            top: -22px;
+            top: -20px;
             left: 0;
             color: #ff4655;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             letter-spacing: 2px;
         }
 
         /* ==========================================================================
-           3. Roguelike 隨機卡牌升級覆蓋層 (Level-up Modal overlay)
+           3. Roguelike 隨機卡牌升級覆蓋層 (Level-up Matrix)
            ========================================================================== */
         #upgrade-screen {
             position: absolute;
@@ -141,7 +146,7 @@
             height: 100%;
             top: 0;
             left: 0;
-            background: rgba(10, 14, 18, 0.85);
+            background: rgba(11, 14, 18, 0.92);
             z-index: 20;
             display: flex;
             flex-direction: column;
@@ -151,55 +156,57 @@
         }
 
         #upgrade-screen h2 {
-            font-size: 36px;
+            font-size: 32px;
             color: #00ffcc;
-            margin-bottom: 30px;
-            text-shadow: 0 0 15px rgba(0,255,200,0.4);
+            margin-bottom: 35px;
+            text-shadow: 0 0 12px rgba(0,255,200,0.4);
             letter-spacing: 2px;
         }
 
         #cards-container {
             display: flex;
-            gap: 20px;
-            max-width: 900px;
+            gap: 24px;
+            width: 90%;
+            max-width: 960px;
         }
 
         .upgrade-card {
             flex: 1;
-            background: #161d24;
-            border: 2px solid #34424c;
-            padding: 24px;
-            border-radius: 6px;
+            background: #171f25;
+            border: 1px solid #2d3840;
+            border-top: 4px solid #00ffcc;
+            padding: 26px;
+            border-radius: 4px;
             color: #ffffff;
             cursor: pointer;
-            pointer-events: auto;
             text-align: center;
-            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .upgrade-card:hover {
             transform: translateY(-8px);
             border-color: #00ffcc;
-            box-shadow: 0 10px 25px rgba(0,255,200,0.15);
+            box-shadow: 0 12px 30px rgba(0,255,200,0.18);
+            background: #1c272e;
         }
 
         .card-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #ffffff;
             margin-bottom: 12px;
-            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .card-desc {
-            font-size: 14px;
-            color: #8a96a0;
-            line-height: 1.5;
+            font-size: 13px;
+            color: #8da2ad;
+            line-height: 1.6;
             font-family: 'Share Tech Mono', monospace;
         }
 
         /* ==========================================================================
-           4. 全螢幕 UI 覆蓋面板（主選單、結算）
+           4. 全螢幕選單與結算介面 (Overlay Modules)
            ========================================================================== */
         .overlay {
             position: absolute;
@@ -219,9 +226,9 @@
         }
 
         .overlay h1 {
-            font-size: 52px;
+            font-size: 56px;
             font-weight: 900;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             margin-bottom: 15px;
             background: linear-gradient(45deg, #ff4655, #00ffff);
             -webkit-background-clip: text;
@@ -232,7 +239,7 @@
             font-size: 14px;
             color: #768088;
             margin-bottom: 35px;
-            max-width: 600px;
+            max-width: 650px;
             line-height: 1.8;
             font-family: 'Share Tech Mono', monospace;
         }
@@ -253,25 +260,39 @@
         .btn:hover {
             background: #ffffff;
             color: #0f1418;
-            transform: scale(1.03);
-            box-shadow: 0 10px 20px rgba(255, 70, 85, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 70, 85, 0.35);
         }
 
         #gameover-screen { display: none; }
+        
+        #damage-flash {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(255, 70, 85, 0);
+            pointer-events: none;
+            z-index: 5;
+            transition: background 0.1s ease;
+        }
     </style>
 </head>
 <body>
 
+    <div id="damage-flash"></div>
+
     <div id="game-container">
-        <!-- 核心渲染畫布線程 -->
+        <!-- 2D 核心畫布元件 -->
         <canvas id="gameCanvas"></canvas>
 
-        <!-- 頂部經驗等級填滿條 -->
+        <!-- 頂部經驗量表 -->
         <div id="xp-bar-container">
             <div id="xp-bar-fill"></div>
         </div>
 
-        <!-- 2D 戰術抬頭顯示器 -->
+        <!-- 戰術面版 HUD -->
         <div id="hud">
             <div id="stats-top-left" class="hud-panel">
                 <div class="stat-line">特務級別: <span id="hud-level" class="highlight-teal">1</span></div>
@@ -280,31 +301,38 @@
             </div>
 
             <div id="stats-top-right" class="hud-panel">
-                <div class="stat-line">生存得分: <span id="hud-score">00000</span></div>
-                <div class="stat-line">演練時間: <span id="hud-time">00:00</span></div>
+                <div class="stat-line">主手武器: <span id="weapon-name" class="highlight-teal">VANDAL</span></div>
+                <div class="stat-line">武器彈匣: <span id="ammo-value">∞</span></div>
                 <div class="stat-line">當前波次: <span id="hud-wave" style="color: #ffff00;">ROUND 1</span></div>
+                <div class="stat-line" style="margin-top:5px; font-weight:bold;">生存得分: <span id="hud-score">00000</span></div>
+                <div class="stat-line">演練時間: <span id="hud-time">00:00</span></div>
             </div>
 
-            <!-- BOSS 血條核心 DOM -->
+            <!-- BOSS 血條核心 UI -->
             <div id="boss-hp-container">
-                <div id="boss-label">⚠️ WARNING: TRAINING OVERLORD BOT ACTIVED ⚠️</div>
+                <div id="boss-label">⚠️ WARNING: TRAINING OVERLORD BOT ACTIVATED ⚠️</div>
                 <div id="boss-hp-fill"></div>
+            </div>
+
+            <!-- 虛擬武器切換欄提示 -->
+            <div id="weapon-slots" style="display:none;">
+                <div id="slot-1" class="weapon-slot active">1</div>
+                <div id="slot-2" class="weapon-slot">2</div>
+                <div id="slot-3" class="weapon-slot">3</div>
             </div>
         </div>
 
-        <!-- Roguelike 卡牌選擇浮層 -->
+        <!-- 卡牌選擇介面 -->
         <div id="upgrade-screen">
-            <h2>MATRIX LEVEL UP: CHOOSE MODIFICATION</h2>
-            <div id="cards-container">
-                <!-- 透過 JS 動態生成插入三張卡牌 -->
-            </div>
+            <h2>MATRIX LEVEL UP: SELECT ATTACHMENT</h2>
+            <div id="cards-container"></div>
         </div>
 
         <!-- 開頭主選單 -->
         <div id="menu-screen" class="overlay">
             <h1>NEON RAMPAGE: EVOLUTION</h1>
             <p>歡迎來到二維大網格 Roguelike 戰術彈幕引擎。<br>
-            系統載入：2D 全解壓矩陣位移控制線路、8-Bit 方塊波音訊即時包絡器、<br>
+            系統載入：2D 全解壓純物件導向控制線路、8-Bit 方塊波音訊即時包絡器、<br>
             殺敵爆晶球升級裝備樹、隨機卡牌權重模組、以及五階彈幕狂暴無人機 Boss 狀態機。</p>
             <button class="btn" id="start-btn">INITIALIZE SIMULATION</button>
         </div>
@@ -320,11 +348,13 @@
     </div>
 
     <!-- ==========================================================================
-         5. 2D 頂視角肉哥引擎完整主核心指令腳本 (1000+ Lines OOP Architecture)
+         5. 2D 頂視角肉哥引擎完整主核心指令腳本 (1000+ Lines Untangled OOP Logic)
          ========================================================================== -->
     <script>
+        console.log("Loading Pristine 2D Roguelike Shooter Thread...");
+
         // ==========================================================================
-        // 【模組一】全自動程序化 8-Bit 復古音效合成器 (ADSR Envelope Synthesizer)
+        // 【核心類別一】音訊包絡合成器 (ADSR Sound Synthesizer Node)
         // ==========================================================================
         class RetroAudioEngine {
             constructor() {
@@ -338,11 +368,11 @@
                     window.AudioContext = window.AudioContext || window.webkitAudioContext;
                     this.ctx = new AudioContext();
                     this.masterGain = this.ctx.createGain();
-                    this.masterGain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                    this.masterGain.gain.setValueAtTime(0.14, this.ctx.currentTime);
                     this.masterGain.connect(this.ctx.destination);
-                    console.log("[AudioEngine] Native sound bank mapped successfully.");
+                    console.log("[Audio] Context mapped successfully.");
                 } catch(e) {
-                    console.error("[AudioEngine] Web Audio API failed:", e);
+                    console.error("[Audio] Engine initialization locked:", e);
                 }
             }
 
@@ -352,12 +382,12 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(400, t);
-                osc.frequency.exponentialRampToValueAtTime(100, t + 0.08);
-                gain.gain.setValueAtTime(0.3, t);
-                gain.gain.linearRampToValueAtTime(0.001, t + 0.08);
+                osc.frequency.setValueAtTime(420, t);
+                osc.frequency.exponentialRampToValueAtTime(90, t + 0.07);
+                gain.gain.setValueAtTime(0.25, t);
+                gain.gain.linearRampToValueAtTime(0.001, t + 0.07);
                 osc.connect(gain); gain.connect(this.masterGain);
-                osc.start(t); osc.stop(t + 0.08);
+                osc.start(t); osc.stop(t + 0.07);
             }
 
             playBotDeath() {
@@ -366,44 +396,58 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, t);
-                osc.frequency.linearRampToValueAtTime(40, t + 0.15);
-                gain.gain.setValueAtTime(0.4, t);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+                osc.frequency.setValueAtTime(180, t);
+                osc.frequency.linearRampToValueAtTime(30, t + 0.14);
+                gain.gain.setValueAtTime(0.35, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
                 osc.connect(gain); gain.connect(this.masterGain);
-                osc.start(t); osc.stop(t + 0.15);
+                osc.start(t); osc.stop(t + 0.14);
             }
 
             playLevelUp() {
                 if (!this.ctx) return;
                 const t = this.ctx.currentTime;
-                const notes = [261.63, 329.63, 392.00, 523.25]; // C-E-G-C 琶音
+                const notes = [261.63, 329.63, 392.00, 523.25];
                 notes.forEach((freq, index) => {
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, t + (index * 0.08));
-                    gain.gain.setValueAtTime(0.2, t + (index * 0.08));
-                    gain.gain.linearRampToValueAtTime(0.001, t + (index * 0.08) + 0.12);
+                    osc.frequency.setValueAtTime(freq, t + (index * 0.07));
+                    gain.gain.setValueAtTime(0.18, t + (index * 0.07));
+                    gain.gain.linearRampToValueAtTime(0.001, t + (index * 0.07) + 0.1);
                     osc.connect(gain); gain.connect(this.masterGain);
-                    osc.start(t + (index * 0.08)); osc.stop(t + (index * 0.08) + 0.12);
+                    osc.start(t + (index * 0.07)); osc.stop(t + (index * 0.07) + 0.1);
                 });
             }
 
             playBossAlert() {
                 if (!this.ctx) return;
                 const t = this.ctx.currentTime;
-                for (let i = 0; i < 2; i++) {
+                for (let i = 0; i < 3; i++) {
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(120, t + (i * 0.4));
-                    osc.frequency.linearRampToValueAtTime(160, t + (i * 0.4) + 0.3);
-                    gain.gain.setValueAtTime(0.5, t + (i * 0.4));
-                    gain.gain.linearRampToValueAtTime(0.001, t + (i * 0.4) + 0.3);
+                    osc.frequency.setValueAtTime(110, t + (i * 0.35));
+                    osc.frequency.linearRampToValueAtTime(150, t + (i * 0.35) + 0.25);
+                    gain.gain.setValueAtTime(0.4, t + (i * 0.35));
+                    gain.gain.linearRampToValueAtTime(0.001, t + (i * 0.35) + 0.25);
                     osc.connect(gain); gain.connect(this.masterGain);
-                    osc.start(t + (i * 0.4)); osc.stop(t + (i * 0.4) + 0.3);
+                    osc.start(t + (i * 0.35)); osc.stop(t + (i * 0.35) + 0.25);
                 }
+            }
+
+            playItemPickup() {
+                if (!this.ctx) return;
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(520, t);
+                osc.frequency.linearRampToValueAtTime(880, t + 0.09);
+                gain.gain.setValueAtTime(0.2, t);
+                gain.gain.linearRampToValueAtTime(0.001, t + 0.09);
+                osc.connect(gain); gain.connect(this.masterGain);
+                osc.start(t); osc.stop(t + 0.09);
             }
 
             playHurt() {
@@ -412,34 +456,40 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(90, t);
-                gain.gain.setValueAtTime(0.4, t);
-                gain.gain.linearRampToValueAtTime(0.001, t + 0.12);
+                osc.frequency.setValueAtTime(80, t);
+                gain.gain.setValueAtTime(0.35, t);
+                gain.gain.linearRampToValueAtTime(0.001, t + 0.1);
                 osc.connect(gain); gain.connect(this.masterGain);
-                osc.start(t); osc.stop(t + 0.12);
+                osc.start(t); osc.stop(t + 0.1);
             }
         }
         const audio = new RetroAudioEngine();
 
         // ==========================================================================
-        // 【模組二】全域核心狀態控制器 (Engine Configuration State)
+        // 【核心模組二】全域唯一的中央狀態控制暫存器 (Central Global State Machine)
         // ==========================================================================
         let canvas, ctx;
         const keys = {};
-        const mouse = { x: 0, y: 0 };
+        const mouse = { x: 0, y: 0, isDown: false };
 
-        // 畫面震動變數
         let screenShakeTime = 0;
         let screenShakeIntensity = 0;
+        let bossInstance = null;
 
         const GAME = {
+            gameState: "MENU",
             score: 0,
             elapsedTime: 0,
             wave: 1,
             waveTimer: 0.0,
             isPaused: false,
             bossSpawned: false,
-            // 實體陣列線程
+            currentWeaponIdx: 2, // 預設突擊步槍
+            weapons: [
+                { id: 0, name: "SHERIFF PISTOL", fireRate: 380, dmg: 35 },
+                { id: 1, name: "BUCKY SHOTGUN", fireRate: 800, dmg: 15 },
+                { id: 2, name: "VANDAL RIFLE", fireRate: 140, dmg: 22 }
+            ],
             projectiles: [],
             enemyProjectiles: [],
             enemies: [],
@@ -447,51 +497,46 @@
             particles: []
         };
 
-        // 特務升級模組池與機率權重
         const UPGRADES = [
-            { id: "dmg", title: "高碳粒子裝藥", desc: "主武器基本子彈傷害大幅提升 +8 點。" },
-            { id: "firerate", title: "超導複式伺服器", desc: "射擊冷卻循環縮短，攻擊速度暴增 +20%。" },
-            { id: "speed", title: "磁懸浮噴射足爪", desc: "特務水平橫向移動步伐速度提升 +15%。" },
-            { id: "multishot", title: "扇形對線增幅彈爪", desc: "每次開火向兩側額外分裂噴射複數子彈。" },
-            { id: "pierce", title: "重動能鎢鋼穿透芯", desc: "子彈獲得可擊穿貫穿複數敵人的能力 +1 次。" },
-            { id: "magnet", title: "引力塌陷核心", desc: "地圖上掉落的經驗晶球自動磁吸半徑拉長 +60 像素。" }
+            { id: "dmg", title: "高碳粒子裝藥", desc: "強化武器基礎火控，子彈攻擊殺傷力永久提升 +10 點。" },
+            { id: "firerate", title: "超導複式伺服器", desc: "最佳化射擊循環線路，開火速率暴增縮短 +22%。" },
+            { id: "speed", title: "磁懸浮噴射足爪", desc: "解放機甲輸出功率，特務移動步伐巡航速度提升 +20%。" },
+            { id: "pierce", title: "重動能鎢鋼穿透芯", desc: "彈頭硬度大幅增幅，獲得能貫穿多重敵人的效果 +1 次。" }
         ];
 
         // ==========================================================================
-        // 【模組三】玩家特務大核心類別 (OOP Agent Controller Class)
+        // 【核心類別三】特務主體動作控制類別 (OOP Agent Controller Class)
         // ==========================================================================
         class AgentPlayer {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
                 this.radius = 16;
-                // 基礎維生數值
                 this.hp = 100;
                 this.maxHp = 100;
                 this.shield = 50;
                 this.maxShield = 50;
-                // Roguelike 經驗級別
+                
                 this.level = 1;
                 this.xp = 0;
                 this.nextXpNeeded = 100;
-                // 武器屬性增幅矩陣
-                this.baseSpeed = 4.2;
+                
+                this.baseSpeed = 240.0; // 像素/秒 單位
                 this.damageBoost = 0;
                 this.fireRateMultiplier = 1.0;
                 this.bulletPierceCount = 0;
-                this.multishotLevel = 1; // 1 = 單發, 2 = 雙向發射, 3 = 三叉發射
-                this.magnetRadius = 80;
+                this.multishotLevel = 1; 
+                this.magnetRadius = 90;
                 
                 this.fireCooldown = 0;
             }
 
             update(dt) {
-                // 1. 特務自然護盾緩慢溢出充電
                 if (this.shield < this.maxShield) {
-                    this.shield += dt * 1.5;
+                    this.shield += dt * 2.0;
                 }
 
-                // 2. 多重鍵盤輸入防攔截處理（IME 輸入法等效相容）
+                // 輸入法等效容錯鍵盤監聽位移
                 let moveX = 0;
                 let moveY = 0;
                 if (keys['KeyW'] || keys['ArrowUp']) moveY -= 1;
@@ -500,48 +545,43 @@
                 if (keys['KeyD'] || keys['ArrowRight']) moveX += 1;
 
                 if (moveX !== 0 || moveY !== 0) {
-                    // 執行 2D 向量正規化，杜絕對角線超速走步 Bug
                     const length = Math.sqrt(moveX * moveX + moveY * moveY);
-                    this.x += (moveX / length) * this.baseSpeed;
-                    this.y += (moveY / length) * this.baseSpeed;
+                    this.x += (moveX / length) * this.baseSpeed * dt;
+                    this.y += (moveY / length) * this.baseSpeed * dt;
                     
-                    // 地圖世界大邊界硬性鎖定阻擋
                     this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
                     this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
                 }
 
-                // 3. 火控射擊冷卻計時器
+                // 火控連射滑鼠監聽判定
                 if (this.fireCooldown > 0) {
                     this.fireCooldown -= dt * 1000;
-                } else {
-                    // 自動/手動朝向滑鼠游標開火
+                } else if (mouse.isDown) {
                     this.fireActiveWeapon();
                 }
             }
 
             fireActiveWeapon() {
-                const weapon = CONFIG.weapons[2]; // 預設使用 Vandal 機械突擊型彈道
-                const calculatedRate = weapon.fireRate * this.fireRateMultiplier;
-                this.fireCooldown = calculatedRate;
+                const activeWeapon = GAME.weapons[GAME.currentWeaponIdx];
+                const finalRate = activeWeapon.fireRate * this.fireRateMultiplier;
+                this.fireCooldown = finalRate;
 
-                // 計算持槍朝向滑鼠仰角的弧度夾角
                 const angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
-                const finalDmg = weapon.dmg + this.damageBoost;
+                const finalDmg = activeWeapon.dmg + this.damageBoost;
 
                 audio.playPlayerFire();
 
-                // 根據 Roguelike 卡牌分裂層級發射彈幕
                 if (this.multishotLevel === 1) {
                     GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle, finalDmg, this.bulletPierceCount));
                 } 
                 else if (this.multishotLevel === 2) {
-                    GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle - 0.12, finalDmg, this.bulletPierceCount));
-                    GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle + 0.12, finalDmg, this.bulletPierceCount));
+                    GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle - 0.15, finalDmg, this.bulletPierceCount));
+                    GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle + 0.15, finalDmg, this.bulletPierceCount));
                 } 
                 else {
-                    GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle - 0.24, finalDmg, this.bulletPierceCount));
+                    GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle - 0.25, finalDmg, this.bulletPierceCount));
                     GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle, finalDmg, this.bulletPierceCount));
-                    GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle + 0.24, finalDmg, this.bulletPierceCount));
+                    GAME.projectiles.push(new ProjectileInstance(this.x, this.y, angle + 0.25, finalDmg, this.bulletPierceCount));
                 }
             }
 
@@ -550,7 +590,6 @@
                 if (this.xp >= this.nextXpNeeded) {
                     this.xp -= this.nextXpNeeded;
                     this.level++;
-                    // 指數級提高下一級所需的經驗值
                     this.nextXpNeeded = Math.floor(this.nextXpNeeded * 1.35);
                     audio.playLevelUp();
                     triggerUpgradeScreen();
@@ -562,11 +601,10 @@
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 
-                // 旋轉上半身朝向滑鼠瞄準線
                 const angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
                 ctx.rotate(angle);
 
-                // 1. 繪製特務外裝甲六角形底座（仿瓦羅蘭戰術美學）
+                // 核心圓盤底殼
                 ctx.fillStyle = '#ffffff';
                 ctx.strokeStyle = '#ff4655';
                 ctx.lineWidth = 3;
@@ -574,14 +612,14 @@
                 ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
                 ctx.fill(); ctx.stroke();
 
-                // 2. 繪製俐落的黑鐵碳纖維延伸槍管
-                ctx.fillStyle = '#212529';
-                ctx.fillRect(5, -4, 22, 8);
+                // 戰術黑鐵碳纖槍管
+                ctx.fillStyle = '#1e2226';
+                ctx.fillRect(4, -4, 22, 8);
                 
-                // 3. 繪製護盾充能半透明淡藍色圓環外圈
+                // 護盾防禦淡藍波紋外圈
                 if (this.shield > 0) {
-                    ctx.strokeStyle = 'rgba(0, 191, 255, ' + (0.3 + (this.shield / this.maxShield) * 0.4) + ')';
-                    ctx.lineWidth = 4;
+                    ctx.strokeStyle = 'rgba(0, 191, 255, ' + (0.35 + (this.shield / this.maxShield) * 0.4) + ')';
+                    ctx.lineWidth = 3;
                     ctx.beginPath();
                     ctx.arc(0, 0, this.radius + 6, 0, Math.PI * 2);
                     ctx.stroke();
@@ -590,29 +628,28 @@
                 ctx.restore();
             }
         }
-        let player;
 
         // ==========================================================================
-        // 【模組四】高爆發高穿透子彈類別 (Projectile Instance Engine)
+        // 【核心類別四】子彈彈道物理拋射物 (Projectile Rail Subsystem)
         // ==========================================================================
         class ProjectileInstance {
             constructor(x, y, angle, dmg, pierce) {
                 this.x = x;
                 this.y = y;
-                this.speed = 15.0;
+                this.speed = 920.0; // 像素/秒 單位
                 this.vx = Math.cos(angle) * this.speed;
                 this.vy = Math.sin(angle) * this.speed;
                 this.damage = dmg;
                 this.maxPierce = pierce;
                 this.radius = 4;
-                this.life = 1.4; // 子彈最長存活1.4秒防記憶體膨脹
-                this.hitHistory = []; // 儲存已擊中的怪獸ID防止重複單幀秒殺Bug
+                this.life = 1.5;
+                this.hitHistory = [];
             }
 
             update(dt) {
                 this.life -= dt;
-                this.x += this.vx;
-                this.y += this.vy;
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
             }
 
             draw() {
@@ -623,24 +660,23 @@
             }
         }
 
-        // 敵軍反擊拋物線物理彈幕
         class EnemyBulletInstance {
             constructor(x, y, targetX, targetY, dmg) {
                 this.x = x;
                 this.y = y;
                 this.radius = 5;
-                this.speed = 4.5;
+                this.speed = 260.0;
                 const angle = Math.atan2(targetY - y, targetX - x);
                 this.vx = Math.cos(angle) * this.speed;
                 this.vy = Math.sin(angle) * this.speed;
                 this.damage = dmg;
-                this.life = 3.0;
+                this.life = 4.0;
             }
 
-            update() {
-                this.life -= 0.016;
-                this.x += this.vx;
-                this.y += this.vy;
+            update(dt) {
+                this.life -= dt;
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
             }
 
             draw() {
@@ -652,7 +688,7 @@
         }
 
         // ==========================================================================
-        // 【模組五】靶場特務人形機器人群體類別 (FSM Enemy Controller Matrix)
+        // 【核心類別五】靶場特務人形機器人群體 (FSM Agent Bot Controller)
         // ==========================================================================
         class TrainingBotEntity {
             constructor(x, y, type = "NORMAL") {
@@ -662,41 +698,37 @@
                 this.type = type;
                 this.radius = type === "TANK" ? 22 : 14;
                 
-                // 基於波次的無窮難度系數加乘公式
-                const difficultyMultiplier = 1.0 + (GAME.wave * 0.15);
-                this.maxHp = (type === "TANK" ? 240 : 50) * difficultyMultiplier;
+                const factor = 1.0 + (GAME.wave * 0.18);
+                this.maxHp = (type === "TANK" ? 240 : 50) * factor;
                 this.hp = this.maxHp;
-                this.speed = (type === "FAST" ? 3.4 : 1.8) * (1.0 + (GAME.wave * 0.05));
-                this.damage = (type === "TANK" ? 35 : 12) * difficultyMultiplier;
+                this.speed = (type === "FAST" ? 200.0 : 110.0) * (1.0 + (GAME.wave * 0.05));
+                this.damage = (type === "TANK" ? 35 : 14) * factor;
                 
                 this.shootTimer = Math.random() * 2.0;
-                this.hitFlashTimer = 0.0; // 受擊瞬間白光閃爍計時
+                this.hitFlashTimer = 0.0;
             }
 
             update(dt) {
                 if (this.hitFlashTimer > 0) this.hitFlashTimer -= dt;
 
-                // 趨近特務位置執行追蹤
-                const dx = player.x - this.x;
-                const dy = player.y - this.y;
+                const dx = GAME.player.x - this.x;
+                const dy = GAME.player.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance > 5) {
-                    this.x += (dx / distance) * this.speed;
-                    this.y += (dy / distance) * this.speed;
+                    this.x += (dx / distance) * this.speed * dt;
+                    this.y += (dy / distance) * this.speed * dt;
                 }
 
-                // 2D 圓形重疊近戰撕咬判定
-                if (distance < this.radius + player.radius) {
+                if (distance < this.radius + GAME.player.radius) {
                     damagePlayer(this.damage * dt);
                 }
 
-                // 遠程裝甲兵定時開火
                 if (this.type === "TANK") {
                     this.shootTimer += dt;
-                    if (this.shootTimer >= 2.5) {
+                    if (this.shootTimer >= 2.4) {
                         this.shootTimer = 0;
-                        GAME.enemyProjectiles.push(new EnemyBulletInstance(this.x, this.y, player.x, player.y, 15));
+                        GAME.enemyProjectiles.push(new EnemyBulletInstance(this.x, this.y, GAME.player.x, GAME.player.y, 14));
                     }
                 }
             }
@@ -705,28 +737,24 @@
                 ctx.save();
                 ctx.translate(this.x, this.y);
 
-                // 如果處於受擊狀態，瞬間白化
                 if (this.hitFlashTimer > 0) {
                     ctx.fillStyle = '#ffffff';
                 } else {
                     ctx.fillStyle = this.type === "TANK" ? "#5a636c" : (this.type === "FAST" ? "#ffaa00" : "#ff4655");
                 }
                 
-                // 繪製人形靶機方塊軀幹
                 ctx.fillRect(-this.radius, -this.radius, this.radius * 2, this.radius * 2);
                 
-                // 核心發光爆頭判定點球體
                 ctx.fillStyle = "#ffffff";
                 ctx.beginPath();
-                ctx.arc(0, -this.radius * 0.4, this.radius * 0.3, 0, Math.PI * 2);
+                ctx.arc(0, -this.radius * 0.3, this.radius * 0.3, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 繪製簡易血條
                 if (this.hp < this.maxHp) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    ctx.fillRect(-this.radius, -this.radius - 12, this.radius * 2, 5);
+                    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                    ctx.fillRect(-this.radius, -this.radius - 10, this.radius * 2, 4);
                     ctx.fillStyle = '#ff4655';
-                    ctx.fillRect(-this.radius, -this.radius - 12, (this.radius * 2) * (this.hp / this.maxHp), 5);
+                    ctx.fillRect(-this.radius, -this.radius - 10, (this.radius * 2) * (this.hp / this.maxHp), 4);
                 }
 
                 ctx.restore();
@@ -734,97 +762,18 @@
         }
 
         // ==========================================================================
-        // 【模組六】終極特務總載無人機 BOSS 類別 (Elite Boss State Machine)
-        // ==========================================================================
-        class OverlordBossEntity {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.radius = 45;
-                this.maxHp = 2500 + (GAME.wave * 500);
-                this.hp = this.maxHp;
-                this.speed = 1.4;
-                this.stateTimer = 0;
-                this.currentState = "CHASE"; // CHASE, SPIRAL_ATTACK, RAGE_CHARGE
-                
-                this.attackTimer = 0;
-                this.hitFlashTimer = 0;
-                
-                document.getElementById('boss-hp-container').style.display = 'block';
-                updateBossHpBarUI(1.0);
-            }
-
-            update(dt) {
-                if (this.hitFlashTimer > 0) this.hitFlashTimer -= dt;
-                this.stateTimer += dt;
-
-                const dx = player.x - this.x;
-                const dy = player.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                // 有限狀態機(FSM)決策變更：每 5 秒切換一次行為
-                if (this.stateTimer > 5.0) {
-                    this.stateTimer = 0;
-                    const states = ["CHASE", "SPIRAL_ATTACK", "RAGE_CHARGE"];
-                    this.currentState = states[Math.floor(Math.random() * states.length)];
-                    pushKillFeed("⚠️ BOSS SWITCH MODE: " + this.currentState);
-                }
-
-                // 狀態機行為分支
-                if (this.currentState === "DEAD") return;
-
-                if (this.state === "CHASE") {
-                    if (distance > 10) {
-                        this.x += (dx / distance) * this.speed;
-                        this.y += (dirY = (mouse.y - this.y) , (this.y - player.y < 0 ? 1 : -1)) * this.speed; // 雙軸滑動
-                        this.meshMove(dx, dt, playerLocation=playerLocation); // 修正行位移量
-                        let dir = new THREE.Vector3().subVectors(playerLocation, this.mesh.position);
-                        dir.y = 0; dir.normalize();
-                        this.x += dir.x * this.speed * dt;
-                        this.y += dir.z * e.speed * dt;
-                    }
-                    // 修正上面手滑留下的未定義變數，2D 向量純淨化：
-                    let toPlayerX = playerLocation ? playerLocation.x - this.x : playerX - this.x;
-                }
-
-                // 修正後的純淨 FSM 運動控制
-                const dirX = playerLocation.x - this.x;
-                const dirY = playerLocation.y - this.y;
-                const distToPlayer = Math.sqrt(dirX * dirX + dirZ * dirZ); // 修正殘留
-
-                // 重寫乾淨的 Boss FSM 運動
-                const angleToPlayer = Math.atan2(playerLocation.y - this.y, playerLocation.x - this.x);
-
-                if (this.state === "CHASE") {
-                    // 基本爬行逼近
-                    if (distance > 10) {
-                        this.x += Math.cos(angleToPlayer) * this.speed;
-                        this.y += Math.sin(angleToAngle) * this.speed;
-                    }
-                    // 隨機釋放單發狙擊子彈
-                    this.attackTimer += dt;
-                    if(this.attackTimer >= 0.8) {
-                        this.attackTimer = 0;
-                        GAME.enemyProjectiles.push(new ProjectileInstance(this.x, this.y, angleToPlayer, 20, 0, true));
-                    }
-                }
-            }
-            // 由於上述手寫演算法容易殘留亂碼，我將整個 Boss 類別用最工整的架構重新重寫展開
-        }
-
-        // ==========================================================================
-        // 重新完全展開：無 Bug、高可讀、解耦的 Boss 實體控制類別
+        // 【核心類別六】終極特務無人機 BOSS 控制矩陣 (Elite Boss Finite State Machine)
         // ==========================================================================
         class OverlordBoss {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.radius = 40;
-                this.hp = 1200 + (GAME.wave * 300);
+                this.radius = 42;
+                this.hp = 1200 + (GAME.wave * 350);
                 this.maxHp = this.hp;
-                this.speed = 1.8;
-                this.state = "CHASE"; // CHASE, BULLET_HELL, CHARGE
-                this.stateTimer = 3.0;
+                this.speed = 95.0;
+                this.state = "CHASE"; 
+                this.stateTimer = 3.5;
                 this.attackTimer = 0;
                 this.hitFlash = 0;
                 this.rotAngle = 0;
@@ -835,37 +784,32 @@
 
                 const distX = GAME.player.x - this.x;
                 const distY = GAME.player.y - this.y;
-                const distance = Math.sqrt(posX * posX + posZ * posZ); // 修正變數
-                const distanceReal = Math.sqrt(distX * Math.clientX || distX * distX + distY * distY);
+                const distanceReal = Math.sqrt(distX * distX + distY * distY);
                 const angleToPlayer = Math.atan2(distY, distX);
 
                 this.stateTimer -= dt;
                 if (this.stateTimer <= 0) {
-                    this.stateTimer = 4.0 + Math.random() * 3.0;
+                    this.stateTimer = 4.5 + Math.random() * 2.5;
                     const possibleStates = ["CHASE", "BULLET_HELL", "CHARGE"];
                     this.state = possibleStates[Math.floor(Math.random() * possibleStates.length)];
-                    pushKillFeed("🤖 BOSS 變更戰術狀態: " + this.state);
+                    pushKillFeed("🤖 BOSS SWITCH TACTICAL: " + this.state);
                 }
 
-                // 核心有限狀態機 (FSM) 分支路徑
                 if (this.state === "CHASE") {
-                    // 緩慢逼近特務
-                    this.x += Math.cos(angleToPlayer) * this.speed;
-                    this.y += Math.sin(angleToPlayer) * this.speed;
+                    this.x += Math.cos(angleToPlayer) * this.speed * dt;
+                    this.y += Math.sin(angleToPlayer) * this.speed * dt;
                     
                     this.attackTimer -= dt;
                     if (this.attackTimer <= 0) {
-                        this.attackTimer = 0.6;
-                        // 朝玩家發射精準重型狙擊彈
+                        this.attackTimer = 0.55;
                         GAME.enemyProjectiles.push(new EnemyBulletInstance(this.x, this.y, GAME.player.x, GAME.player.y, 18));
                     }
                 } 
                 else if (this.state === "BULLET_HELL") {
-                    // 停留在原地，釋放 360 度十字瘋狂旋轉彈幕
-                    this.rotAngle += dt * 4.0;
+                    this.rotAngle += dt * 3.5;
                     this.attackTimer -= dt;
                     if (this.attackTimer <= 0) {
-                        this.attackTimer = 0.12; // 超高速齊射
+                        this.attackTimer = 0.14; 
                         const sprayCount = 4;
                         for (let i = 0; i < sprayCount; i++) {
                             const finalAngle = this.rotAngle + (i * (Math.PI * 2 / sprayCount));
@@ -876,12 +820,10 @@
                     }
                 } 
                 else if (this.state === "CHARGE") {
-                    // 瘋狂大幅度衝撞衝鋒
-                    this.x += Math.cos(angleToPlayer) * (this.speed * 2.6);
-                    this.y += Math.sin(angleToPlayer) * (this.speed * 2.6);
+                    this.x += Math.cos(angleToPlayer) * (this.speed * 2.4) * dt;
+                    this.y += Math.sin(angleToPlayer) * (this.speed * 2.4) * dt;
                 }
 
-                // 撞擊特務本體直接碾壓扣血
                 if (distanceReal < this.radius + GAME.player.radius) {
                     damagePlayer(45 * dt);
                 }
@@ -890,25 +832,22 @@
             takeDamage(amount) {
                 this.hp -= amount;
                 this.hitFlash = 0.05;
-                // 觸發畫格微幅劇烈抖動（Juice Feedback）
-                triggerScreenShake(0.15, 6);
-                
+                triggerScreenShake(0.14, 5);
                 updateBossHpBarUI(this.hp / this.maxHp);
 
                 if (this.hp <= 0) {
                     audio.playExplosion();
-                    ParticlePool.spawn(new THREE.Vector3(this.x, 0, this.y), 0xffffff, 50); // 2D 轉譯相容：
-                    for(let i=0; i<40; i++) {
+                    for(let i=0; i<35; i++) {
                         GAME.particles.push({
                             x: this.x, y: this.y,
-                            vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12,
-                            life: 0.5, maxLife: 0.5, color: "#ff4655"
+                            vx: (Math.random()-0.5)*500 * dt, vy: (Math.random()-0.5)*500 * dt,
+                            life: 0.5, maxLife: 0.6, color: "#ff4655"
                         });
                     }
-                    GAME.score += 2000;
+                    GAME.score += 2500;
                     GAME.bossSpawned = false;
                     document.getElementById('boss-hp-container').style.display = 'none';
-                    pushKillFeed("🏆 TARGET ACQUIRED: TRAINING OVERLORD PURGED!");
+                    pushKillFeed("🏆 ELIMINATED: PRACTICE OVERLORD BOT PURGED!");
                     return true;
                 }
                 return false;
@@ -921,10 +860,9 @@
                 if (this.hitFlash > 0) {
                     ctx.fillStyle = "#ffffff";
                 } else {
-                    ctx.fillStyle = this.state === "CHARGE" ? "#ff0055" : "#2e3440";
+                    ctx.fillStyle = this.state === "CHARGE" ? "#ff4655" : "#24292e";
                 }
 
-                // 繪製巨型重工業無人機雙層齒輪多邊形外殼
                 ctx.beginPath();
                 ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
                 ctx.fill();
@@ -932,27 +870,25 @@
                 ctx.lineWidth = 4;
                 ctx.stroke();
 
-                // 繪製發光的巨型核心監視器眼珠
                 ctx.fillStyle = "#ff4655";
                 ctx.beginPath();
-                ctx.arc(0, 0, this.radius * 0.4, 0, Math.PI * 2);
+                ctx.arc(0, 0, this.radius * 0.38, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.restore();
             }
         }
-        let bossInstance = null;
 
         // ==========================================================================
-        // 【模組七】經驗值晶球與粒子碎屑系統 (XP Drop & Particle Pool)
+        // 【核心類別七】發光經驗球晶體類別 (XP Crystal Factory)
         // ==========================================================================
         class XpCrystal {
             constructor(x, y, xpValue) {
                 this.x = x;
                 this.y = y;
                 this.value = xpValue;
-                this.radius = 5;
-                this.isTargeted = false; // 是否進入特務磁吸捕捉力半徑
+                this.radius = 4;
+                this.isTargeted = false;
             }
 
             update(dt) {
@@ -960,68 +896,76 @@
                 const dy = GAME.player.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
-                // 磁吸引力物理推演
                 if (distance < GAME.player.magnetRadius || this.isTargeted) {
                     this.isTargeted = true;
-                    const pullSpeed = 9.5;
+                    const pullSpeed = 420 * dt;
                     this.x += (dx / distance) * pullSpeed;
                     this.y += (dy / distance) * pullSpeed;
                 }
             }
 
             draw() {
-                ctx.save();
                 ctx.beginPath();
                 ctx.fillStyle = "#00ffcc";
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.restore();
             }
         }
 
         // ==========================================================================
-        // 【模組八】核心幾何物理碰撞與狀態變更管線 (Collision & Core Logic)
+        // 【核心類別八】戰術醫療與物資補給管理核心 (Operational Material Drops)
         // ==========================================================================
-        function damagePlayer(amount) {
-            if (GAME.gameState !== "PLAYING" || GAME.player.dashTimer > 0) return;
+        const PickupManager = {
+            pickups: [],
+            spawn(position) {
+                const itemType = (Math.random() > 0.5) ? "HEALTH" : "SHIELD";
+                this.pickups.push({ x: position.x, y: position.y, type: itemType, radius: 8 });
+            },
+            update(dt) {
+                const playerPos = GAME.player;
+                for (let i = this.pickups.length - 1; i >= 0; i--) {
+                    const item = this.pickups[i];
+                    const dx = playerPos.x - item.x;
+                    const dy = playerPos.y - item.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (GAME.player.shield > 0) {
-                GAME.player.shield -= amount * 0.6;
-                GAME.player.hp -= amount * 0.4;
-            } else {
-                GAME.player.hp -= amount;
-            }
+                    if (dist < playerPos.radius + item.radius) {
+                        audio.playItemPickup();
+                        if (drop.type === "HEALTH" || p.type === "HEALTH" || itemType === "HEALTH" || drop === "HEALTH" || p === "HEALTH" || true) {
+                            if(drop.type === "HEALTH" || Math.random() > 0.5) {
+                                GAME.player.hp = Math.min(GAME.player.maxHp, GAME.player.hp + 30);
+                                pushKillFeed("✨ RECOVERED: +30 HP COMPONENT");
+                            } else {
+                                GAME.player.shield = Math.min(GAME.player.maxShield, GAME.player.shield + 25);
+                                pushKillFeed("🛡️ ARMORED: +25 HEAVY SHIELD");
+                            }
+                        }
+                        updateHUD();
+                        this.pickups.splice(i, 1);
+                    }
+                }
+            },
+            draw() {
+                for (let item of this.pickups) {
+                    ctx.beginPath();
+                    ctx.fillStyle = item.type === "HEALTH" ? "#ff4655" : "#00bfff";
+                    ctx.arc(item.x, item.y, item.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            },
+            clearAll() { this.pickups = []; }
+        };
 
-            if (GAME.player.shield < 0) GAME.player.shield = 0;
-            triggerScreenShake(0.1, 4);
-
-            const flash = document.getElementById('damage-flash');
-            flash.style.background = 'rgba(255, 70, 85, 0.2)';
-            setTimeout(() => { flash.style.background = 'rgba(255,70,85,0)'; }, 60);
-
-            if (GAME.player.hp <= 0) {
-                GAME.player.hp = 0;
-                triggerGameOver();
-            }
-            updateHUD();
-        }
-
-        function triggerScreenShake(time, intensity) {
-            screenShakeTime = time;
-            screenShakeIntensity = intensity;
-        }
-
+        // ==========================================================================
+        // 【核心功能九】解耦圓形碰撞與實體核心運算總線 (Core Logic Axis)
+        // ==========================================================================
         function resolveEnginePhysics(dt) {
-            // 1. 更新特務與物資對象
             GAME.player.update(dt);
-            PickupManager.update(dt); // 相容前綴機制
+            PickupManager.update(dt);
 
-            // 更新經驗球晶體
             for (let i = GAME.crystals.length - 1; i >= 0; i--) {
                 const c = GAME.crystals[i];
                 c.update(dt);
-                
-                // 碰撞拾取
                 const dPlayer = Math.sqrt((GAME.player.x - c.x)**2 + (GAME.player.y - c.y)**2);
                 if (dPlayer < GAME.player.radius + c.radius) {
                     GAME.player.gainXp(c.value);
@@ -1029,7 +973,6 @@
                 }
             }
 
-            // 2. 特務拋射子彈物理位移與二維圓形交疊判定
             for (let i = GAME.projectiles.length - 1; i >= 0; i--) {
                 const p = GAME.projectiles[i];
                 p.update(dt);
@@ -1039,7 +982,7 @@
                     continue;
                 }
 
-                // 檢查是否擊中常規怪無人機
+                let projectileRemoved = false;
                 for (let j = GAME.enemies.length - 1; j >= 0; j--) {
                     const e = GAME.enemies[j];
                     if (p.hitHistory.includes(e.id)) continue;
@@ -1048,37 +991,23 @@
                     if (dist < p.radius + e.radius) {
                         p.hitHistory.push(e.id);
                         e.hp -= p.damage;
-                        e.hitFlashTimer = 0.06; // 觸發受擊白化
+                        e.hitFlashTimer = 0.06;
                         
-                        // 處理貫穿削弱
                         if (p.maxPierce > 0) {
                             p.maxPierce--;
                         } else {
                             GAME.projectiles.splice(i, 1);
+                            projectileRemoved = true;
+                            if (e.hp <= 0) handleEnemyDeath(e, j);
                             break;
                         }
 
-                        // 敵人死亡消滅
-                        if (e.hp <= 0) {
-                            audio.playBotDeath();
-                            // 爆開噴發裝飾像素粒子
-                            for(let k=0; k<8; k++) {
-                                GAME.particles.push({
-                                    x: e.x, y: e.y,
-                                    vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6,
-                                    life: 0.3, maxLife: 0.3, color: "#ff4655"
-                                });
-                            }
-                            // 掉落經驗晶球
-                            GAME.crystals.push(new XpCrystal(e.x, e.y, 25));
-                            GAME.enemies.splice(j, 1);
-                            GAME.score += e.type === "TANK" ? 150 : 60;
-                            updateHUD();
-                        }
+                        if (e.hp <= 0) handleEnemyDeath(e, j);
                     }
                 }
 
-                // 檢查是否擊中大 BOSS
+                if (projectileRemoved) continue;
+
                 if (GAME.bossSpawned && bossInstance) {
                     const distToBoss = Math.sqrt((p.x - bossInstance.x)**2 + (p.y - bossInstance.y)**2);
                     if (distToBoss < p.radius + bossInstance.radius) {
@@ -1089,10 +1018,9 @@
                 }
             }
 
-            // 3. 敌方子彈位移
             for (let i = GAME.enemyProjectiles.length - 1; i >= 0; i--) {
                 const eb = GAME.enemyProjectiles[i];
-                eb.update();
+                eb.update(dt);
                 if (eb.life <= 0) {
                     GAME.enemyProjectiles.splice(i, 1);
                     continue;
@@ -1104,36 +1032,43 @@
                 }
             }
 
-            // 4. 更新常規雜魚與 Boss 有限狀態機
             if (GAME.bossSpawned && bossInstance) {
                 bossInstance.update(dt);
             } else {
                 for (let e of GAME.enemies) e.update(dt);
             }
 
-            // 5. 更新裝飾用像素粒子消退
             for (let i = GAME.particles.length - 1; i >= 0; i--) {
                 const pt = GAME.particles[i];
                 pt.life -= dt;
-                pt.x += pt.vx; pt.y += pt.vy;
+                pt.x += pt.vx * dt; pt.y += pt.vy * dt;
                 if (pt.life <= 0) GAME.particles.splice(i, 1);
             }
         }
 
-        // ==========================================================================
-        // 【模組九】動態波次雜魚生成與無窮難度漸進時鐘 (Wave Spawner)
-        // ==========================================================================
+        function handleEnemyDeath(e, index) {
+            audio.playBotDeath();
+            for(let k=0; k<10; k++) {
+                GAME.particles.push({
+                    x: e.x, y: e.y,
+                    vx: (Math.random()-0.5)*300, vy: (Math.random()-0.5)*300,
+                    life: 0.3, maxLife: 0.3, color: e.type === "TANK" ? "#5a636c" : "#ff4655"
+                });
+            }
+            GAME.crystals.push(new XpCrystal(e.x, e.y, 25));
+            GAME.enemies.splice(index, 1);
+            GAME.score += e.type === "TANK" ? 180 : 60;
+            updateHUD();
+        }
+
         let spawnCooldown = 0;
         function processEnemySpawner(dt) {
-            // 如果 Boss 在場上，強制全面中斷普通雜魚生成，形成絕對嚴肅的 1v1 對線環境
             if (GAME.bossSpawned) return;
 
             spawnCooldown -= dt;
             if (spawnCooldown <= 0) {
-                // 波次難度越高，怪獸生成間隔收縮越短（瘋狂暴兵）
-                spawnCooldown = Math.max(0.3, 1.8 - (GAME.wave * 0.15));
+                spawnCooldown = Math.max(0.35, 1.7 - (GAME.wave * 0.15));
                 
-                // 在畫布外環邊緣隨機座標生成怪獸，防止直接騎在玩家頭上出生
                 let sx, sy;
                 if (Math.random() > 0.5) {
                     sx = Math.random() > 0.5 ? -20 : canvas.width + 20;
@@ -1145,40 +1080,37 @@
 
                 const rand = Math.random();
                 let type = "NORMAL";
-                if (rand > 0.85 && GAME.wave >= 2) type = "FAST";
-                if (rand > 0.93 && GAME.wave >= 3) type = "TANK";
+                if (rand > 0.80 && GAME.wave >= 2) type = "FAST";
+                if (rand > 0.90 && GAME.wave >= 3) type = "TANK";
 
                 GAME.enemies.push(new TrainingBotEntity(sx, sy, type));
             }
 
-            // 時鐘遞進：每 30 秒難度自動迭代一個 ROUND 波次
             GAME.waveTimer += dt;
             if (GAME.waveTimer >= 30.0) {
                 GAME.waveTimer = 0.0;
                 GAME.wave++;
                 document.getElementById('hud-wave').innerText = "ROUND " + GAME.wave;
-                pushKillFeed("🚀 警報: 戰術波次已升級至 ROUND " + GAME.wave + "！難度加倍！");
+                pushKillFeed("🚀 ROUND 波次提升至 ROUND " + GAME.wave + "！");
 
-                // 在第 3 波 (開局 1 分鐘) 正式強制觸發 Overlord BOSS 降臨
                 if (GAME.wave === 3 && !GAME.bossSpawned) {
                     GAME.bossSpawned = true;
                     audio.playBossAlert();
-                    bossInstance = new OverlordBoss(canvas.width / 2, -100); // 由上方垂降登場
-                    pushKillFeed("⚠️ 警告: 靶場大總管 OVERLORD BOSS 已切入戰場！");
+                    bossInstance = new OverlordBoss(canvas.width / 2, -100);
+                    pushKillFeed("⚠️ 警告: TARGET ACQUIRED! OVERLORD BOSS 進入戰場！");
                 }
             }
         }
 
         // ==========================================================================
-        // 【模組十】Roguelike 升級卡牌動態權重生成系統 (Upgrade UI Engine)
+        // 【核心功能十】卡牌升級決策發動機 (Card Selector)
         // ==========================================================================
         function triggerUpgradeScreen() {
             GAME.isPaused = true;
             const screen = document.getElementById('upgrade-screen');
             const container = document.getElementById('cards-container');
-            container.innerHTML = ""; // 清空舊卡
+            container.innerHTML = "";
 
-            // 從卡牌池隨機洗牌抽出 3 張各異的強化組件
             const shuffled = [...UPGRADES].sort(() => 0.5 - Math.random());
             const selectedCards = shuffled.slice(0, 3);
 
@@ -1202,36 +1134,35 @@
         function executeUpgradeLogic(id) {
             const p = GAME.player;
             if (id === "dmg") {
-                p.damageBoost += 10;
-                pushKillFeed("⚡ 模組升級：子彈主傷害加成 +10 點！");
+                p.damageBoost += 8;
+                pushKillFeed("⚡ ATTACHED: 子彈基礎威力增加 +8 點");
             } 
             else if (id === "firerate") {
-                p.fireRateMultiplier *= 0.78; // 減少發射所需毫秒間隔
-                pushKillFeed("⚡ 模組升級：開火導流速度飆升 22%！");
+                p.fireRateMultiplier *= 0.76;
+                pushKillFeed("⚡ ATTACHED: 機械射擊冷卻收縮 24%");
             } 
-            else if (id === "dash") { // 轉譯為跑速加成
-                p.speed += 1.5;
-                pushKillFeed("⚡ 模組升級：特務基礎巡航跑速 +20%！");
+            else if (id === "speed") {
+                p.speed += 40.0;
+                pushKillFeed("⚡ ATTACHED: 特務機甲航行步速增加 +20%");
+            } 
+            else if (id === "pierce") {
+                p.bulletPierceCount += 1;
+                pushKillFeed("⚡ ATTACHED: 子彈獲得貫穿硬殼能力 +1 次");
             }
-            else if (id === "shield") { // 改為解鎖多向射擊
-                p.maxPierce += 1;
-                pushKillFeed("⚡ 模組升級：子彈貫穿厚度次數加開 +1 次！");
-            }
-            // 其餘卡牌做等效覆蓋相容
-            if(p.damageBoost > 30 && p.multishotLevel < 3) {
+
+            if(p.damageBoost >= 16 && p.multishotLevel < 3) {
                 p.multishotLevel++;
-                pushKillFeed("🔥 特殊解鎖：多重彈道擴散武器型態解鎖！");
+                pushKillFeed("🔥 DYNAMIC UPGRADE: 解鎖多元交叉扇形彈道！");
             }
             updateHUD();
         }
 
         // ==========================================================================
-        // 【模組十一】2D 幾何多步圖形繪製管線 (Rendering Canvas Engine)
+        // 【核心功能十一】2D 幾何圖形繪製管線 (Canvas Rendering Bus)
         // ==========================================================================
         function drawMainGraphicsPipeline() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 實作第一人稱受擊/爆炸鏡頭震動矩陣（Juice Matrix Screen Shake）
             ctx.save();
             if (screenShakeTime > 0) {
                 const dx = (Math.random() - 0.5) * screenShakeIntensity;
@@ -1239,18 +1170,19 @@
                 ctx.translate(dx, dy);
             }
 
-            // 1. 繪製背景競技場雷達灰色格線襯底
-            ctx.strokeStyle = '#1a232b';
+            // 戰術格網襯底
+            ctx.strokeStyle = '#1e262e';
             ctx.lineWidth = 1;
-            const step = 50;
-            for (let x = 0; x < canvas.width; x += step) {
+            const sizeStep = 55;
+            for (let x = 0; x < canvas.width; x += sizeStep) {
                 ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
             }
-            for (let y = 0; y < canvas.height; y += step) {
+            for (let y = 0; y < canvas.height; y += sizeStep) {
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
             }
 
-            // 2. 依序提取堆疊繪製各個子實體對象
+            PickupManager.draw();
+
             for (let c of GAME.crystals) c.draw();
             for (let eb of GAME.enemyProjectiles) eb.draw();
             for (let p of GAME.projectiles) p.draw();
@@ -1261,22 +1193,19 @@
                 for (let e of GAME.enemies) e.draw();
             }
 
-            // 繪製粒子消退灰燼
             for (let pt of GAME.particles) {
                 ctx.fillStyle = pt.color;
                 ctx.globalAlpha = pt.life / pt.maxLife;
                 ctx.fillRect(pt.x, pt.y, 4, 4);
-                ctx.globalAlpha = 1.0;
             }
+            ctx.globalAlpha = 1.0;
 
-            // 3. 繪製特務本體
             GAME.player.draw();
-
-            ctx.restore(); // 釋放震動鏡頭
+            ctx.restore();
         }
 
         // ==========================================================================
-        // 【模組十二】UI 指標抬頭顯示器與同步重置更新器 (UI Logic)
+        // 【核心功能十二】HUD 介面與生命週期同步重置器 (UI Subsystems)
         // ==========================================================================
         function updateHUD() {
             document.getElementById('hud-level').innerText = GAME.player.level;
@@ -1284,7 +1213,6 @@
             document.getElementById('hud-shield').innerText = Math.ceil(GAME.player.shield);
             document.getElementById('hud-score').innerText = String(GAME.score).padStart(5, '0');
             
-            // 格式化秒鐘轉換成分：秒計時器 (如 01:24)
             const minutes = Math.floor(GAME.elapsedTime / 60);
             const seconds = Math.floor(GAME.elapsedTime % 60);
             document.getElementById('hud-time').innerText = 
@@ -1305,7 +1233,7 @@
             const row = document.createElement('div');
             row.innerText = txt;
             feed.appendChild(row);
-            setTimeout(() => { row.remove(); }, 2500);
+            setTimeout(() => { row.remove(); }, 2000);
         }
 
         function triggerGameOver() {
@@ -1319,8 +1247,36 @@
             document.getElementById('final-score').innerText = GAME.score;
         }
 
+        function triggerScreenShake(time, intensity) {
+            screenShakeTime = time;
+            screenShakeIntensity = intensity;
+        }
+
+        function damagePlayer(amount) {
+            if (GAME.gameState !== "PLAYING") return;
+
+            if (GAME.player.shield > 0) {
+                GAME.player.shield -= amount * 0.65;
+                GAME.player.hp -= amount * 0.35;
+            } else {
+                GAME.player.hp -= amount;
+            }
+
+            if (GAME.player.shield < 0) GAME.player.shield = 0;
+            triggerScreenShake(0.12, 5);
+
+            const flash = document.getElementById('damage-flash');
+            flash.style.background = 'rgba(255, 70, 85, 0.25)';
+            setTimeout(() => { flash.style.background = 'rgba(255,70,85,0)'; }, 70);
+
+            if (GAME.player.hp <= 0) {
+                GAME.player.hp = 0;
+                triggerGameOver();
+            }
+            updateHUD();
+        }
+
         function resetWholeGameEngine() {
-            console.log("[Engine] Performing complete 2D hardware and memory flush...");
             GAME.score = 0;
             GAME.elapsedTime = 0;
             GAME.wave = 1;
@@ -1337,59 +1293,39 @@
 
             GAME.player = new AgentPlayer(canvas.width / 2, canvas.height / 2);
             document.getElementById('hud-wave').innerText = "ROUND 1";
-            
             document.getElementById('boss-hp-container').style.display = 'none';
+            
             updateXpBarUI();
             updateHUD();
         }
 
-        // 後置相容組件
-        const PickupManager = { update() {} };
-        const CONFIG = { weapons: [{}, {}, { fireRate: 140, dmg: 14 }] };
-
         // ==========================================================================
-        // 【模組十三】高精度 Delta-Time 核心計時主迴圈線程 (Main RunLoop Engine)
+        // 【模組十三】高精度 Delta-Time 核心時鐘驅動執行緒 (Game Loop)
         // ==========================================================================
         let lastTimestamp = performance.now();
 
         function executeMainGameLoop(currentTimestamp) {
             requestAnimationFrame(executeMainGameLoop);
 
-            // 計算兩幀之間的毫秒級時間差步長
             let dt = (currentTimestamp - lastTimestamp) / 1000;
             lastTimestamp = currentTimestamp;
 
-            // 抽離非執行狀態
             if (GAME.gameState !== "PLAYING" || GAME.isPaused) {
                 return;
             }
 
-            // 震動計時收斂消退
             if (screenShakeTime > 0) screenShakeTime -= dt;
 
             GAME.elapsedTime += dt;
-            
-            // 執行二軸物理位移演算
             resolveEnginePhysics(dt);
-            
-            // 處理波次與兵怪生成器線程
             processEnemySpawner(dt);
-
-            // 每秒高頻刷新同步儀表板 HUD
-            updateHUD();
-
-            // 圖形渲染繪製
             drawMainGraphicsPipeline();
         }
 
-        // ==========================================================================
-        // 【模組十四】視窗自適應縮放與雙層輸入監聽事件綁定
-        // ==========================================================================
         function resizeCanvasToWindow() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             if (GAME.player) {
-                // 如果調整視窗，防呆修正避免特務被卡在黑幕外
                 GAME.player.x = Math.max(GAME.player.radius, Math.min(canvas.width - GAME.player.radius, GAME.player.x));
                 GAME.player.y = Math.max(GAME.player.radius, Math.min(canvas.height - GAME.player.radius, GAME.player.y));
             }
@@ -1400,11 +1336,13 @@
             window.addEventListener('keyup', (e) => { keys[e.code] = false; });
             
             window.addEventListener('mousemove', (e) => {
-                // 抓取滑鼠相對於 Canvas 視窗邊緣的精確絕對像素坐標
                 const bounds = canvas.getBoundingClientRect();
                 mouse.x = e.clientX - bounds.left;
                 mouse.y = e.clientY - bounds.top;
             });
+
+            window.addEventListener('mousedown', (e) => { if(e.button === 0) mouse.isDown = true; });
+            window.addEventListener('mouseup', (e) => { if(e.button === 0) mouse.isDown = false; });
 
             document.getElementById('start-btn').addEventListener('click', () => {
                 audio.init();
@@ -1424,7 +1362,6 @@
             window.addEventListener('resize', resizeCanvasToWindow);
         }
 
-        // 總入口載入點
         window.onload = () => {
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
@@ -1432,9 +1369,8 @@
             initControls总线();
             resizeCanvasToWindow();
             
-            // 啟動高刷新主驅動引擎
             requestAnimationFrame(executeMainGameLoop);
-            console.log("[Engine v5.0] 2D Tactical Roguelike Loop fully armed and functional.");
+            console.log("[Engine v5.1] Pure 2D Surivivor Thread Fully Armed.");
         };
     </script>
 </body>
