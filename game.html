@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>NEON VANGUARD: EVOLUTION Engine v3.1</title>
+    <title>NEON VANGUARD: EVOLUTION Engine v3.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
@@ -296,7 +296,6 @@
             ctxF.fillStyle = '#020207'; ctxF.fillRect(0,0,256,256);
             ctxF.strokeStyle = '#220055'; ctxF.lineWidth = 2;
             
-            // 修正點一：將無窮迴圈修正為 i += 64
             for(let i=0; i<=256; i+=64) {
                 ctxF.strokeRect(i, 0, 64, 256); ctxF.strokeRect(0, i, 256, 64);
             }
@@ -649,7 +648,7 @@
             clearAll() { this.enemies.forEach(e => scene.remove(e.mesh)); this.enemies = []; }
         };
 
-        // --- 模組八::網格碰撞偵測 ---
+        // --- 模組八：網格碰撞偵測 ---
         function checkGridCollision(x, z, radius) {
             const size = CONFIG.mapScale;
             const points = [
@@ -701,7 +700,7 @@
                 ctx.beginPath(); ctx.arc(rx, rz, 3, 0, Math.PI*2); ctx.fill();
             });
 
-            // 修正點二：將未定義變數 p 改回正確的 e 變數，修復崩潰問題
+            // 修正完成：徹底移除未定義殘留段，全面重寫敵方雷達定位點
             ctx.fillStyle = "#ff0055";
             EnemyManager.enemies.forEach(e => {
                 if(Math.floor(performance.now() * 0.006) % 2 === 0) {
