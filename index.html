@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuroko's Creative Space</title>
+    <!-- 引入 Tailwind CSS 實現現代感排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #0b0f19;
+        }
+        .glow-effect:hover {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="text-gray-200 min-h-screen flex flex-col justify-between">
+
+    <!-- 導覽列 -->
+    <nav class="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <a href="#" class="text-xl font-bold text-indigo-400 tracking-wider">KUROKO_P .</a>
+            <div class="space-x-6 text-sm font-medium">
+                <a href="#about" class="hover:text-indigo-400 transition">關於我</a>
+                <a href="#works" class="hover:text-indigo-400 transition">作品展示</a>
+                <a href="#contact" class="hover:text-indigo-400 transition">聯絡管道</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero 主視覺區塊 -->
+    <header id="about" class="max-w-4xl mx-auto text-center py-20 px-6">
+        <div class="inline-block relative mb-6">
+            <!-- 頭貼外圈發光效果 -->
+            <div class="w-28 h-28 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-1 shadow-lg">
+                <!-- 這裡可以把 src 換成你的頭貼網址，目前先用預設灰底 -->
+                <div class="w-full h-full rounded-full bg-gray-800 flex items-center justify-center text-3xl">🐱</div>
+            </div>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight">Kuroko's Creative Space</h1>
+        <p class="text-indigo-400 font-medium mb-6">Video Editor & Multimedia Creator</p>
+        <p class="text-gray-400 max-w-xl mx-auto leading-relaxed text-sm md:text-base">
+            熱衷於影音剪輯、動態視覺與各式數位創意。這裡記錄了我的作品與熱愛的事物。<br>
+            <span class="text-xs text-gray-500 block mt-2">KUROKOKAWAIIINE !!!</span>
+        </p>
+        
+        <!-- 核心技能標籤 -->
+        <div class="mt-8 flex flex-wrap justify-center gap-2.5 text-xs">
+            <span class="px-3 py-1.5 rounded-full bg-gray-900 border border-gray-800 text-gray-300"># 影片剪輯</span>
+            <span class="px-3 py-1.5 rounded-full bg-gray-900 border border-gray-800 text-gray-300"># 後期特效</span>
+            <span class="px-3 py-1.5 rounded-full bg-gray-900 border border-gray-800 text-gray-300"># 數位二創</span>
+            <span class="px-3 py-1.5 rounded-full bg-gray-900 border border-gray-800 text-gray-300"># Live2D 嘗試</span>
+        </div>
+    </header>
+
+    <!-- 作品展示區塊 -->
+    <section id="works" class="max-w-6xl mx-auto px-6 py-12 w-full">
+        <h2 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+            <span class="w-1 h-6 bg-indigo-500 rounded"></span>精選作品
+        </h2>
+        
+        <!-- 作品卡片網格 -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- 卡片 1 (影片範例) -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden glow-effect flex flex-col justify-between">
+                <div>
+                    <!-- 預留的影片/圖片封面位置 -->
+                    <div class="aspect-video bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
+                        <i class="fa-solid fa-video text-3xl"></i>
+                    </div>
+                    <div class="p-5">
+                        <span class="text-xs font-semibold text-indigo-400 tracking-wider uppercase block mb-1">Video Editing</span>
+                        <h3 class="text-lg font-bold text-white mb-2">影音剪輯作品集</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">包含節奏卡點、動態特效與轉場調色，專注於呈現流暢的視覺體驗。</p>
+                    </div>
+                </div>
+                <div class="p-5 pt-0">
+                    <a href="#" class="inline-flex items-center text-xs font-medium text-indigo-400 hover:underline gap-1">觀看影片 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+                </div>
+            </div>
+
+            <!-- 卡片 2 (Live2D / 2D 專案) -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden glow-effect flex flex-col justify-between">
+                <div>
+                    <div class="aspect-video bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles text-3xl"></i>
+                    </div>
+                    <div class="p-5">
+                        <span class="text-xs font-semibold text-purple-400 tracking-wider uppercase block mb-1">Live2D / Design</span>
+                        <h3 class="text-lg font-bold text-white mb-2">角色與動態模型實作</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">探索虛擬角色模型的圖層拆解與動態綁定，打造極具生命力的角色互動。</p>
+                    </div>
+                </div>
+                <div class="p-5 pt-0">
+                    <a href="#" class="inline-flex items-center text-xs font-medium text-purple-400 hover:underline gap-1">查看專案 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+                </div>
+            </div>
+
+            <!-- 卡片 3 (其他創意嘗試) -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden glow-effect flex flex-col justify-between">
+                <div>
+                    <div class="aspect-video bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
+                        <i class="fa-solid fa-gamepad text-3xl"></i>
+                    </div>
+                    <div class="p-5">
+                        <span class="text-xs font-semibold text-emerald-400 tracking-wider uppercase block mb-1">Creative Log</span>
+                        <h3 class="text-lg font-bold text-white mb-2">遊戲二創與企劃</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">結合喜愛的遊戲 IP（米哈遊、動漫等系列）進行精華剪輯與音樂節奏混剪。</p>
+                    </div>
+                </div>
+                <div class="p-5 pt-0">
+                    <a href="#" class="inline-flex items-center text-xs font-medium text-emerald-400 hover:underline gap-1">瀏覽更多 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 聯絡與社群區塊 -->
+    <footer id="contact" class="w-full bg-gray-900/60 border-t border-gray-800 mt-20 px-6 py-12 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h3 class="text-xl font-bold text-white mb-4">與我聯絡</h3>
+            <p class="text-gray-400 text-sm mb-6">歡迎各類影音合作案或技術交流提案！</p>
+            
+            <!-- 社群按鈕連結（可自行修改 href） -->
+            <div class="flex justify-center gap-4 mb-8">
+                <a href="https://github.com/nekowakuroko" target="_blank" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-300 hover:bg-indigo-600 hover:text-white transition shadow" title="GitHub">
+                    <i class="fa-brands fa-github text-lg"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-300 hover:bg-red-600 hover:text-white transition shadow" title="YouTube">
+                    <i class="fa-brands fa-youtube text-lg"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-300 hover:bg-orange-500 hover:text-white transition shadow" title="Shopee 賣場">
+                    <i class="fa-solid fa-bag-shopping text-lg"></i>
+                </a>
+            </div>
+            
+            <p class="text-xs text-gray-600">&copy; 2026 Kuroko_P. All rights reserved. Powered by GitHub Pages.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
